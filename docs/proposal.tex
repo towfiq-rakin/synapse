@@ -1,0 +1,325 @@
+% ===========================================================================
+%  Synapse — Project Proposal
+%  Based on SDP - I Guidelines
+%  Compile with: pdflatex proposal.tex
+% ===========================================================================
+\documentclass[12pt, a4paper]{article}
+
+% ---------------------------------------------------------------------------
+% Packages
+% ---------------------------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{tocloft}
+\usepackage{setspace}
+
+% ---------------------------------------------------------------------------
+% Colour palette
+% ---------------------------------------------------------------------------
+\definecolor{primary}{HTML}{1A56DB}    % Synapse brand blue
+\definecolor{muted}{HTML}{6B7280}      % grey for metadata
+\definecolor{codebg}{HTML}{F3F4F6}    % light code background
+
+% ---------------------------------------------------------------------------
+% Hyperref setup
+% ---------------------------------------------------------------------------
+\hypersetup{
+  colorlinks   = true,
+  linkcolor    = primary,
+  urlcolor     = primary,
+  citecolor    = primary,
+  pdftitle     = {Synapse — Project Proposal},
+  pdfauthor    = {Rakin},
+  pdfsubject   = {SDP - I Project Proposal},
+}
+
+% ---------------------------------------------------------------------------
+% Section title styling
+% ---------------------------------------------------------------------------
+\titleformat{\section}
+  {\Large\bfseries\color{primary}}
+  {\thesection.}{1em}{}[\vspace{-4pt}\rule{\linewidth}{0.4pt}\vspace{4pt}]
+
+\titleformat{\subsection}
+  {\large\bfseries\color{primary!80!black}}
+  {\thesubsection}{1em}{}
+
+% ---------------------------------------------------------------------------
+% Header / Footer
+% ---------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[L]{\small\textcolor{muted}{Synapse — Project Proposal}}
+\fancyhead[R]{\small\textcolor{muted}{\today}}
+\fancyfoot[C]{\small\textcolor{muted}{\thepage}}
+
+% ---------------------------------------------------------------------------
+% Table helpers
+% ---------------------------------------------------------------------------
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\begin{document}
+
+% ===========================================================================
+% TITLE PAGE
+% ===========================================================================
+\begin{titlepage}
+  \centering
+  \vspace*{2cm}
+
+  {\Huge\bfseries\color{primary} Synapse}\\[0.4em]
+  {\Large\color{muted} Project Proposal}\\[0.2em]
+  {\normalsize\color{muted} Software Development Project - I}
+
+  \vspace{1.5cm}
+  \rule{0.6\linewidth}{1.5pt}
+  \vspace{1cm}
+
+  \begin{tabular}{@{}ll@{}}
+    \textbf{Project Title} & Synapse — Production-ready, Notion-inspired \\
+                           & knowledge management \& blogging platform \\[4pt]
+    \textbf{Prepared By}   & Rakin \\[4pt]
+    \textbf{Date}          & \today \\[4pt]
+  \end{tabular}
+
+  \vspace{2cm}
+  \rule{0.6\linewidth}{0.8pt}
+  \vspace{0.5cm}
+
+  {\small\color{muted}
+    Synapse Development Team
+  }
+
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Title of the Project}
+\textbf{Synapse} --- A production-ready, Notion-inspired knowledge management and blogging platform.
+
+\section{Executive Summary}
+
+\subsection{Brief overview of the project}
+Synapse is a sophisticated, multi-user web application engineered to revolutionize personal knowledge management (PKM) and online publishing. Drawing inspiration from industry leaders like Notion and Obsidian, Synapse provides a unified workspace where users can seamlessly draft, interconnect, and publish their ideas. The platform centers around a block-based rich text editor enhanced with Markdown, interactive graph visualizations, and state-of-the-art AI assistance powered by Google Gemini.
+
+\subsection{Problem statement or opportunity}
+In the current landscape of productivity tools, users often face a dichotomy: powerful, offline-first personal knowledge bases (like Obsidian) that are complex to publish from, or sleek blogging platforms (like Medium or WordPress) that lack deep organizational and interconnected note-taking features. Valuable knowledge frequently becomes trapped in isolated "silos," and the friction of transitioning from a rough draft to a published piece hampers continuous knowledge sharing. There is a distinct opportunity to bridge this gap with a single, cohesive cloud-based platform.
+
+\subsection{Proposed solution}
+Synapse resolves this fragmentation by offering a robust cloud-hosted platform that merges deep, networked thought with one-click publishing. Key features include a highly responsive Markdown editor supporting KaTeX and Mermaid, bidirectional wiki-linking (\texttt{[[note-slug]]}) that automatically builds an interactive knowledge graph, and a robust "Share to Blog" mechanism. Furthermore, an integrated Gemini AI Copilot will be ever-present to assist users in summarizing, expanding, and refining their content contextually.
+
+\subsection{Expected benefits and impact}
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Enhanced Productivity:} By reducing the cognitive load required to organize information, users can focus entirely on writing and ideation.
+    \item \textbf{Frictionless Sharing:} The gap between personal notes and public blogs is eliminated, encouraging more frequent sharing of knowledge.
+    \item \textbf{Improved Information Retrieval:} Visualizing connections through an interactive graph allows users to discover hidden relationships in their research and thoughts.
+    \item \textbf{AI-Accelerated Workflow:} The integrated Gemini Copilot acts as a collaborative partner, dramatically reducing the time required for editing and brainstorming.
+\end{itemize}
+
+\section{Project Objectives}
+
+\subsection{Main objectives of the project}
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Develop a Unified Workspace:} Create a seamless, block-based Markdown editor capable of handling complex inputs such as LaTeX math equations, Mermaid.js diagrams, and rich media.
+    \item \textbf{Implement Networked Knowledge Capabilities:} Build a robust bidirectional linking system and an interactive D3.js force-directed graph to visualize relationships between notes.
+    \item \textbf{Facilitate Effortless Publishing:} Provide a secure, performant routing system for users to expose specific notes as public blog posts with clean URLs and comprehensive SEO optimization.
+    \item \textbf{Integrate Intelligent Assistance:} Embed an AI writing assistant using the Google Gemini API to offer real-time, context-aware content generation and editing.
+\end{itemize}
+
+\subsection{Measurable goals}
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Performance:} Achieve a Largest Contentful Paint (LCP) of under 2.5 seconds for all publicly accessible blog pages, ensuring an optimal reading experience.
+    \item \textbf{User Experience:} Reduce the time it takes to publish a draft from an average of several minutes (in traditional setups) to under 10 seconds (via a single toggle).
+    \item \textbf{System Reliability:} Maintain a 99.5\% platform uptime, monitored and managed through Google Cloud Platform's infrastructure.
+    \item \textbf{Engagement:} Attain an average of at least 10 interconnected notes per active user within the first month of deployment, demonstrating the utility of the wiki-link feature.
+\end{itemize}
+
+\section{Scope of Work}
+
+\subsection{Website Features}
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{User Authentication \& Authorization:} Secure login, registration, and session management using next-auth v5 with support for email/password and potential future OAuth integrations.
+    \item \textbf{Workspace Management:} A comprehensive dashboard featuring a collapsible tree-view sidebar for managing nested folders and notes.
+    \item \textbf{Advanced Editor Interface:} A TipTap-based rich text editor featuring Markdown shortcuts, syntax highlighting, drag-and-drop image uploads (via Google Cloud Storage), and real-time auto-saving.
+    \item \textbf{Knowledge Graph \& Backlinks:} Automatic extraction of \texttt{[[wiki-links]]} to generate node-based relationship graphs and dedicated backlink panels.
+    \item \textbf{Public Publishing System:} Granular privacy controls allowing users to switch note visibility to 'public', instantly generating a readable, SEO-friendly web page.
+    \item \textbf{AI Copilot Chat:} A slide-over panel interface for interacting with the Gemini AI model, providing context-aware answers and text manipulation based on the currently open document.
+\end{itemize}
+
+\subsection{Platform}
+Synapse will be developed as a highly responsive web application, designed utilizing mobile-first principles to ensure full compatibility across modern web browsers (Chrome, Firefox, Safari, Edge) on both desktop and mobile devices.
+
+\subsection{Integrations}
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Google Gemini API (\texttt{gemini-2.0-flash}):} Powering the core conversational AI and text processing capabilities.
+    \item \textbf{Google Cloud Storage (GCS):} For secure, scalable hosting and delivery of user-uploaded media and assets.
+    \item \textbf{MongoDB Atlas:} Serving as the primary, highly available cloud database for persisting user documents and relationship metadata.
+\end{itemize}
+
+\subsection{Deliverables}
+\begin{itemize}[leftmargin=2em]
+    \item A fully functional, cloud-hosted web application accessible via a public domain.
+    \item Comprehensive Software Requirements Specification (SRS) and architecture documentation.
+    \item The complete source code repository hosted on GitHub.
+    \item An administrative dashboard for user and platform management.
+\end{itemize}
+
+\section{Target Audience}
+
+\subsection{Who will use the website}
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Students and Academics:} Individuals managing extensive research notes, study guides, and interconnected concepts.
+    \item \textbf{Software Developers and Technologists:} Professionals requiring support for code snippets, markdown, and complex system documentation.
+    \item \textbf{Bloggers and Content Creators:} Writers seeking a distraction-free drafting environment that seamlessly transitions into a publishing platform.
+    \item \textbf{Knowledge Workers:} General users looking to build a "second brain" to store, organize, and retrieve personal and professional information.
+\end{itemize}
+
+\subsection{User demographics, behaviours, and needs}
+The primary demographic consists of tech-savvy individuals aged 18-40 who value efficiency, aesthetics, and data portability. These users typically experience frustration with context-switching between drafting tools and publishing CMS platforms. They need a fast, reliable system that supports keyboard-centric workflows, visual data representation, and the ability to share their thoughts publicly with minimal friction.
+
+\section{Technology Stack}
+
+\subsection{Frontend Technologies}
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Framework:} Next.js 14 (App Router) for Server-Side Rendering (SSR) and optimized performance.
+    \item \textbf{Language:} TypeScript for type safety and maintainability.
+    \item \textbf{Styling:} Tailwind CSS paired with shadcn/ui for accessible, modern component design.
+    \item \textbf{State Management:} Zustand for lightweight, global client state.
+    \item \textbf{Editor Core:} TipTap (built on ProseMirror) for robust block-based text editing.
+\end{itemize}
+
+\subsection{Backend Technologies}
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Runtime Environment:} Node.js (integrated within Next.js API Routes and Server Actions).
+    \item \textbf{Authentication:} next-auth v5.
+    \item \textbf{AI Integration:} Vercel AI SDK for managing streaming Server-Sent Events (SSE) with the Gemini API.
+\end{itemize}
+
+\subsection{Database}
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Primary Datastore:} MongoDB Atlas (NoSQL) accessed via Mongoose ODM, chosen for its flexibility in handling hierarchical document structures.
+\end{itemize}
+
+\subsection{Development Tools}
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{IDE:} Visual Studio Code.
+    \item \textbf{Version Control:} Git and GitHub.
+    \item \textbf{Package Manager:} npm or pnpm.
+\end{itemize}
+
+\subsection{Hosting/Deployment}
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Application Hosting:} Google Cloud Run for scalable, containerized deployment.
+    \item \textbf{Asset Storage:} Google Cloud Storage (GCS) buckets.
+\end{itemize}
+
+\section{Design \& User Experience}
+
+\subsection{UI/UX approach}
+The design philosophy embraces a minimalist, "Obsidian-meets-Notion" aesthetic. The interface will prioritize a distraction-free focus mode for writing, utilizing ample whitespace and clean typography. The platform will natively support both Light and Dark modes, automatically syncing with the user's system preferences. Interactions will feel instantaneous, with optimistic UI updates and skeleton loaders for asynchronous actions.
+
+\subsection{Website layout and navigation structure}
+The core application utilizes a sophisticated three-panel layout:
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{Left Sidebar:} A collapsible tree-view navigation menu for managing the hierarchical structure of folders and notes, alongside global search and settings access.
+    \item \textbf{Center Canvas:} The primary workspace housing the TipTap rich text editor, document title, and frontmatter metadata.
+    \item \textbf{Right Panel:} A contextual sidebar displaying a dynamic Table of Contents, the D3.js interactive relationship graph, and a list of incoming backlinks. This panel can be toggled to display the AI Copilot chat interface.
+\end{enumerate}
+Publicly shared notes will strip away the editor chrome, presenting a clean, reader-focused layout optimized for legibility and SEO.
+
+\subsection{Wireframes / mockups}
+(While formal wireframes are omitted from this document, the conceptual design strictly adheres to the established paradigms of modern PKM tools, prioritizing the content canvas and relegating navigation to collapsible sidebars.)
+
+\section{Project Timeline}
+
+The project development lifecycle is structured into six iterative phases:
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Phase 1: Requirements Gathering \& Planning (Weeks 1-2)}
+        \begin{itemize}
+            \item Finalize Software Requirements Specification (SRS).
+            \item Define database schemas and establish the overall system architecture.
+        \end{itemize}
+    \item \textbf{Phase 2: UI/UX Design \& Setup (Weeks 3-4)}
+        \begin{itemize}
+            \item Initialize the Next.js project and configure Tailwind CSS and shadcn/ui.
+            \item Develop foundational, reusable UI components.
+        \end{itemize}
+    \item \textbf{Phase 3: Core Framework \& Backend (Weeks 5-7)}
+        \begin{itemize}
+            \item Implement next-auth for secure user authentication.
+            \item Connect to MongoDB Atlas and build out API routes for folder and note CRUD operations.
+        \end{itemize}
+    \item \textbf{Phase 4: Advanced Editor Development (Weeks 8-10)}
+        \begin{itemize}
+            \item Integrate TipTap and implement custom nodes for Markdown, KaTeX, and Mermaid.
+            \item Develop the \texttt{[[wiki-link]]} parsing logic and connect the Google Gemini AI streaming interface.
+        \end{itemize}
+    \item \textbf{Phase 5: Publishing \& Graph Visualization (Weeks 11-12)}
+        \begin{itemize}
+            \item Build the D3.js interactive graph renderer.
+            \item Implement the public routing system (\texttt{/[username]/[slug]}) with full SEO metadata generation.
+        \end{itemize}
+    \item \textbf{Phase 6: Testing, Deployment \& Documentation (Weeks 13-14)}
+        \begin{itemize}
+            \item Conduct comprehensive end-to-end testing and bug resolution.
+            \item Containerize the application and deploy to Google Cloud Run.
+            \item Finalize user and technical documentation.
+        \end{itemize}
+\end{itemize}
+
+\section{Team Structure}
+
+As a primary development effort, the roles will be consolidated, with distinct responsibilities managed throughout the project lifecycle:
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Project Manager / UI/UX Designer:} Rakin
+        \begin{itemize}
+            \item Responsible for overarching project timeline, requirement definition, and designing the user interface system.
+        \end{itemize}
+    \item \textbf{Lead Full-Stack Developer:} Rakin
+        \begin{itemize}
+            \item Responsible for all frontend component implementation, backend API development, database management, and third-party integrations (Gemini, GCS).
+        \end{itemize}
+    \item \textbf{QA Tester / DevOps:} Rakin
+        \begin{itemize}
+            \item Responsible for ensuring system stability, performance testing, and managing the Google Cloud Platform deployment pipeline.
+        \end{itemize}
+\end{itemize}
+
+\section{Success Metrics}
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Performance Optimization:} Achieve an initial page load time of under 3 seconds and a Lighthouse Performance score of 90+ for public blog endpoints.
+    \item \textbf{Feature Completeness:} Successful implementation and demonstration of all core functionalities, including bidirectional linking, markdown rendering, and AI assistance.
+    \item \textbf{System Stability:} Ensure zero critical errors during note saving and graph rendering under typical load conditions.
+    \item \textbf{SEO Health:} Validation of correct Open Graph tags, Twitter Cards, and semantic HTML structure for all publicly shared documents.
+\end{itemize}
+
+\section{Maintenance \& Support}
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Regular Updates:} Routine monthly maintenance to update NPM dependencies, address technical debt, and implement minor feature enhancements based on usage analysis.
+    \item \textbf{Security \& Reliability:} Continuous monitoring of dependency vulnerabilities using automated tools (e.g., Dependabot or Snyk) and prompt application of security patches.
+    \item \textbf{Data Integrity:} Automated, regular backups of the MongoDB Atlas database and Google Cloud Storage buckets to ensure no loss of user data.
+    \item \textbf{Ongoing Support:} Maintenance of system logs and performance metrics via GCP's Operations Suite to proactively identify and resolve production issues.
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,953 @@
+% ===========================================================================
+%  Synapse — Software Requirements Specification (SRS)
+%  IEEE 830-style
+%  Compile with: pdflatex SRS.tex  (or xelatex / lualatex)
+% ===========================================================================
+\documentclass[12pt, a4paper]{article}
+
+% ---------------------------------------------------------------------------
+% Packages
+% ---------------------------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{parskip}
+\usepackage{microtype}
+\usepackage{tocloft}
+\usepackage{mdframed}
+\usepackage{listings}
+\usepackage{setspace}
+
+% ---------------------------------------------------------------------------
+% Colour palette
+% ---------------------------------------------------------------------------
+\definecolor{primary}{HTML}{1A56DB}    % Synapse brand blue
+\definecolor{accent}{HTML}{0E9F6E}     % green for priority tags
+\definecolor{warn}{HTML}{C27803}       % amber for warnings
+\definecolor{muted}{HTML}{6B7280}      % grey for metadata
+\definecolor{codebg}{HTML}{F3F4F6}    % light code background
+\definecolor{rowalt}{HTML}{F9FAFB}    % table row alternate
+
+% ---------------------------------------------------------------------------
+% Hyperref setup
+% ---------------------------------------------------------------------------
+\hypersetup{
+  colorlinks   = true,
+  linkcolor    = primary,
+  urlcolor     = primary,
+  citecolor    = primary,
+  pdftitle     = {Synapse — Software Requirements Specification},
+  pdfauthor    = {Synapse Development Team},
+  pdfsubject   = {IEEE 830-style SRS},
+  pdfkeywords  = {SRS, requirements, Synapse, PKM, blogging},
+  bookmarksnumbered = true,
+  bookmarksopen     = true,
+}
+
+% ---------------------------------------------------------------------------
+% Section title styling
+% ---------------------------------------------------------------------------
+\titleformat{\section}
+  {\Large\bfseries\color{primary}}
+  {\thesection}{1em}{}[\vspace{-4pt}\rule{\linewidth}{0.4pt}\vspace{4pt}]
+
+\titleformat{\subsection}
+  {\large\bfseries\color{primary!80!black}}
+  {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries}
+  {\thesubsubsection}{1em}{}
+
+% ---------------------------------------------------------------------------
+% Header / Footer
+% ---------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[L]{\small\textcolor{muted}{Synapse — Software Requirements Specification}}
+\fancyhead[R]{\small\textcolor{muted}{v1.0 · 2026-03-05}}
+\fancyfoot[C]{\small\textcolor{muted}{\thepage}}
+
+% ---------------------------------------------------------------------------
+% Listing style (for code/ASCII diagrams)
+% ---------------------------------------------------------------------------
+\lstset{
+  backgroundcolor = \color{codebg},
+  basicstyle      = \ttfamily\small,
+  breaklines      = true,
+  frame           = single,
+  framerule       = 0pt,
+  rulecolor       = \color{codebg},
+  xleftmargin     = 8pt,
+  xrightmargin    = 8pt,
+}
+
+% ---------------------------------------------------------------------------
+% Requirement box
+% ---------------------------------------------------------------------------
+\newmdenv[
+  leftmargin   = 0pt,
+  rightmargin  = 0pt,
+  innerleftmargin  = 10pt,
+  innerrightmargin = 10pt,
+  innertopmargin   = 6pt,
+  innerbottommargin = 6pt,
+  linewidth    = 2pt,
+  linecolor    = primary!40,
+  backgroundcolor = primary!4,
+  skipabove    = 6pt,
+  skipbelow    = 6pt,
+]{reqbox}
+
+% Priority tag helper
+\newcommand{\ptag}[1]{%
+  \ifnum\pdfstrcmp{#1}{P1}=0
+    \textcolor{white}{\colorbox{primary}{\textbf{\small P1}}}%
+  \else\ifnum\pdfstrcmp{#1}{P2}=0
+    \textcolor{white}{\colorbox{accent}{\textbf{\small P2}}}%
+  \else
+    \textcolor{white}{\colorbox{warn}{\textbf{\small P3}}}%
+  \fi\fi
+}
+
+% Requirement macro: \req{ID}{priority}{text}
+\newcommand{\req}[3]{%
+  \begin{reqbox}
+    \noindent\textbf{#1}\quad\ptag{#2}\quad #3
+  \end{reqbox}%
+}
+
+% ---------------------------------------------------------------------------
+% Table helpers
+% ---------------------------------------------------------------------------
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+
+% ---------------------------------------------------------------------------
+% Document
+% ---------------------------------------------------------------------------
+\begin{document}
+
+% ===========================================================================
+% TITLE PAGE
+% ===========================================================================
+\begin{titlepage}
+  \centering
+  \vspace*{2cm}
+
+  {\Huge\bfseries\color{primary} Synapse}\\[0.4em]
+  {\Large\color{muted} Software Requirements Specification}\\[0.2em]
+  {\normalsize\color{muted} IEEE 830-style}
+
+  \vspace{1.5cm}
+  \rule{0.6\linewidth}{1.5pt}
+  \vspace{1cm}
+
+  \begin{tabular}{@{}ll@{}}
+    \textbf{Document type} & IEEE 830-style SRS \\[4pt]
+    \textbf{Project}       & Synapse — Production-ready, Notion-inspired \\
+                           & knowledge management \& blogging platform \\[4pt]
+    \textbf{Version}       & 1.0 \\[4pt]
+    \textbf{Date}          & 2026-03-05 \\[4pt]
+    \textbf{Status}        & Draft \\
+  \end{tabular}
+
+  \vspace{2cm}
+  \rule{0.6\linewidth}{0.8pt}
+  \vspace{0.5cm}
+
+  {\small\color{muted}
+    Synapse Development Team\\
+    \texttt{Synapse.app}
+  }
+
+  \vfill
+  {\footnotesize\color{muted}
+    This document is confidential and intended solely for the use of the
+    Synapse development team and authorised stakeholders.
+  }
+\end{titlepage}
+
+% ===========================================================================
+% TABLE OF CONTENTS
+% ===========================================================================
+\tableofcontents
+\newpage
+
+% ===========================================================================
+% SECTION 1 — INTRODUCTION
+% ===========================================================================
+\section{Introduction}
+
+\subsection{Purpose}
+
+This document specifies the software requirements for \textbf{Synapse}, a
+multi-user, cloud-hosted personal knowledge management (PKM) and blogging
+platform. It is intended to serve as a binding contract between the development
+team and stakeholders, defining \emph{what} the system must do without
+prescribing \emph{how} it does it.
+
+\subsection{Scope}
+
+Synapse is a web application that enables registered users to:
+
+\begin{itemize}[leftmargin=2em]
+  \item Create, organise, and manage notes and blog posts using a rich
+        Markdown-based block editor.
+  \item Link notes bidirectionally using \texttt{[[wiki-link]]} syntax and
+        visualise connections in an interactive graph.
+  \item Publish notes publicly with pretty, readable URLs and SEO metadata.
+  \item Leverage a Gemini AI writing assistant for summarisation, editing,
+        and Q\&A.
+\end{itemize}
+
+The system is deployed on Google Cloud (Cloud Run + GCS) with MongoDB Atlas as
+the data store.
+
+\subsection{Definitions, Acronyms, and Abbreviations}
+
+\begin{longtable}{@{}L{3.2cm} L{10cm}@{}}
+  \toprule
+  \textbf{Term}       & \textbf{Definition} \\
+  \midrule\endhead
+  \bottomrule\endfoot
+  Note       & A Markdown document created by an authenticated user \\
+  Blog       & A note with \texttt{type: blog} and a public slug, rendered
+               in blog format \\
+  Folder     & A logical container for notes and sub-folders \\
+  Slug       & A URL-safe string identifier for a note or folder \\
+  Wiki-link  & \texttt{[[note-slug]]} inline syntax creating a bidirectional
+               link between notes \\
+  Backlink   & An inbound reference from another note via wiki-link \\
+  Graph View & An interactive D3.js force-directed visualisation of linked
+               notes \\
+  Copilot    & The Gemini AI writing assistant panel \\
+  PKM        & Personal Knowledge Management \\
+  SRS        & Software Requirements Specification (this document) \\
+  SSR        & Server-Side Rendering \\
+  ISR        & Incremental Static Regeneration \\
+  RSC        & React Server Component \\
+  GCS        & Google Cloud Storage \\
+\end{longtable}
+
+\subsection{Overview}
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Section~\ref{sec:overall}} provides a product perspective,
+        user classes, and operating environment.
+  \item \textbf{Section~\ref{sec:functional}} enumerates functional requirements
+        grouped by feature area.
+  \item \textbf{Section~\ref{sec:nonfunctional}} specifies non-functional
+        requirements (performance, security, etc.).
+  \item \textbf{Section~\ref{sec:interfaces}} describes external interfaces.
+  \item \textbf{Section~\ref{sec:constraints}} lists system constraints.
+\end{itemize}
+
+% ===========================================================================
+% SECTION 2 — OVERALL DESCRIPTION
+% ===========================================================================
+\section{Overall Description}
+\label{sec:overall}
+
+\subsection{Product Perspective}
+
+Synapse is a standalone web platform. Its primary user interface runs in a
+web browser (Next.js App Router). A Node.js backend (co-located in the
+Next.js application, deployed on Cloud Run) serves REST API routes. Media
+assets are stored in a GCS bucket. AI features communicate with the Google
+Gemini API.
+
+\begin{lstlisting}[title={High-level system topology}]
+[Browser Client] <-> [Cloud Run: Next.js App] <-> [MongoDB Atlas]
+                                               <-> [GCS Bucket]
+                                               <-> [Google Gemini API]
+\end{lstlisting}
+
+\subsection{Product Functions — Summary}
+
+\begin{longtable}{@{}C{1.2cm} L{11cm}@{}}
+  \toprule
+  \textbf{\#} & \textbf{Function} \\
+  \midrule\endhead
+  \bottomrule\endfoot
+  F1  & Multi-user registration and authentication \\
+  F2  & Note and folder CRUD \\
+  F3  & Rich Markdown editor (KaTeX, Mermaid, syntax highlight) \\
+  F4  & \texttt{[[wiki-link]]} bidirectional linking \\
+  F5  & Graph view of linked notes \\
+  F6  & Public note/blog publishing with pretty URLs \\
+  F7  & AI Copilot (Gemini-powered) chat panel \\
+  F8  & Image upload to GCS \\
+  F9  & Admin dashboard \\
+  F10 & Note export (Markdown / PDF) \\
+\end{longtable}
+
+\subsection{User Classes and Characteristics}
+
+\subsubsection{Owner / Admin}
+
+\begin{itemize}[leftmargin=2em]
+  \item Has full system access.
+  \item Can view all users, ban or promote them via \texttt{/admin}.
+  \item Technically proficient; uses advanced features (graph view, AI
+        copilot, exports).
+\end{itemize}
+
+\subsubsection{Registered User}
+
+\begin{itemize}[leftmargin=2em]
+  \item Signs up with email and password (or OAuth).
+  \item Has a personal workspace scoped by their \texttt{userId}.
+  \item Can create, organise, and publish notes and blogs.
+  \item Has access to the AI Copilot.
+\end{itemize}
+
+\subsubsection{Public Visitor}
+
+\begin{itemize}[leftmargin=2em]
+  \item Not authenticated.
+  \item Can read notes and blogs that the author has set to
+        \texttt{visibility: public}.
+  \item Accesses content via pretty URLs (e.g.,
+        \texttt{Synapse.app/rakin/compiler/example}).
+  \item Cannot create, edit, or interact with notes.
+\end{itemize}
+
+\subsection{Operating Environment}
+
+\begin{longtable}{@{}L{3.8cm} L{9cm}@{}}
+  \toprule
+  \textbf{Component} & \textbf{Environment} \\
+  \midrule\endhead
+  \bottomrule\endfoot
+  Browser support  & Latest Chrome, Firefox, Edge, Safari \\
+  Server runtime   & Node.js 20 LTS (Cloud Run container) \\
+  Database         & MongoDB Atlas (cloud-managed, M10+ cluster) \\
+  Object storage   & Google Cloud Storage bucket \\
+  AI provider      & Google Gemini API (\texttt{gemini-2.0-flash}) \\
+  Framework        & Next.js 14 (App Router, TypeScript) \\
+\end{longtable}
+
+\subsection{Design and Implementation Constraints}
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Next.js 14 App Router} must be used for both SSR/ISR public
+        pages and protected app routes.
+  \item \textbf{MongoDB Atlas} is the mandated database; a relational database
+        is not in scope.
+  \item \textbf{Tailwind CSS} is required as a peer dependency of shadcn/ui.
+  \item All user data must be stored within the user's own
+        \texttt{userId}-scoped documents; no cross-user data access is
+        permitted through the API.
+\end{itemize}
+
+\subsection{Assumptions and Dependencies}
+
+\begin{itemize}[leftmargin=2em]
+  \item Google Cloud Platform project is provisioned with GCS, Cloud Run,
+        Artifact Registry, and Secret Manager.
+  \item MongoDB Atlas cluster is available before deployment.
+  \item Google Gemini API key is available and has sufficient quota.
+  \item Email delivery is handled via Resend or Nodemailer with an SMTP
+        provider.
+\end{itemize}
+
+% ===========================================================================
+% SECTION 3 — FUNCTIONAL REQUIREMENTS
+% ===========================================================================
+\section{Functional Requirements}
+\label{sec:functional}
+
+Requirements follow the convention:
+
+\begin{center}
+  \textbf{FR-[AREA]-[NUMBER] (Priority):} \emph{The system shall\ldots}
+\end{center}
+
+Priority codes: \ptag{P1}~must-have for MVP \quad
+                \ptag{P2}~important, near-term \quad
+                \ptag{P3}~future / nice-to-have
+
+% ---------------------------------------------------------------------------
+\subsection{Authentication \& User Management}
+
+\req{FR-AUTH-01}{P1}{The system shall allow a visitor to register a new account
+by providing a unique email address, a unique username, and a password.}
+
+\req{FR-AUTH-02}{P1}{The system shall hash passwords using bcrypt before
+persisting them to the database. Plain-text passwords must never be stored.}
+
+\req{FR-AUTH-03}{P1}{The system shall authenticate registered users using an
+email + password credential flow via next-auth v5.}
+
+\req{FR-AUTH-04}{P2}{The system shall support optional OAuth sign-in via GitHub
+and Google in addition to credentials.}
+
+\req{FR-AUTH-05}{P1}{The system shall issue a JWT session upon successful login,
+valid for a configurable duration (default: 30 days).}
+
+\req{FR-AUTH-06}{P2}{The system shall send a verification email upon
+registration. Users with an unverified email shall not be able to authenticate.}
+
+\req{FR-AUTH-07}{P1}{The system shall protect all routes under \texttt{/app/*}
+from unauthenticated access, redirecting unauthenticated requests to
+\texttt{/login}.}
+
+\req{FR-AUTH-08}{P1}{The system shall enforce unique usernames. Attempted
+registration with a reserved or already-taken username must be rejected with a
+descriptive error.}
+
+\req{FR-AUTH-09}{P1}{The system shall maintain a blocklist of reserved
+usernames: \texttt{app}, \texttt{api}, \texttt{admin}, \texttt{blog},
+\texttt{login}, \texttt{register}, \texttt{feed}, \texttt{settings},
+\texttt{u}, \texttt{about}.}
+
+\req{FR-AUTH-10}{P1}{The system shall validate usernames against the pattern
+\texttt{/\^{}[a-z0-9-]+\$/} where the value is 3–32 characters and does not
+start or end with a hyphen.}
+
+\req{FR-AUTH-11}{P2}{The system shall support a password reset flow via email.}
+
+\req{FR-AUTH-12}{P2}{An admin user shall be able to view, ban, and promote user
+accounts via the \texttt{/admin} dashboard.}
+
+% ---------------------------------------------------------------------------
+\subsection{Note and Folder Management}
+
+\req{FR-NOTE-01}{P1}{The system shall allow an authenticated user to create a
+new note within a folder or at the root level, specifying at minimum a title.}
+
+\req{FR-NOTE-02}{P1}{The system shall allow a user to update the content,
+title, and tags of their own notes.}
+
+\req{FR-NOTE-03}{P1}{The system shall allow a user to delete their own notes.}
+
+\req{FR-NOTE-04}{P1}{The system shall reject any attempt by a user to read,
+update, or delete a note not owned by that user (IDOR prevention), returning
+HTTP 403 or 404.}
+
+\req{FR-NOTE-05}{P1}{Every note shall be stored with \texttt{userId},
+\texttt{folderId | null}, \texttt{title}, \texttt{slug}, \texttt{pathSegments},
+\texttt{content} (TipTap JSON), \texttt{contentText} (plain-text), \texttt{type},
+\texttt{visibility}, \texttt{tags}, and \texttt{outboundLinks}.}
+
+\req{FR-NOTE-06}{P1}{The system shall auto-save note content with a debounce of
+no more than 2 seconds of inactivity.}
+
+\req{FR-NOTE-07}{P1}{The system shall allow a user to create folders, rename
+folders, delete folders (cascading delete of child notes and sub-folders), and
+move folders within the tree.}
+
+\req{FR-NOTE-08}{P1}{The system shall display all notes and folders for the
+authenticated user in a collapsible tree-view sidebar, mirroring the folder
+hierarchy stored in the database.}
+
+\req{FR-NOTE-09}{P2}{The system shall allow a user to reorder notes and folders
+within a parent via drag-and-drop. The updated order shall be persisted.}
+
+\req{FR-NOTE-10}{P1}{The sidebar shall provide a fuzzy search input that
+filters visible notes and folders by title or content.}
+
+\req{FR-NOTE-11}{P1}{Each note item in the sidebar shall display the note title.
+Clicking it shall navigate the editor to that note.}
+
+\req{FR-NOTE-12}{P2}{The system shall allow a user to filter the sidebar by one
+or more tags.}
+
+% ---------------------------------------------------------------------------
+\subsection{Rich Markdown Editor}
+
+\req{FR-EDIT-01}{P1}{The editor shall be built on TipTap (ProseMirror) and
+support block-based Markdown input including headings (H1–H6), paragraphs,
+ordered and unordered lists, blockquotes, horizontal rules, and code blocks.}
+
+\req{FR-EDIT-02}{P1}{The editor shall render inline KaTeX math expressions
+wrapped in single \texttt{\$\ldots\$} and block math wrapped in
+\texttt{\$\$\ldots\$\$} in real time.}
+
+\req{FR-EDIT-03}{P1}{The editor shall render Mermaid diagram source in fenced
+code blocks tagged \texttt{```mermaid} as live SVG diagrams within the editor.}
+
+\req{FR-EDIT-04}{P1}{The editor shall apply syntax highlighting to fenced code
+blocks with a language tag (e.g., \texttt{```python}) using Shiki or Prism.}
+
+\req{FR-EDIT-05}{P1}{The editor shall support inline images embedded from a URL
+or uploaded directly. Uploaded images shall be sent to GCS and replaced with
+the returned CDN URL.}
+
+\req{FR-EDIT-06}{P2}{The editor shall provide a formatting toolbar with common
+actions: bold, italic, strikethrough, inline code, link, heading level
+selector, quote, and list type toggles.}
+
+\req{FR-EDIT-07}{P1}{The editor shall support frontmatter metadata fields
+rendered as structured form inputs above the document body: \texttt{title},
+\texttt{tags}, \texttt{slug}, \texttt{publishedAt}.}
+
+\req{FR-EDIT-08}{P1}{The editor shall display the note's last-saved timestamp
+in the top bar, updating in real time as auto-saves occur.}
+
+% ---------------------------------------------------------------------------
+\subsection{Wiki-Links and Backlinks}
+
+\req{FR-LINK-01}{P1}{The editor shall recognise \texttt{[[note-slug]]} syntax
+as a wiki-link and render it as a highlighted, clickable inline element.}
+
+\req{FR-LINK-02}{P1}{Clicking a wiki-link in the editor shall navigate to the
+referenced note (if it exists and is owned by the same user).}
+
+\req{FR-LINK-03}{P1}{On every save, the system shall extract all
+\texttt{[[slug]]} tokens from the note content and persist the resulting array
+as \texttt{outboundLinks} on the note document.}
+
+\req{FR-LINK-04}{P1}{The system shall expose an API endpoint
+\texttt{GET /api/notes/[id]/backlinks} that returns all notes containing the
+given note's slug in their \texttt{outboundLinks} array.}
+
+\req{FR-LINK-05}{P1}{The editor's right panel shall display a \textbf{Backlinks}
+section listing all notes that link to the current note.}
+
+% ---------------------------------------------------------------------------
+\subsection{Graph View}
+
+\req{FR-GRAPH-01}{P1}{The system shall render an interactive, force-directed
+graph using D3.js in the right panel of the editor.}
+
+\req{FR-GRAPH-02}{P1}{Graph nodes shall represent notes; directed edges shall
+represent wiki-link relationships (outbound from source to target).}
+
+\req{FR-GRAPH-03}{P1}{Clicking a graph node shall navigate the editor to the
+corresponding note.}
+
+\req{FR-GRAPH-04}{P1}{Hovering a graph node shall display a tooltip with the
+note's title.}
+
+\req{FR-GRAPH-05}{P1}{The editor's graph panel shall scope the graph to notes
+within \textbf{2 hops} of the currently open note to avoid visual overload.}
+
+\req{FR-GRAPH-06}{P2}{The system shall provide a dedicated \texttt{/graph} page
+displaying the full graph for all of the authenticated user's notes.}
+
+\req{FR-GRAPH-07}{P2}{The currently active note node shall be visually
+distinguished (e.g., distinct colour or size) in the graph.}
+
+% ---------------------------------------------------------------------------
+\subsection{Publishing and Blogging}
+
+\req{FR-PUB-01}{P1}{Each note shall carry a \texttt{visibility} field with
+values \texttt{private} (default) or \texttt{public}.}
+
+\req{FR-PUB-02}{P1}{A user shall be able to toggle a note between
+\texttt{private} and \texttt{public} from a Share modal in the editor top bar.}
+
+\req{FR-PUB-03}{P1}{When \texttt{visibility} is set to \texttt{public}, the
+system shall make the note accessible at the route
+\texttt{/\{username\}/\{\ldots{}pathSegments\}} via SSR without authentication.}
+
+\req{FR-PUB-04}{P1}{When \texttt{visibility} is \texttt{private}, the route
+\texttt{/\{username\}/\{\ldots{}pathSegments\}} shall return HTTP 404, identical
+to the response for a non-existent note, to prevent private-note enumeration.}
+
+\req{FR-PUB-05}{P1}{A note with \texttt{type: blog} shall also appear on the
+global \texttt{/blog} listing page sorted by \texttt{publishedAt} descending.}
+
+\req{FR-PUB-06}{P2}{Public note/blog pages shall include \texttt{<meta>} Open
+Graph tags: \texttt{og:title}, \texttt{og:description}, \texttt{og:url},
+\texttt{og:image} (first embedded image or user avatar fallback).}
+
+\req{FR-PUB-07}{P2}{Public note/blog pages shall include Twitter Card meta
+tags.}
+
+\req{FR-PUB-08}{P2}{The system shall expose an RSS feed at \texttt{/feed.xml}
+listing all public blog posts across all users, sorted by \texttt{publishedAt}.}
+
+\req{FR-PUB-09}{P1}{When a note is made public, the Share modal must display the
+full pretty URL and a copy-to-clipboard button.}
+
+\req{FR-PUB-10}{P1}{A public user profile page at \texttt{/\{username\}} shall
+list all public notes and blogs created by that user.}
+
+% ---------------------------------------------------------------------------
+\subsection{AI Copilot}
+
+\req{FR-AI-01}{P1}{The system shall provide a floating AI Copilot button
+(chat-bubble icon) in the top-right corner of the editor layout.}
+
+\req{FR-AI-02}{P1}{Clicking the Copilot button shall toggle a slide-over panel
+containing a chat conversation UI.}
+
+\req{FR-AI-03}{P1}{The Copilot shall use the Google Gemini API
+(\texttt{gemini-2.0-flash}) as the underlying language model.}
+
+\req{FR-AI-04}{P1}{Communication between the client and the Gemini API shall be
+streamed via Server-Sent Events through the route \texttt{POST /api/ai/chat},
+using the Vercel AI SDK.}
+
+\req{FR-AI-05}{P1}{On each new chat session, the current note's
+\texttt{contentText} shall be injected into the Gemini system prompt as
+context.}
+
+\req{FR-AI-06}{P1}{The Copilot shall support the following capabilities exposed
+via natural-language chat: summarise, expand, fix grammar, explain selection,
+and Q\&A over the note.}
+
+\req{FR-AI-07}{P1}{The user shall be able to abort an in-progress AI response.}
+
+\req{FR-AI-08}{P2}{The Copilot panel shall render AI responses with Markdown
+formatting (bold, code blocks, lists).}
+
+\req{FR-AI-09}{P2}{The system shall provide a settings toggle to switch the
+Copilot model between \texttt{gemini-2.0-flash} and \texttt{gemini-2.5-pro}.}
+
+% ---------------------------------------------------------------------------
+\subsection{Image Uploads}
+
+\req{FR-UPLOAD-01}{P1}{The system shall allow an authenticated user to upload
+an image (JPEG, PNG, GIF, WebP) from within the editor.}
+
+\req{FR-UPLOAD-02}{P1}{The upload flow shall: (a) call \texttt{POST /api/upload}
+to obtain a GCS presigned URL, (b) PUT the file directly to GCS from the
+client, and (c) insert the returned GCS CDN URL into the editor content.}
+
+\req{FR-UPLOAD-03}{P1}{Uploaded files shall be stored in GCS under the path
+\texttt{uploads/\{userId\}/\{uuid\}.\{ext\}} to prevent path collisions.}
+
+\req{FR-UPLOAD-04}{P2}{The system shall enforce a maximum file size of 10~MB
+per upload. Uploads exceeding this limit shall be rejected with a descriptive
+error message.}
+
+\req{FR-UPLOAD-05}{P2}{The system shall restrict upload MIME types to images
+only (\texttt{image/*}). Non-image uploads shall be rejected.}
+
+% ---------------------------------------------------------------------------
+\subsection{Note Export}
+
+\req{FR-EXPORT-01}{P2}{The system shall allow a user to export a note as a raw
+Markdown (\texttt{.md}) file, downloading it to their device.}
+
+\req{FR-EXPORT-02}{P2}{The system shall allow a user to export a note as a
+rendered PDF, generated server-side.}
+
+% ---------------------------------------------------------------------------
+\subsection{Table of Contents}
+
+\req{FR-TOC-01}{P1}{The editor's right panel shall display an auto-generated
+Table of Contents derived from the current note's heading nodes (H1–H6).}
+
+\req{FR-TOC-02}{P1}{Clicking a TOC entry shall smoothly scroll the editor to
+the corresponding heading.}
+
+\req{FR-TOC-03}{P1}{The TOC shall update in real time as headings are added,
+removed, or renamed in the editor.}
+
+% ---------------------------------------------------------------------------
+\subsection{Settings}
+
+\req{FR-SET-01}{P1}{The system shall provide a \texttt{/app/settings} page for
+authenticated users.}
+
+\req{FR-SET-02}{P1}{The settings page shall allow a user to switch between
+\texttt{light}, \texttt{dark}, and \texttt{system} theme modes.}
+
+\req{FR-SET-03}{P2}{The settings page shall allow a user to update their
+display name, bio, and avatar image.}
+
+\req{FR-SET-04}{P2}{The settings page shall allow a user to change their
+password (requires current password confirmation).}
+
+% ===========================================================================
+% SECTION 4 — NON-FUNCTIONAL REQUIREMENTS
+% ===========================================================================
+\section{Non-Functional Requirements}
+\label{sec:nonfunctional}
+
+\subsection{Performance}
+
+\req{NFR-PERF-01}{P1}{Public SSR pages (\texttt{/\{username\}/\ldots}) shall
+achieve a Largest Contentful Paint (LCP) of $\leq 2.5$ seconds on a simulated
+4G connection (Lighthouse mobile audit).}
+
+\req{NFR-PERF-02}{P1}{Note list API (\texttt{GET /api/notes}) shall respond
+within 200~ms at the 95th percentile under normal load ($<100$ concurrent
+users).}
+
+\req{NFR-PERF-03}{P1}{Auto-save (\texttt{PATCH /api/notes/[id]}) shall complete
+within 500~ms at the 95th percentile.}
+
+\req{NFR-PERF-04}{P1}{The AI streaming endpoint shall deliver the first token
+to the client within 2 seconds of the request.}
+
+\req{NFR-PERF-05}{P1}{The D3.js graph shall render and become interactive within
+1 second for a graph of up to 500 nodes.}
+
+\subsection{Scalability}
+
+\req{NFR-SCALE-01}{P1}{The Cloud Run service shall be configured with a minimum
+of 1 instance and auto-scale up to 10 instances on increased load.}
+
+\req{NFR-SCALE-02}{P1}{The system architecture shall support horizontal scaling
+(stateless Next.js server; all session and file state external to the
+process).}
+
+\req{NFR-SCALE-03}{P1}{MongoDB indexes (\texttt{\{userId, pathSegments\}}
+compound unique; \texttt{userId} on Notes and Folders) shall remain effective up
+to 1 million documents per collection.}
+
+\subsection{Availability}
+
+\req{NFR-AVAIL-01}{P1}{The platform shall target 99.5\% monthly uptime
+(excluding planned maintenance windows).}
+
+\req{NFR-AVAIL-02}{P1}{MongoDB Atlas shall be configured with a replica set for
+automatic failover.}
+
+\subsection{Security}
+
+\req{NFR-SEC-01}{P1}{All API routes under \texttt{/api/*} (except next-auth
+handlers and the public share resolver) shall require a valid JWT session.
+Unauthenticated requests shall receive HTTP 401.}
+
+\req{NFR-SEC-02}{P1}{Every \texttt{/api/notes/[id]} and
+\texttt{/api/folders/[id]} handler shall verify
+\texttt{document.userId === session.user.id} before performing any operation.
+Violations shall return HTTP 403.}
+
+\req{NFR-SEC-03}{P1}{The private/non-existent note indistinguishability property
+(both return identical HTTP 404) shall be enforced on all public-facing route
+resolvers.}
+
+\req{NFR-SEC-04}{P1}{All Markdown/HTML rendered on public pages shall be
+sanitised using \texttt{rehype-sanitize} before being inserted into the DOM.}
+
+\req{NFR-SEC-05}{P1}{User passwords shall be hashed with bcrypt using a minimum
+cost factor of 12.}
+
+\req{NFR-SEC-06}{P1}{Environment variables and secrets (MongoDB URI, Gemini API
+key, GCS credentials) shall be managed via Google Cloud Secret Manager and
+injected at runtime. They must not be committed to source control.}
+
+\req{NFR-SEC-07}{P1}{The application shall enforce HTTPS for all connections.
+HTTP requests shall be redirected to HTTPS.}
+
+\req{NFR-SEC-08}{P1}{Rate limiting shall be applied to authentication endpoints
+(\texttt{/api/auth/\ldots}) with a maximum of 10 attempts per IP per minute.}
+
+\req{NFR-SEC-09}{P1}{Public-facing routes (\texttt{/\{username\}/\ldots}) shall
+be rate limited to a maximum of 300 requests per IP per minute using
+middleware.}
+
+\req{NFR-SEC-10}{P1}{GCS upload objects shall be namespaced per \texttt{userId}
+(\texttt{uploads/\{userId\}/\ldots}) to prevent cross-user path collisions.}
+
+\subsection{Usability}
+
+\req{NFR-UX-01}{P1}{The application shall be fully usable on screen widths
+$\geq 768$~px (tablet landscape and desktop).}
+
+\req{NFR-UX-02}{P1}{The colour-contrast ratios of all text and interactive
+elements shall comply with WCAG 2.1 Level AA (minimum contrast ratio 4.5:1 for
+normal text).}
+
+\req{NFR-UX-03}{P1}{Key interactive elements (editor save status, AI streaming
+indicator, upload progress) shall provide visible real-time feedback to the
+user.}
+
+\req{NFR-UX-04}{P1}{The autocomplete dropdown for \texttt{[[wiki-link]]}
+completion shall appear within 300~ms of typing \texttt{[[}.}
+
+\subsection{Maintainability}
+
+\req{NFR-MAINT-01}{P1}{All server-side code shall be written in TypeScript with
+strict mode enabled (\texttt{"strict": true} in \texttt{tsconfig.json}).}
+
+\req{NFR-MAINT-02}{P1}{Shared data types (Note, Folder, User interfaces) shall
+be defined once in \texttt{types/index.ts} and imported throughout the
+codebase.}
+
+\req{NFR-MAINT-03}{P1}{Database models shall be defined using Mongoose schemas
+with explicit field types and validation rules.}
+
+\req{NFR-MAINT-04}{P1}{Environment-specific configuration shall be centralised
+in \texttt{.env.local} (development) and Cloud Secret Manager (production);
+config objects shall not be hardcoded in component files.}
+
+\subsection{Reliability}
+
+\req{NFR-REL-01}{P1}{Auto-save shall implement exponential-backoff retry logic
+(max 3 retries) for network failures. After all retries fail, the user shall be
+notified of a save failure.}
+
+\req{NFR-REL-02}{P1}{The editor shall preserve unsaved content locally
+(localStorage) as a backup in case of unexpected page reload, offering to
+restore it on the next session.}
+
+% ===========================================================================
+% SECTION 5 — EXTERNAL INTERFACE REQUIREMENTS
+% ===========================================================================
+\section{External Interface Requirements}
+\label{sec:interfaces}
+
+\subsection{User Interfaces}
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Editor Layout:} Three-panel layout — left sidebar (tree),
+        centre (TipTap editor), right panel (TOC + graph).
+  \item \textbf{AI Copilot Panel:} Slide-over overlay from the right edge;
+        does not obscure the editor layout.
+  \item \textbf{Public Pages:} Clean reading layout with note title, rendered
+        Markdown, KaTeX, and Mermaid; no editor chrome.
+  \item \textbf{Theme:} Light and dark modes derived from a CSS
+        custom-property design token system.
+\end{itemize}
+
+\subsection{Hardware Interfaces}
+
+Not applicable. The application is a web-based SaaS product with no
+hardware-specific requirements.
+
+\subsection{Software Interfaces}
+
+\begin{longtable}{@{}L{3.5cm} L{3cm} L{2.5cm} L{4.5cm}@{}}
+  \toprule
+  \textbf{Interface} & \textbf{Protocol / Format} & \textbf{Direction}
+    & \textbf{Purpose} \\
+  \midrule\endhead
+  \bottomrule\endfoot
+  MongoDB Atlas        & TCP / Mongoose ODM  & Server $\leftrightarrow$ DB
+    & All CRUD operations \\
+  Google Gemini API    & HTTPS / JSON + SSE  & Server $\rightarrow$ Gemini
+    & AI text generation \\
+  Google Cloud Storage & HTTPS / REST        & Server + Client $\rightarrow$ GCS
+    & Image storage / presigned upload \\
+  Email provider       & SMTP / Resend API   & Server $\rightarrow$ Email
+    & Verification and password reset \\
+  next-auth v5         & Internal Next.js    & Server $\leftrightarrow$ Client
+    & Session management \\
+\end{longtable}
+
+\subsection{Communication Interfaces}
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{Client $\leftrightarrow$ Server:} HTTPS REST (JSON) for CRUD;
+        Server-Sent Events for AI streaming.
+  \item \textbf{Server $\leftrightarrow$ MongoDB:} TCP with TLS, MongoDB wire
+        protocol via \texttt{mongoose}.
+  \item \textbf{Server $\leftrightarrow$ GCS:} HTTPS REST via
+        \texttt{@google-cloud/storage} SDK or presigned URL redirect.
+  \item \textbf{Server $\leftrightarrow$ Gemini:} HTTPS with SSE streaming via
+        \texttt{@ai-sdk/google}.
+\end{itemize}
+
+% ===========================================================================
+% SECTION 6 — SYSTEM CONSTRAINTS
+% ===========================================================================
+\section{System Constraints}
+\label{sec:constraints}
+
+\begin{longtable}{@{}C{1.6cm} L{11.5cm}@{}}
+  \toprule
+  \textbf{ID} & \textbf{Constraint} \\
+  \midrule\endhead
+  \bottomrule\endfoot
+  CON-01 & The application must be deployable as a Docker container on Google
+           Cloud Run. \\
+  CON-02 & The data store is MongoDB Atlas; no relational databases shall be
+           used. \\
+  CON-03 & The editor must be TipTap (ProseMirror-based). Competing editors
+           (e.g., Quill, Slate) are out of scope. \\
+  CON-04 & The AI provider is Google Gemini. Third-party providers (OpenAI,
+           Anthropic) are out of scope for v1. \\
+  CON-05 & Next.js 14 App Router must be used. Pages Router is disallowed. \\
+  CON-06 & All new code must be TypeScript with strict mode. Plain JavaScript
+           is not acceptable. \\
+  CON-07 & shadcn/ui + Tailwind CSS are required as the UI component and
+           styling system. \\
+  CON-08 & Secrets must not be committed to git history; \texttt{.env.local}
+           must be \texttt{.gitignored}. \\
+\end{longtable}
+
+% ===========================================================================
+% SECTION 7 — ASSUMPTIONS & DEPENDENCIES
+% ===========================================================================
+\section{Assumptions \& Dependencies}
+\label{sec:assumptions}
+
+\subsection{Assumptions}
+
+\begin{itemize}[leftmargin=2em]
+  \item Users have a modern browser with JavaScript enabled; no IE~11 support
+        is required.
+  \item The Google Cloud project is owned/controlled by the development team
+        during deployment.
+  \item The Gemini API provides sufficient rate limit quota for the expected
+        user base in early releases.
+  \item MongoDB Atlas will provide connection strings and manages backups
+        externally.
+\end{itemize}
+
+\subsection{Dependencies}
+
+\begin{longtable}{@{}L{4.2cm} C{2.5cm} L{6.5cm}@{}}
+  \toprule
+  \textbf{Dependency} & \textbf{Version} & \textbf{Purpose} \\
+  \midrule\endhead
+  \bottomrule\endfoot
+  Next.js               & 14.x    & Full-stack web framework \\
+  TypeScript            & 5.x     & Type safety \\
+  TipTap / ProseMirror  & 2.x     & Rich block editor \\
+  shadcn/ui             & latest  & Accessible UI component library \\
+  Tailwind CSS          & 3.x     & Utility-first CSS \\
+  Zustand               & 4.x     & Global state management \\
+  Mongoose              & 8.x     & MongoDB ODM \\
+  next-auth             & 5.x     & Authentication \\
+  Vercel AI SDK         & latest  & AI streaming abstraction \\
+  @ai-sdk/google        & latest  & Gemini provider for Vercel AI SDK \\
+  assistant-ui          & latest  & Pre-built AI chat UI components \\
+  D3.js                 & 7.x     & Force-directed graph rendering \\
+  KaTeX                 & 0.x     & \LaTeX{} math rendering \\
+  Mermaid.js            & 10.x    & Diagram rendering \\
+  @google-cloud/storage & latest  & GCS SDK for Node.js \\
+  bcrypt                & 5.x     & Password hashing \\
+\end{longtable}
+
+% ===========================================================================
+% SECTION 8 — APPENDIX: GLOSSARY
+% ===========================================================================
+\section{Appendix — Glossary}
+\label{sec:glossary}
+
+\begin{longtable}{@{}L{3.2cm} L{10cm}@{}}
+  \toprule
+  \textbf{Term} & \textbf{Definition} \\
+  \midrule\endhead
+  \bottomrule\endfoot
+  App Router    & Next.js 14 routing system using the \texttt{app/} directory
+                  with React Server Components \\
+  Debounce      & Delay mechanism that prevents a function from executing until
+                  a pause in events \\
+  IDOR          & Insecure Direct Object Reference — accessing resources owned
+                  by another user \\
+  ISR           & Incremental Static Regeneration — SSR page re-rendered on a
+                  time or on-demand basis \\
+  Presigned URL & Time-limited URL generated by GCS allowing direct
+                  client-to-storage upload \\
+  TipTap        & Open-source, headless rich text editor built on ProseMirror \\
+  Slug          & Human-readable, URL-safe string derived from a title
+                  (e.g., \texttt{my-first-post}) \\
+  Wiki-link     & \texttt{[[slug]]} notation creating hyperlinks between notes,
+                  popularised by Obsidian \\
+\end{longtable}
+
+\end{document}
