@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ${IMAGE:-synapse:latest}
+    image: synapse:latest
     container_name: synapse-app
     restart: unless-stopped
     env_file:

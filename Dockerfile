@@ -27,7 +27,7 @@ RUN npm prune --omit=dev
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/next.config.ts ./next.config.ts
-COPY --from=builder /app/middleware.ts ./middleware.ts
+COPY --from=builder /app/proxy.ts ./proxy.ts
 
 USER nextjs
 EXPOSE 3000
