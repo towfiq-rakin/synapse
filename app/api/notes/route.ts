@@ -1,6 +1,9 @@
 import { auth } from "@/lib/auth";
+import Folder from "@/lib/db/models/Folder";
 import Note, { type NoteType, type NoteVisibility } from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { generateUniqueSlug, parseFrontmatterTitle } from "@/lib/notes-path";
+import { Types } from "mongoose";
 
 function normalizeText(input: unknown, fallback = ""): string {
   if (typeof input !== "string") return fallback;
@@ -74,18 +77,44 @@ export async function POST(request: Request) {
   const title = normalizeText(body.title, "Untitled").slice(0, 180);
   const content = typeof body.content === "string" ? body.content : "";
   const contentText = typeof body.contentText === "string" ? body.contentText : "";
-  const slug = normalizeSlug(body.slug);
   const tags = normalizeTags(body.tags);
   const type: NoteType = isNoteType(body.type) ? body.type : "note";
   const visibility: NoteVisibility = isVisibility(body.visibility) ? body.visibility : "private";
+  let folderId: string | null = null;
+
+  if (body.folderId !== undefined && body.folderId !== null && body.folderId !== "") {
+    if (typeof body.folderId !== "string" || !Types.ObjectId.isValid(body.folderId)) {
+      return Response.json({ error: "Invalid folder id" }, { status: 400 });
+    }
+
+    folderId = body.folderId;
+  }
 
   await connectToDatabase();
+
+  if (folderId) {
+    const folderExists = await Folder.exists({ _id: folderId, userId });
+
+    if (!folderExists) {
+      return Response.json({ error: "Folder not found" }, { status: 400 });
+    }
+  }
+
+  const frontmatterTitle = parseFrontmatterTitle(contentText);
+  const resolvedTitle = normalizeText(frontmatterTitle ?? title, "Untitled").slice(0, 180);
+
+  const slug = normalizeSlug(body.slug) ??
+    (await generateUniqueSlug(resolvedTitle, async (candidate) => {
+      const existing = await Note.exists({ userId, folderId, slug: candidate });
+      return Boolean(existing);
+    }));
 
   try {
     const created = await Note.create({
       userId,
-      title,
+      title: resolvedTitle,
       slug,
+      folderId,
       content,
       contentText,
       type,

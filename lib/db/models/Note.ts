@@ -1,4 +1,4 @@
-import { Schema, model, models, type Model } from "mongoose";
+import { Schema, model, models, type Model, type Types } from "mongoose";
 import { userIdField, type IUserOwnedDocument } from "./shared/ownership";
 
 export type NoteType = "note" | "blog";
@@ -7,6 +7,7 @@ export type NoteVisibility = "private" | "public";
 export interface INote extends IUserOwnedDocument {
   title: string;
   slug?: string;
+  folderId: Types.ObjectId | null;
   content: string;
   contentText: string;
   type: NoteType;
@@ -32,6 +33,12 @@ const noteSchema = new Schema<INote>(
       lowercase: true,
       maxlength: 200,
       match: /^[a-z0-9-]+$/,
+    },
+    folderId: {
+      type: Schema.Types.ObjectId,
+      ref: "Folder",
+      default: null,
+      index: true,
     },
     content: {
       type: String,
@@ -62,8 +69,9 @@ const noteSchema = new Schema<INote>(
 );
 
 noteSchema.index({ userId: 1, updatedAt: -1 });
+noteSchema.index({ userId: 1, folderId: 1, updatedAt: -1 });
 noteSchema.index(
-  { userId: 1, slug: 1 },
+  { userId: 1, folderId: 1, slug: 1 },
   {
     unique: true,
     partialFilterExpression: {
