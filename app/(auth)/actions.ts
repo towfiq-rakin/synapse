@@ -57,7 +57,7 @@ export async function loginAction(
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/app",
+      redirectTo: "/",
     });
   } catch (error) {
     if (error instanceof AuthError) {
@@ -148,7 +148,7 @@ export async function signupAction(
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/app",
+      redirectTo: "/",
     });
   } catch (error) {
     if (error instanceof AuthError) {
