@@ -114,24 +114,16 @@ export function useLinkHandler(props: LinkHandlerProps) {
   useEffect(() => {
     if (!editor) return
 
-    // Get URL immediately on mount
-    const { href } = editor.getAttributes("link")
-
-    if (isLinkActive(editor) && url === null) {
-      setUrl(href || "")
-    }
-  }, [editor, url])
-
-  useEffect(() => {
-    if (!editor) return
-
     const updateLinkState = () => {
       const { href } = editor.getAttributes("link")
       setUrl(href || "")
     }
 
+    const frame = window.requestAnimationFrame(updateLinkState)
+
     editor.on("selectionUpdate", updateLinkState)
     return () => {
+      window.cancelAnimationFrame(frame)
       editor.off("selectionUpdate", updateLinkState)
     }
   }, [editor])

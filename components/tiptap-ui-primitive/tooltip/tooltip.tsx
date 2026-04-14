@@ -173,19 +173,28 @@ export const TooltipTrigger = forwardRef<HTMLElement, TooltipTriggerProps>(
     const ref = useMergeRefs([context.refs.setReference, propRef, childrenRef])
 
     if (asChild && isValidElement(children)) {
+      const child = children as React.ReactElement<
+        React.HTMLAttributes<HTMLElement> & {
+          ref?: React.Ref<HTMLElement>
+        }
+      >
       const dataAttributes = {
         "data-tooltip-state": context.open ? "open" : "closed",
       }
+      const referenceProps = context.getReferenceProps({
+        ...props,
+        ...(typeof child.props === "object" ? child.props : {}),
+        ...dataAttributes,
+      })
 
-      return cloneElement(
-        children,
-        context.getReferenceProps({
-          ref,
-          ...props,
-          ...(typeof children.props === "object" ? children.props : {}),
-          ...dataAttributes,
-        })
-      )
+      // Floating UI requires forwarding this ref to the reference element.
+      // eslint-disable-next-line react-hooks/refs
+      return cloneElement(child, {
+        ...(referenceProps as React.HTMLAttributes<HTMLElement> & {
+          ref?: React.Ref<HTMLElement>
+        }),
+        ref,
+      })
     }
 
     return (

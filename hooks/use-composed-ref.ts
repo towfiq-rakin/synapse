@@ -19,15 +19,15 @@ const updateRef = <T>(ref: NonNullable<UserRef<T>>, value: T | null) => {
 }
 
 export const useComposedRef = <T extends HTMLElement>(
-  libRef: React.RefObject<T | null>,
+  libRef: UserRef<T>,
   userRef: UserRef<T>
 ) => {
   const prevUserRef = useRef<UserRef<T>>(null)
 
   return useCallback(
     (instance: T | null) => {
-      if (libRef && "current" in libRef) {
-        ;(libRef as { current: T | null }).current = instance
+      if (libRef) {
+        updateRef(libRef, instance)
       }
 
       if (prevUserRef.current) {

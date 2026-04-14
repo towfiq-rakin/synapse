@@ -266,10 +266,22 @@ export const LinkPopover = forwardRef<HTMLButtonElement, LinkPopoverProps>(
     )
 
     useEffect(() => {
-      if (autoOpenOnLinkActive && isActive) {
-        setIsOpen(true)
+      if (!autoOpenOnLinkActive || !editor) return
+
+      const openWhenLinkIsActive = () => {
+        if (editor.isActive("link")) {
+          setIsOpen(true)
+        }
       }
-    }, [autoOpenOnLinkActive, isActive])
+
+      const frame = window.requestAnimationFrame(openWhenLinkIsActive)
+      editor.on("selectionUpdate", openWhenLinkIsActive)
+
+      return () => {
+        window.cancelAnimationFrame(frame)
+        editor.off("selectionUpdate", openWhenLinkIsActive)
+      }
+    }, [autoOpenOnLinkActive, editor])
 
     if (!isVisible) {
       return null

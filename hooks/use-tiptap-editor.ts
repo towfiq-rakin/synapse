@@ -23,19 +23,27 @@ export function useTiptapEditor(providedEditor?: Editor | null): {
 
   useEffect(() => {
     if (!mainEditor) {
-      setStorageEditor(null)
-      return
+      const clearTask = window.setTimeout(() => {
+        setStorageEditor(null)
+      }, 0)
+
+      return () => {
+        window.clearTimeout(clearTask)
+      }
     }
 
     const updateHandler = () =>
       setStorageEditor(getActivePageEditor(mainEditor))
 
-    updateHandler()
+    const syncTask = window.setTimeout(() => {
+      updateHandler()
+    }, 0)
 
     mainEditor.on("update", updateHandler)
     mainEditor.on("selectionUpdate", updateHandler)
 
     return () => {
+      window.clearTimeout(syncTask)
       mainEditor.off("update", updateHandler)
       mainEditor.off("selectionUpdate", updateHandler)
     }

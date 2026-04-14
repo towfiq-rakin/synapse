@@ -184,8 +184,14 @@ export function useMenuNavigation<T>({
   ])
 
   useEffect(() => {
-    if (query) {
+    if (!query) return
+
+    const frame = window.requestAnimationFrame(() => {
       setSelectedIndex(autoSelectFirstItem ? 0 : -1)
+    })
+
+    return () => {
+      window.cancelAnimationFrame(frame)
     }
   }, [query, autoSelectFirstItem])
 
