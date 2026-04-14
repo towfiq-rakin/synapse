@@ -1,13 +1,10 @@
+@import '../styles/_variables.scss';
+@import '../styles/_keyframe-animations.scss';
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "katex/dist/katex.min.css";
-@import "@blocknote/core/fonts/inter.css";
-@import "@blocknote/react/style.css";
-@import "@blocknote/shadcn/style.css";
-
-/* Path to your installed `@blocknote/shadcn` package. */
-@source "../node_modules/@blocknote/shadcn";
 
 @custom-variant dark (&:is(.dark *));
 
