@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useState } from "react"
 import { EditorContent, EditorContext, useEditor, type Editor } from "@tiptap/react"
 import { Sigma } from "lucide-react"
 
@@ -55,29 +55,14 @@ import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button"
 import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu"
 import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button"
 import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button"
-import {
-  ColorHighlightPopover,
-  ColorHighlightPopoverContent,
-  ColorHighlightPopoverButton,
-} from "@/components/tiptap-ui/color-highlight-popover"
-import {
-  LinkPopover,
-  LinkContent,
-  LinkButton,
-} from "@/components/tiptap-ui/link-popover"
+import { ColorHighlightPopover } from "@/components/tiptap-ui/color-highlight-popover"
+import { LinkPopover } from "@/components/tiptap-ui/link-popover"
 import { MarkButton } from "@/components/tiptap-ui/mark-button"
 import { TextAlignButton } from "@/components/tiptap-ui/text-align-button"
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button"
 
-// --- Icons ---
-import { ArrowLeftIcon } from "@/components/tiptap-icons/arrow-left-icon"
-import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
-import { LinkIcon } from "@/components/tiptap-icons/link-icon"
-
 // --- Hooks ---
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint"
-import { useWindowSize } from "@/hooks/use-window-size"
-import { useCursorVisibility } from "@/hooks/use-cursor-visibility"
 
 // --- Components ---
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle"
@@ -234,15 +219,9 @@ const MathFormulaPopover = ({ editor }: { editor: Editor | null }) => {
 }
 
 const MainToolbarContent = ({
-  onHighlighterClick,
-  onLinkClick,
   editor,
-  isMobile,
 }: {
-  onHighlighterClick: () => void
-  onLinkClick: () => void
   editor: Editor | null
-  isMobile: boolean
 }) => {
   return (
     <>
@@ -273,12 +252,8 @@ const MainToolbarContent = ({
         <MarkButton type="strike" />
         <MarkButton type="code" />
         <MarkButton type="underline" />
-        {!isMobile ? (
-          <ColorHighlightPopover />
-        ) : (
-          <ColorHighlightPopoverButton onClick={onHighlighterClick} />
-        )}
-        {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
+        <ColorHighlightPopover />
+        <LinkPopover />
       </ToolbarGroup>
 
       <ToolbarSeparator />
@@ -311,8 +286,6 @@ const MainToolbarContent = ({
 
       <Spacer />
 
-      {isMobile && <ToolbarSeparator />}
-
       <ToolbarGroup>
         <ThemeToggle />
       </ToolbarGroup>
@@ -320,43 +293,8 @@ const MainToolbarContent = ({
   )
 }
 
-const MobileToolbarContent = ({
-  type,
-  onBack,
-}: {
-  type: "highlighter" | "link"
-  onBack: () => void
-}) => (
-  <>
-    <ToolbarGroup>
-      <Button variant="ghost" onClick={onBack}>
-        <ArrowLeftIcon className="tiptap-button-icon" />
-        {type === "highlighter" ? (
-          <HighlighterIcon className="tiptap-button-icon" />
-        ) : (
-          <LinkIcon className="tiptap-button-icon" />
-        )}
-      </Button>
-    </ToolbarGroup>
-
-    <ToolbarSeparator />
-
-    {type === "highlighter" ? (
-      <ColorHighlightPopoverContent />
-    ) : (
-      <LinkContent />
-    )}
-  </>
-)
-
 export function SimpleEditor() {
   const isMobile = useIsBreakpoint()
-  const { height } = useWindowSize()
-  const [toolbarHeight, setToolbarHeight] = useState(0)
-  const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
-    "main"
-  )
-  const toolbarRef = useRef<HTMLDivElement>(null)
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -446,64 +384,14 @@ export function SimpleEditor() {
     },
   })
 
-  const rect = useCursorVisibility({
-    editor,
-    overlayHeight: toolbarHeight,
-  })
-
-  useEffect(() => {
-    const toolbarElement = toolbarRef.current
-
-    if (!toolbarElement) {
-      return
-    }
-
-    const updateToolbarHeight = () => {
-      setToolbarHeight(toolbarElement.getBoundingClientRect().height)
-    }
-
-    updateToolbarHeight()
-
-    const resizeObserver = new ResizeObserver(updateToolbarHeight)
-    resizeObserver.observe(toolbarElement)
-
-    window.addEventListener("resize", updateToolbarHeight)
-
-    return () => {
-      resizeObserver.disconnect()
-      window.removeEventListener("resize", updateToolbarHeight)
-    }
-  }, [])
-
-  const toolbarView = isMobile ? mobileView : "main"
-
   return (
     <div className="simple-editor-wrapper">
       <EditorContext.Provider value={{ editor }}>
-        <Toolbar
-          ref={toolbarRef}
-          style={{
-            ...(isMobile
-              ? {
-                  bottom: `calc(100% - ${height - rect.y}px)`,
-                }
-              : {}),
-          }}
-        >
-          {toolbarView === "main" ? (
-            <MainToolbarContent
-              onHighlighterClick={() => setMobileView("highlighter")}
-              onLinkClick={() => setMobileView("link")}
-              editor={editor}
-              isMobile={isMobile}
-            />
-          ) : (
-            <MobileToolbarContent
-              type={toolbarView === "highlighter" ? "highlighter" : "link"}
-              onBack={() => setMobileView("main")}
-            />
-          )}
-        </Toolbar>
+        {!isMobile ? (
+          <Toolbar>
+            <MainToolbarContent editor={editor} />
+          </Toolbar>
+        ) : null}
 
         <EditorContent
           editor={editor}

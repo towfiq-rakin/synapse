@@ -37,7 +37,7 @@
     width: 100%;
     min-height: var(--tt-toolbar-height);
     background: var(--tt-toolbar-bg-color);
-    border-bottom: 1px solid var(--tt-toolbar-border-color);
+    border-bottom: none;
     padding: 0 0.5rem;
     overflow-x: auto;
     overscroll-behavior-x: contain;
@@ -53,7 +53,7 @@
       position: absolute;
       top: auto;
       height: calc(var(--tt-toolbar-height) + var(--tt-safe-area-bottom));
-      border-top: 1px solid var(--tt-toolbar-border-color);
+      border-top: none;
       border-bottom: none;
       padding: 0 0.5rem var(--tt-safe-area-bottom);
       flex-wrap: nowrap;

@@ -6,35 +6,13 @@ import { Button } from "@/components/tiptap-ui-primitive/button"
 // --- Icons ---
 import { MoonStarIcon } from "@/components/tiptap-icons/moon-star-icon"
 import { SunIcon } from "@/components/tiptap-icons/sun-icon"
-import { useEffect, useState } from "react"
-
-const getInitialDarkMode = (): boolean => {
-  if (typeof window === "undefined" || typeof document === "undefined") {
-    return false
-  }
-
-  return (
-    !!document.querySelector('meta[name="color-scheme"][content="dark"]') ||
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  )
-}
+import { useTheme } from "next-themes"
 
 export function ThemeToggle() {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(getInitialDarkMode)
+  const { resolvedTheme, setTheme } = useTheme()
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
-    const handleChange = (event: MediaQueryListEvent) =>
-      setIsDarkMode(event.matches)
-    mediaQuery.addEventListener("change", handleChange)
-    return () => mediaQuery.removeEventListener("change", handleChange)
-  }, [])
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDarkMode)
-  }, [isDarkMode])
-
-  const toggleDarkMode = () => setIsDarkMode((isDark) => !isDark)
+  const isDarkMode = resolvedTheme === "dark"
+  const toggleDarkMode = () => setTheme(isDarkMode ? "light" : "dark")
 
   return (
     <Button
