@@ -5,11 +5,12 @@ import { redirect } from "next/navigation";
 import { Types } from "mongoose";
 import { auth } from "@/lib/auth";
 import Folder from "@/lib/db/models/Folder";
-import Note, { type NoteType, type NoteVisibility } from "@/lib/db/models/Note";
+import Note, { type NoteVisibility } from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { getExplorerUser } from "@/lib/explorer";
 import {
   buildFolderSegmentsById,
-  buildPrivateNoteHref,
+  buildUserNoteHref,
   generateUniqueSlug,
   parseFrontmatterTitle,
 } from "@/lib/notes-path";
@@ -22,10 +23,6 @@ function readString(formData: FormData, key: string): string {
 function normalizeTitle(input: string): string {
   const title = input.trim().slice(0, 180);
   return title || "Untitled";
-}
-
-function normalizeType(input: string): NoteType {
-  return input === "blog" ? "blog" : "note";
 }
 
 function normalizeVisibility(input: string): NoteVisibility {
@@ -69,7 +66,6 @@ export async function createNoteAction(formData: FormData): Promise<void> {
   const userId = await requireUserId();
   const title = normalizeTitle(readString(formData, "title"));
   const content = readString(formData, "content");
-  const type = normalizeType(readString(formData, "type"));
   const visibility = normalizeVisibility(readString(formData, "visibility"));
   const tags = normalizeTags(readString(formData, "tags"));
 
@@ -90,13 +86,16 @@ export async function createNoteAction(formData: FormData): Promise<void> {
     folderId,
     content,
     contentText: content,
-    type,
+    type: "note",
     visibility,
     tags,
   });
 
   const folders = await Folder.find({ userId }).select("_id slug parentId").lean();
-  const href = buildPrivateNoteHref(created, buildFolderSegmentsById(folders));
+  const user = await getExplorerUser(userId);
+  const href = user
+    ? buildUserNoteHref(user.username, created, buildFolderSegmentsById(folders))
+    : "/";
 
   revalidatePath("/");
   revalidatePath("/notes");
@@ -112,7 +111,6 @@ export async function updateNoteAction(noteId: string, formData: FormData): Prom
 
   const title = normalizeTitle(readString(formData, "title"));
   const content = readString(formData, "content");
-  const type = normalizeType(readString(formData, "type"));
   const visibility = normalizeVisibility(readString(formData, "visibility"));
   const tags = normalizeTags(readString(formData, "tags"));
 
@@ -141,7 +139,7 @@ export async function updateNoteAction(noteId: string, formData: FormData): Prom
         folderId,
         content,
         contentText: content,
-        type,
+        type: "note",
         visibility,
         tags,
       },
@@ -154,7 +152,10 @@ export async function updateNoteAction(noteId: string, formData: FormData): Prom
   }
 
   const folders = await Folder.find({ userId }).select("_id slug parentId").lean();
-  const href = buildPrivateNoteHref(updated, buildFolderSegmentsById(folders));
+  const user = await getExplorerUser(userId);
+  const href = user
+    ? buildUserNoteHref(user.username, updated, buildFolderSegmentsById(folders))
+    : "/";
 
   revalidatePath("/");
   revalidatePath("/notes");
@@ -238,7 +239,10 @@ export async function createQuickNoteAction(formData: FormData): Promise<void> {
   });
 
   const folders = await Folder.find({ userId }).select("_id slug parentId").lean();
-  const href = buildPrivateNoteHref(created, buildFolderSegmentsById(folders));
+  const user = await getExplorerUser(userId);
+  const href = user
+    ? buildUserNoteHref(user.username, created, buildFolderSegmentsById(folders))
+    : "/";
 
   revalidatePath("/");
   revalidatePath("/notes");

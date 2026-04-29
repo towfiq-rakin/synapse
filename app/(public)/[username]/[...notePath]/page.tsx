@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
+import AutoSyncNoteEditor from "@/components/editor/auto-sync-note-editor";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -16,8 +18,10 @@ type PublicPathPageProps = {
 };
 
 type PublicNote = {
+  _id: { toString(): string } | string;
   title: string;
   content: string;
+  folderId: { toString(): string } | string | null;
 };
 
 function isLikelyHtml(input: string): boolean {
@@ -45,6 +49,7 @@ async function renderNoteHtml(content: string): Promise<string> {
 }
 
 export default async function PublicPathPage({ params }: PublicPathPageProps) {
+  const session = await auth();
   const { username, notePath } = await params;
   const normalizedPath = normalizePathSegments(notePath);
 
@@ -70,6 +75,7 @@ export default async function PublicPathPage({ params }: PublicPathPageProps) {
   }
 
   const userId = typeof user._id === "string" ? user._id : user._id.toString();
+  const isOwner = session?.user?.id === userId;
 
   const folders = await Folder.find({ userId })
     .select("_id slug parentId")
@@ -85,13 +91,24 @@ export default async function PublicPathPage({ params }: PublicPathPageProps) {
     userId,
     folderId,
     slug: noteSlug,
-    visibility: "public",
+    ...(isOwner ? {} : { visibility: "public" }),
   })
-    .select("title content")
+    .select("_id title content folderId")
     .lean<PublicNote | null>();
 
   if (!note) {
     notFound();
+  }
+
+  if (isOwner) {
+    return (
+      <AutoSyncNoteEditor
+        noteId={typeof note._id === "string" ? note._id : note._id.toString()}
+        initialTitle={note.title || "Untitled"}
+        initialContent={note.content || ""}
+        initialFolderId={typeof note.folderId === "string" ? note.folderId : note.folderId?.toString() ?? null}
+      />
+    );
   }
 
   const renderedHtml = await renderNoteHtml(note.content);

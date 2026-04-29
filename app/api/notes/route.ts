@@ -1,9 +1,9 @@
 import { auth } from "@/lib/auth";
-import Folder from "@/lib/db/models/Folder";
-import Note, { type NoteType, type NoteVisibility } from "@/lib/db/models/Note";
+import Note, { type NoteVisibility } from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
-import { generateUniqueSlug, parseFrontmatterTitle } from "@/lib/notes-path";
-import { Types } from "mongoose";
+import { getExplorerPayload, resolveFolderIdFromBody } from "@/lib/explorer";
+import { buildFolderSegmentsById, buildUserNoteHref, generateUniqueSlug, parseFrontmatterTitle, type FolderPathNode, type NotePathNode } from "@/lib/notes-path";
+import Folder from "@/lib/db/models/Folder";
 
 function normalizeText(input: unknown, fallback = ""): string {
   if (typeof input !== "string") return fallback;
@@ -29,10 +29,6 @@ function normalizeTags(input: unknown): string[] {
     .slice(0, 50);
 }
 
-function isNoteType(value: unknown): value is NoteType {
-  return value === "note" || value === "blog";
-}
-
 function isVisibility(value: unknown): value is NoteVisibility {
   return value === "private" || value === "public";
 }
@@ -49,14 +45,13 @@ export async function GET() {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  await connectToDatabase();
+  const explorer = await getExplorerPayload(userId);
 
-  const notes = await Note.find({ userId })
-    .sort({ updatedAt: -1 })
-    .select("_id title slug type visibility tags updatedAt createdAt")
-    .lean();
+  if (!explorer) {
+    return Response.json({ error: "User not found" }, { status: 404 });
+  }
 
-  return Response.json({ notes });
+  return Response.json({ notes: explorer.notes, explorer });
 }
 
 export async function POST(request: Request) {
@@ -78,26 +73,14 @@ export async function POST(request: Request) {
   const content = typeof body.content === "string" ? body.content : "";
   const contentText = typeof body.contentText === "string" ? body.contentText : "";
   const tags = normalizeTags(body.tags);
-  const type: NoteType = isNoteType(body.type) ? body.type : "note";
   const visibility: NoteVisibility = isVisibility(body.visibility) ? body.visibility : "private";
-  let folderId: string | null = null;
-
-  if (body.folderId !== undefined && body.folderId !== null && body.folderId !== "") {
-    if (typeof body.folderId !== "string" || !Types.ObjectId.isValid(body.folderId)) {
-      return Response.json({ error: "Invalid folder id" }, { status: 400 });
-    }
-
-    folderId = body.folderId;
-  }
 
   await connectToDatabase();
 
-  if (folderId) {
-    const folderExists = await Folder.exists({ _id: folderId, userId });
+  const folderId = await resolveFolderIdFromBody(userId, body);
 
-    if (!folderExists) {
-      return Response.json({ error: "Folder not found" }, { status: 400 });
-    }
+  if (folderId === undefined) {
+    return Response.json({ error: "Folder not found" }, { status: 404 });
   }
 
   const frontmatterTitle = parseFrontmatterTitle(contentText);
@@ -117,12 +100,19 @@ export async function POST(request: Request) {
       folderId,
       content,
       contentText,
-      type,
+      type: "note",
       visibility,
       tags,
     });
 
-    return Response.json({ note: created.toObject() }, { status: 201 });
+    const explorer = await getExplorerPayload(userId);
+    const user = explorer?.user;
+    const folders = await Folder.find({ userId }).select("_id slug parentId").lean<FolderPathNode[]>();
+    const href = user
+      ? buildUserNoteHref(user.username, created as NotePathNode, buildFolderSegmentsById(folders))
+      : undefined;
+
+    return Response.json({ note: created.toObject(), href, explorer }, { status: 201 });
   } catch (error) {
     if (
       typeof error === "object" &&

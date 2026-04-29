@@ -1,16 +1,17 @@
 import { auth } from "@/lib/auth";
-import Folder from "@/lib/db/models/Folder";
-import Note, { type NoteType, type NoteVisibility } from "@/lib/db/models/Note";
+import Note, { type NoteVisibility } from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { getExplorerPayload, resolveFolderIdFromBody } from "@/lib/explorer";
 import {
   buildFolderSegmentsById,
-  buildPrivateNoteHref,
+  buildUserNoteHref,
   generateUniqueSlug,
   parseFrontmatterTitle,
   slugFromText,
   type FolderPathNode,
   type NotePathNode,
 } from "@/lib/notes-path";
+import Folder from "@/lib/db/models/Folder";
 import { Types } from "mongoose";
 
 type RouteContext = {
@@ -41,10 +42,6 @@ function normalizeTags(input: unknown): string[] | undefined {
     .map((value) => value.trim().toLowerCase())
     .filter((value) => value.length > 0)
     .slice(0, 50);
-}
-
-function isNoteType(value: unknown): value is NoteType {
-  return value === "note" || value === "blog";
 }
 
 function isVisibility(value: unknown): value is NoteVisibility {
@@ -85,7 +82,13 @@ export async function GET(_request: Request, context: RouteContext) {
     return Response.json({ error: "Note not found" }, { status: 404 });
   }
 
-  return Response.json({ note });
+  const explorer = await getExplorerPayload(userId);
+  const folders = await Folder.find({ userId }).select("_id slug parentId").lean<FolderPathNode[]>();
+  const href = explorer
+    ? buildUserNoteHref(explorer.user.username, note as NotePathNode, buildFolderSegmentsById(folders))
+    : undefined;
+
+  return Response.json({ note, href, privatePath: href, explorer });
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
@@ -115,7 +118,6 @@ export async function PATCH(request: Request, context: RouteContext) {
     contentText?: string;
     folderId?: string | null;
     slug?: string | undefined;
-    type?: NoteType;
     visibility?: NoteVisibility;
     tags?: string[];
   } = {};
@@ -134,16 +136,6 @@ export async function PATCH(request: Request, context: RouteContext) {
     updates.contentText = body.contentText;
   }
 
-  if (body.folderId !== undefined) {
-    if (body.folderId === null || body.folderId === "") {
-      nextFolderId = null;
-    } else if (typeof body.folderId === "string" && Types.ObjectId.isValid(body.folderId)) {
-      nextFolderId = body.folderId;
-    } else {
-      return Response.json({ error: "Invalid folder id" }, { status: 400 });
-    }
-  }
-
   if (body.slug !== undefined) {
     const slug = normalizeSlug(body.slug);
     if (slug === undefined) {
@@ -151,13 +143,6 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
     updates.slug = slug || undefined;
     explicitSlug = true;
-  }
-
-  if (body.type !== undefined) {
-    if (!isNoteType(body.type)) {
-      return Response.json({ error: "Invalid note type" }, { status: 400 });
-    }
-    updates.type = body.type;
   }
 
   if (body.visibility !== undefined) {
@@ -177,6 +162,16 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   await connectToDatabase();
 
+  if (body.folderId !== undefined || body.folderPath !== undefined) {
+    const resolvedFolderId = await resolveFolderIdFromBody(userId, body);
+
+    if (resolvedFolderId === undefined) {
+      return Response.json({ error: "Folder not found" }, { status: 404 });
+    }
+
+    nextFolderId = resolvedFolderId;
+  }
+
   const current = await Note.findOne({ _id: id, userId }).select("title folderId slug contentText").lean<{
     title: string;
     folderId: { toString(): string } | string | null;
@@ -186,14 +181,6 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   if (!current) {
     return Response.json({ error: "Note not found" }, { status: 404 });
-  }
-
-  if (nextFolderId) {
-    const folderExists = await Folder.exists({ _id: nextFolderId, userId });
-
-    if (!folderExists) {
-      return Response.json({ error: "Folder not found" }, { status: 400 });
-    }
   }
 
   if (nextFolderId !== undefined) {
@@ -239,10 +226,13 @@ export async function PATCH(request: Request, context: RouteContext) {
       return Response.json({ error: "Note not found" }, { status: 404 });
     }
 
+    const explorer = await getExplorerPayload(userId);
     const folders = await Folder.find({ userId }).select("_id slug parentId").lean<FolderPathNode[]>();
-    const privatePath = buildPrivateNoteHref(note as NotePathNode, buildFolderSegmentsById(folders));
+    const href = explorer
+      ? buildUserNoteHref(explorer.user.username, note as NotePathNode, buildFolderSegmentsById(folders))
+      : undefined;
 
-    return Response.json({ note, privatePath });
+    return Response.json({ note, href, privatePath: href, explorer });
   } catch (error) {
     if (
       typeof error === "object" &&

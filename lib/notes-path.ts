@@ -5,6 +5,7 @@ type NullableId = StringLikeId | null;
 
 export type FolderPathNode = {
   _id: StringLikeId;
+  name?: string;
   slug: string;
   parentId: NullableId;
 };
@@ -41,6 +42,7 @@ export function slugFromText(input: string, fallback = "untitled"): string {
 export function normalizePathSegments(segments: string[]): string[] {
   return segments
     .map((segment) => segment.trim().toLowerCase())
+    .map((segment) => slugFromText(segment, ""))
     .filter((segment) => segment.length > 0);
 }
 
@@ -119,6 +121,24 @@ export function buildPrivateNoteHref(
   const folderId = toNullableId(note.folderId);
   const folderSegments = folderId ? folderSegmentsById.get(folderId) ?? [] : [];
   return `/${[...folderSegments, noteSlug].join("/")}`;
+}
+
+export function buildUserNoteHref(
+  username: string,
+  note: NotePathNode,
+  folderSegmentsById: Map<string, string[]>,
+): string {
+  const notePath = buildPrivateNoteHref(note, folderSegmentsById);
+  return `/${username.toLowerCase()}${notePath}`;
+}
+
+export function buildUserFolderHref(
+  username: string,
+  folderId: StringLikeId,
+  folderSegmentsById: Map<string, string[]>,
+): string {
+  const folderSegments = folderSegmentsById.get(toId(folderId)) ?? [];
+  return `/${[username.toLowerCase(), ...folderSegments].join("/")}`;
 }
 
 export function parseFrontmatterTitle(input: string): string | null {

@@ -5,7 +5,8 @@ import Note from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { Button } from "@/components/ui/button";
 import { createQuickNoteAction } from "./actions";
-import { buildFolderSegmentsById, buildPrivateNoteHref, type FolderPathNode, type NotePathNode } from "@/lib/notes-path";
+import { getExplorerUser } from "@/lib/explorer";
+import { buildFolderSegmentsById, buildUserNoteHref, type FolderPathNode, type NotePathNode } from "@/lib/notes-path";
 
 export default async function NotesPage() {
   const session = await auth();
@@ -25,7 +26,8 @@ export default async function NotesPage() {
   ]);
 
   if (latest) {
-    redirect(buildPrivateNoteHref(latest, buildFolderSegmentsById(folders)));
+    const user = await getExplorerUser(session.user.id);
+    redirect(user ? buildUserNoteHref(user.username, latest, buildFolderSegmentsById(folders)) : "/");
   }
 
   return (
