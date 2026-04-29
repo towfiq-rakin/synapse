@@ -1,7 +1,7 @@
 "use client"
 
-import Image from "next/image"
 import {
+  Brain,
   Clock3,
   Files,
   Search,
@@ -22,8 +22,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
-import synapseLogo from "@/assets/logo/synapse.png"
-import synapseWhiteLogo from "@/assets/logo/synapse-white.png"
 
 const sidebarItems = [
   { label: "New Note", icon: SquarePen },
@@ -99,21 +97,10 @@ function BrandTitle() {
 function BrandLogo() {
   return (
     <div
-      className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-xl"
+      className="flex size-8 shrink-0 items-center justify-center text-sidebar-foreground"
       aria-hidden="true"
     >
-      <Image
-        src={synapseLogo}
-        alt=""
-        className="size-8 object-contain dark:hidden"
-        priority
-      />
-      <Image
-        src={synapseWhiteLogo}
-        alt=""
-        className="hidden size-8 object-contain dark:block"
-        priority
-      />
+      <Brain className="size-4" />
     </div>
   )
 }
