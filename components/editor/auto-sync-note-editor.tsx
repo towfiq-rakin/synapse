@@ -35,7 +35,6 @@ import {
   CalendarDays,
   ChevronDown,
   ChevronRight,
-  FileText,
   Loader2,
   Plus,
   SquareCheck,
@@ -44,7 +43,6 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { Button as TiptapButton } from "@/components/tiptap-ui-primitive/button";
 import { Toolbar, ToolbarGroup, ToolbarSeparator } from "@/components/tiptap-ui-primitive/toolbar";
 import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button";
 import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button";
@@ -69,6 +67,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
 import "@/components/tiptap-node/code-block-node/code-block-node.scss";
@@ -315,13 +314,9 @@ const ObsidianLiveMarkdown = Extension.create({
 });
 
 function NoteEditorToolbar({
-  editor,
   title,
-  onFocusEditor,
 }: {
-  editor: Editor | null;
   title: string;
-  onFocusEditor: () => void;
 }) {
   return (
     <div className="synapse-note-topbar">
@@ -386,16 +381,7 @@ function NoteEditorToolbar({
       </Toolbar>
 
       <div className="synapse-note-actions">
-        <TiptapButton
-          type="button"
-          variant="ghost"
-          tooltip="Focus editor"
-          aria-label="Focus editor"
-          onClick={onFocusEditor}
-          disabled={!editor}
-        >
-          <FileText className="tiptap-button-icon" />
-        </TiptapButton>
+        <SidebarTrigger className="md:hidden" />
         <ThemeToggle />
       </div>
     </div>
@@ -565,7 +551,6 @@ export default function AutoSyncNoteEditor({
   const router = useRouter();
   const [derivedTitle, setDerivedTitle] = useState<string>(initialTitle || "Untitled");
   const [frontmatter, setFrontmatter] = useState<NoteFrontmatterState>(EMPTY_FRONTMATTER);
-  const [isToolbarHidden, setIsToolbarHidden] = useState<boolean>(false);
   const [initialEditorContent, setInitialEditorContent] = useState<PreparedEditorContent>({
     content: "",
     contentType: "markdown",
@@ -725,17 +710,6 @@ export default function AutoSyncNoteEditor({
     });
   }
 
-  function handleFocusEditor() {
-    editor?.chain().focus().run();
-    setIsToolbarHidden(true);
-  }
-
-  function handleChromeMouseEnter() {
-    if (isToolbarHidden) {
-      setIsToolbarHidden(false);
-    }
-  }
-
   const editor = useEditor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: false,
@@ -824,7 +798,6 @@ export default function AutoSyncNoteEditor({
     frontmatterRef.current = parsed.frontmatter;
     hadFrontmatterRef.current = parsed.hadFrontmatter;
     folderIdRef.current = initialFolderId ?? null;
-    setIsToolbarHidden(false);
     setIsPreparingEditor(true);
     isHydratedRef.current = false;
     hydrationDoneRef.current = false;
@@ -875,8 +848,8 @@ export default function AutoSyncNoteEditor({
   return (
     <section className="synapse-note-shell">
       <EditorContext.Provider value={{ editor }}>
-        <div className={`synapse-note-chrome${isToolbarHidden ? " is-hidden" : ""}`} onMouseEnter={handleChromeMouseEnter}>
-          <NoteEditorToolbar editor={editor} title={derivedTitle} onFocusEditor={handleFocusEditor} />
+        <div className="synapse-note-chrome">
+          <NoteEditorToolbar title={derivedTitle} />
         </div>
 
         <article className="synapse-note-page">

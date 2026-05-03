@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { usePathname } from "next/navigation"
 import { PanelLeftIcon } from "lucide-react"
 import AppSidebar from "@/components/layout/app-sidebar"
 import ExplorerSidebar from "@/components/layout/explorer-sidebar"
@@ -57,6 +58,9 @@ function DesktopSidebarControl({
 
 export default function AppShell({ children, defaultOpen }: AppShellProps) {
   const [activePanel, setActivePanel] = useState<SidebarPanel>(null)
+  const pathname = usePathname()
+  const showMobileShellHeader = !pathname.startsWith("/notes/")
+  const showMobileShellThemeToggle = !pathname.startsWith("/notes/")
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
@@ -67,16 +71,18 @@ export default function AppShell({ children, defaultOpen }: AppShellProps) {
       <ExplorerSidebar open={activePanel === "explorer"} />
       <SidebarInset
         className={cn(
-          "min-h-svh transition-[margin] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          "h-svh min-h-svh overflow-hidden transition-[margin] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
           activePanel === "explorer" && "md:ml-56"
         )}
       >
-        <header className="sticky top-0 z-20 flex items-center justify-between px-3 py-3 md:hidden">
-          <SidebarTrigger />
-          <ThemeToggle />
-        </header>
+        {showMobileShellHeader ? (
+          <header className="sticky top-0 z-20 flex items-center justify-between px-3 py-3 md:hidden">
+            <SidebarTrigger />
+            {showMobileShellThemeToggle ? <ThemeToggle /> : null}
+          </header>
+        ) : null}
         <DesktopSidebarControl activePanel={activePanel} onPanelChange={setActivePanel} />
-        <div className="synapse-editor-shell min-h-0 flex-1 overflow-auto">{children}</div>
+        <div className="synapse-editor-shell min-h-0 flex-1 overflow-auto overscroll-contain">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   )

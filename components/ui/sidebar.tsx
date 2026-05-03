@@ -222,7 +222,7 @@ function Sidebar({
       <div
         data-slot="sidebar-gap"
         className={cn(
-          "synapse-sidebar-gap relative w-(--sidebar-width) bg-transparent",
+          "synapse-sidebar-gap relative w-(--sidebar-width) bg-sidebar",
           SIDEBAR_TRANSITION,
           "group-data-[collapsible=offcanvas]:w-0",
           "group-data-[side=right]:rotate-180",
