@@ -2,8 +2,7 @@ import { auth } from "@/lib/auth";
 import Note, { type NoteVisibility } from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { getExplorerPayload, resolveFolderIdFromBody } from "@/lib/explorer";
-import { buildFolderSegmentsById, buildUserNoteHref, generateUniqueSlug, parseFrontmatterTitle, type FolderPathNode, type NotePathNode } from "@/lib/notes-path";
-import Folder from "@/lib/db/models/Folder";
+import { generateUniqueSlug, parseFrontmatterTitle } from "@/lib/notes-path";
 
 function normalizeText(input: unknown, fallback = ""): string {
   if (typeof input !== "string") return fallback;
@@ -106,11 +105,7 @@ export async function POST(request: Request) {
     });
 
     const explorer = await getExplorerPayload(userId);
-    const user = explorer?.user;
-    const folders = await Folder.find({ userId }).select("_id slug parentId").lean<FolderPathNode[]>();
-    const href = user
-      ? buildUserNoteHref(user.username, created as NotePathNode, buildFolderSegmentsById(folders))
-      : undefined;
+    const href = `/notes/${created._id.toString()}`;
 
     return Response.json({ note: created.toObject(), href, explorer }, { status: 201 });
   } catch (error) {

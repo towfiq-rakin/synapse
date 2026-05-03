@@ -1,0 +1,486 @@
+.synapse-note-shell {
+  min-height: 100svh;
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in oklab, var(--foreground) 4%, transparent),
+      transparent 26rem
+    ),
+    var(--background);
+  color: var(--foreground);
+}
+
+.synapse-note-chrome {
+  --synapse-topbar-peek: 0.55rem;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  min-height: 2.75rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
+  background: color-mix(in oklab, var(--background) 92%, transparent);
+  backdrop-filter: blur(18px);
+  transform: translateY(0);
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease;
+  will-change: transform;
+}
+
+.synapse-note-chrome.is-hidden {
+  transform: translateY(calc(-100% + var(--synapse-topbar-peek)));
+}
+
+.synapse-note-topbar {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) minmax(20rem, auto) minmax(7rem, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+}
+
+.synapse-note-breadcrumb {
+  min-width: 0;
+  padding-left: 2.75rem;
+}
+
+.synapse-note-breadcrumb [data-slot="breadcrumb-list"] {
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+}
+
+.synapse-note-breadcrumb [data-slot="breadcrumb-page"],
+.synapse-note-breadcrumb [data-slot="breadcrumb-link"] {
+  display: inline-block;
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.synapse-note-toolbar.tiptap-toolbar {
+  justify-self: center;
+  min-height: 2.25rem;
+  width: max-content;
+  max-width: min(58vw, 45rem);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  overflow-x: auto;
+}
+
+.synapse-note-toolbar .tiptap-toolbar-group {
+  gap: 0.1rem;
+}
+
+.synapse-note-toolbar [data-slot="tiptap-button"] {
+  border-radius: 0.55rem;
+  color: color-mix(in oklab, var(--foreground) 76%, var(--muted-foreground));
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.synapse-note-toolbar [data-slot="tiptap-button"]:hover,
+.synapse-note-toolbar [data-slot="tiptap-button"][data-active-state="on"] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.synapse-note-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.synapse-note-actions [data-slot="tiptap-button"] {
+  border-radius: 0.55rem;
+  color: color-mix(in oklab, var(--foreground) 76%, var(--muted-foreground));
+}
+
+.synapse-note-actions [data-slot="tiptap-button"]:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.synapse-note-page {
+  width: min(100%, 56rem);
+  margin: 0 auto;
+  padding: clamp(2rem, 6vw, 4.5rem) clamp(1.15rem, 5vw, 4rem) 32vh;
+}
+
+.synapse-note-title {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(2.25rem, 6vw, 4rem);
+  font-weight: 750;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+  outline: none;
+}
+
+.synapse-note-title::placeholder {
+  color: color-mix(in oklab, var(--muted-foreground) 56%, transparent);
+}
+
+.synapse-note-properties {
+  margin-top: 1.2rem;
+  border: 1px solid color-mix(in oklab, var(--border) 82%, transparent);
+  border-radius: 0.85rem;
+  background: color-mix(in oklab, var(--muted) 26%, var(--background));
+  overflow: visible;
+}
+
+.synapse-note-properties-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: color-mix(in oklab, var(--foreground) 88%, var(--muted-foreground));
+  font-size: 1.12rem;
+  font-weight: 560;
+  line-height: 1.1;
+  padding: 0.85rem 0.9rem 0.7rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.synapse-note-properties-header-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted-foreground);
+}
+
+.synapse-note-properties-body {
+  border-top: 1px solid color-mix(in oklab, var(--border) 68%, transparent);
+}
+
+.synapse-note-property-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 9.5rem) 1fr;
+  align-items: center;
+  min-height: 2.05rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 68%, transparent);
+}
+
+.synapse-note-property-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.8rem;
+  color: var(--muted-foreground);
+  font-size: 0.97rem;
+}
+
+.synapse-note-property-key-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: color-mix(in oklab, var(--foreground) 62%, var(--muted-foreground));
+}
+
+.synapse-note-property-input {
+  width: 100%;
+  height: 2rem;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  padding: 0 0.8rem;
+  font-size: 1rem;
+  outline: none;
+}
+
+.synapse-note-property-input:focus {
+  background: color-mix(in oklab, var(--accent) 52%, transparent);
+}
+
+.synapse-note-property-add-wrap {
+  position: relative;
+}
+
+.synapse-note-property-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 1.02rem;
+  line-height: 1;
+  padding: 0.65rem 0.8rem 0.75rem;
+  cursor: pointer;
+}
+
+.synapse-note-property-add:hover {
+  color: var(--foreground);
+}
+
+.synapse-note-property-add-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.synapse-note-property-add-menu {
+  position: absolute;
+  left: 0.35rem;
+  top: calc(100% - 0.2rem);
+  z-index: 30;
+  min-width: 10rem;
+  border: 1px solid color-mix(in oklab, var(--border) 82%, transparent);
+  border-radius: 0.6rem;
+  background: color-mix(in oklab, var(--background) 94%, #161616);
+  box-shadow: 0 14px 36px rgb(0 0 0 / 0.28);
+  padding: 0.25rem;
+}
+
+.synapse-note-property-add-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 0.92rem;
+  padding: 0.45rem 0.5rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.synapse-note-property-add-item:hover {
+  background: var(--accent);
+}
+
+.synapse-note-property-add-item-icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  color: var(--muted-foreground);
+}
+
+.synapse-note-property-checkbox {
+  justify-self: start;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-left: 0.8rem;
+  accent-color: var(--primary);
+}
+
+.synapse-note-content {
+  margin-top: 2rem;
+}
+
+.synapse-note-prosemirror {
+  min-height: 62vh;
+  width: 100%;
+  outline: none;
+  color: color-mix(in oklab, var(--foreground) 90%, var(--muted-foreground));
+  font-size: clamp(1.02rem, 1.1vw, 1.12rem);
+  line-height: 1.78;
+}
+
+.synapse-note-prosemirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: color-mix(in oklab, var(--muted-foreground) 72%, transparent);
+  pointer-events: none;
+}
+
+.synapse-note-prosemirror h1,
+.synapse-note-prosemirror h2,
+.synapse-note-prosemirror h3,
+.synapse-note-prosemirror h4 {
+  color: var(--foreground);
+  font-weight: 720;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.synapse-note-prosemirror h1 {
+  margin: 2.25rem 0 0.8rem;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+}
+
+.synapse-note-prosemirror h2 {
+  margin: 2rem 0 0.65rem;
+  font-size: clamp(1.55rem, 3vw, 2rem);
+}
+
+.synapse-note-prosemirror h3 {
+  margin: 1.6rem 0 0.5rem;
+  font-size: 1.35rem;
+}
+
+.synapse-note-prosemirror p {
+  margin: 0.75rem 0;
+}
+
+.synapse-note-prosemirror a {
+  color: color-mix(in oklab, var(--primary) 82%, #0891b2);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.synapse-note-prosemirror ul,
+.synapse-note-prosemirror ol {
+  margin: 0.8rem 0;
+  padding-left: 1.45rem;
+}
+
+.synapse-note-prosemirror li {
+  margin: 0.25rem 0;
+  padding-left: 0.1rem;
+}
+
+.synapse-note-prosemirror blockquote {
+  margin: 1.35rem 0;
+  border-left: 3px solid color-mix(in oklab, var(--foreground) 32%, transparent);
+  padding: 0.2rem 0 0.2rem 1rem;
+  color: var(--muted-foreground);
+}
+
+.synapse-note-prosemirror code {
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  background: var(--muted);
+  padding: 0.08rem 0.32rem;
+  color: var(--foreground);
+  font-size: 0.9em;
+}
+
+.synapse-note-prosemirror pre {
+  margin: 1.35rem 0;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--muted) 74%, var(--background));
+  padding: 1rem;
+}
+
+.synapse-note-prosemirror pre code {
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.synapse-note-prosemirror hr {
+  margin: 2.2rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.synapse-note-prosemirror img {
+  max-width: 100%;
+  border-radius: 1rem;
+}
+
+.synapse-note-prosemirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.synapse-note-prosemirror ul[data-type="taskList"] li {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.synapse-note-prosemirror ul[data-type="taskList"] label {
+  padding-top: 0.15rem;
+}
+
+.synapse-note-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  color: var(--muted-foreground);
+  font-size: 0.95rem;
+}
+
+.dark .synapse-note-shell {
+  background:
+    radial-gradient(circle at 18% 0%, hsl(190 90% 52% / 0.08), transparent 28rem),
+    #151515;
+}
+
+.dark .synapse-note-chrome {
+  border-bottom-color: #2a2a2a;
+  background: rgb(21 21 21 / 0.88);
+}
+
+.dark .synapse-note-properties {
+  border-color: #3a3a3a;
+  background: #232323;
+}
+
+.dark .synapse-note-property-input {
+  color: #e6dfcf;
+}
+
+.dark .synapse-note-property-row,
+.dark .synapse-note-properties-body {
+  border-color: #414141;
+}
+
+.dark .synapse-note-property-key,
+.dark .synapse-note-property-add {
+  color: #c2b28d;
+}
+
+.dark .synapse-note-property-add-menu {
+  border-color: #3a3a3a;
+  background: #2a2a2a;
+}
+
+.dark .synapse-note-toolbar [data-slot="tiptap-button"]:hover,
+.dark .synapse-note-toolbar [data-slot="tiptap-button"][data-active-state="on"],
+.dark .synapse-note-actions [data-slot="tiptap-button"]:hover {
+  background: #2a2a2a;
+}
+
+.dark .synapse-note-prosemirror pre {
+  border-color: #2a2a2a;
+  background: #1d1d1d;
+}
+
+@media (max-width: 720px) {
+  .synapse-note-topbar {
+    grid-template-columns: 1fr auto;
+    min-height: auto;
+    padding: 0.45rem 0.75rem;
+  }
+
+  .synapse-note-toolbar.tiptap-toolbar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: start;
+    max-width: calc(100vw - 1.5rem);
+  }
+
+  .synapse-note-breadcrumb {
+    padding-left: 0;
+  }
+
+  .synapse-note-actions {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .synapse-note-page {
+    padding-top: 2rem;
+  }
+
+  .synapse-note-property-row {
+    grid-template-columns: minmax(6.2rem, 7.2rem) 1fr;
+  }
+}

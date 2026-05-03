@@ -1,12 +1,9 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import Folder from "@/lib/db/models/Folder";
 import Note from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { Button } from "@/components/ui/button";
 import { createQuickNoteAction } from "./actions";
-import { getExplorerUser } from "@/lib/explorer";
-import { buildFolderSegmentsById, buildUserNoteHref, type FolderPathNode, type NotePathNode } from "@/lib/notes-path";
 
 export default async function NotesPage() {
   const session = await auth();
@@ -17,17 +14,14 @@ export default async function NotesPage() {
 
   await connectToDatabase();
 
-  const [folders, latest] = await Promise.all([
-    Folder.find({ userId: session.user.id }).select("_id slug parentId").lean<FolderPathNode[]>(),
-    Note.findOne({ userId: session.user.id })
-      .sort({ updatedAt: -1 })
-      .select("_id title slug folderId")
-      .lean<NotePathNode | null>(),
-  ]);
+  const latest = await Note.findOne({ userId: session.user.id })
+    .sort({ updatedAt: -1 })
+    .select("_id")
+    .lean<{ _id: { toString(): string } | string } | null>();
 
   if (latest) {
-    const user = await getExplorerUser(session.user.id);
-    redirect(user ? buildUserNoteHref(user.username, latest, buildFolderSegmentsById(folders)) : "/");
+    const latestId = typeof latest._id === "string" ? latest._id : latest._id.toString();
+    redirect(`/notes/${latestId}`);
   }
 
   return (

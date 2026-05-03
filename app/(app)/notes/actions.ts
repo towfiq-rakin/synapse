@@ -7,10 +7,7 @@ import { auth } from "@/lib/auth";
 import Folder from "@/lib/db/models/Folder";
 import Note, { type NoteVisibility } from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
-import { getExplorerUser } from "@/lib/explorer";
 import {
-  buildFolderSegmentsById,
-  buildUserNoteHref,
   generateUniqueSlug,
   parseFrontmatterTitle,
 } from "@/lib/notes-path";
@@ -91,15 +88,9 @@ export async function createNoteAction(formData: FormData): Promise<void> {
     tags,
   });
 
-  const folders = await Folder.find({ userId }).select("_id slug parentId").lean();
-  const user = await getExplorerUser(userId);
-  const href = user
-    ? buildUserNoteHref(user.username, created, buildFolderSegmentsById(folders))
-    : "/";
-
   revalidatePath("/");
   revalidatePath("/notes");
-  redirect(href);
+  redirect(`/notes/${created._id.toString()}`);
 }
 
 export async function updateNoteAction(noteId: string, formData: FormData): Promise<void> {
@@ -151,16 +142,10 @@ export async function updateNoteAction(noteId: string, formData: FormData): Prom
     redirect("/notes");
   }
 
-  const folders = await Folder.find({ userId }).select("_id slug parentId").lean();
-  const user = await getExplorerUser(userId);
-  const href = user
-    ? buildUserNoteHref(user.username, updated, buildFolderSegmentsById(folders))
-    : "/";
-
   revalidatePath("/");
   revalidatePath("/notes");
-  revalidatePath(href);
-  redirect(href);
+  revalidatePath(`/notes/${updated._id.toString()}`);
+  redirect(`/notes/${updated._id.toString()}`);
 }
 
 export async function deleteNoteAction(noteId: string, formData: FormData): Promise<void> {
@@ -238,13 +223,7 @@ export async function createQuickNoteAction(formData: FormData): Promise<void> {
     tags: [],
   });
 
-  const folders = await Folder.find({ userId }).select("_id slug parentId").lean();
-  const user = await getExplorerUser(userId);
-  const href = user
-    ? buildUserNoteHref(user.username, created, buildFolderSegmentsById(folders))
-    : "/";
-
   revalidatePath("/");
   revalidatePath("/notes");
-  redirect(href);
+  redirect(`/notes/${created._id.toString()}`);
 }

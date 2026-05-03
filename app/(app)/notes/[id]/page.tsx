@@ -1,16 +1,22 @@
 import { notFound, redirect } from "next/navigation";
 import { Types } from "mongoose";
 import { auth } from "@/lib/auth";
-import Folder from "@/lib/db/models/Folder";
+import AutoSyncNoteEditor from "@/components/editor/auto-sync-note-editor";
 import Note from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
-import { buildFolderSegmentsById, buildPrivateNoteHref, type FolderPathNode, type NotePathNode } from "@/lib/notes-path";
 
 type NotePageProps = {
   params: Promise<{ id: string }>;
 };
 
-export default async function LegacyNoteIdRedirectPage({ params }: NotePageProps) {
+type EditorNote = {
+  _id: { toString(): string } | string;
+  title: string;
+  content: string;
+  folderId: { toString(): string } | string | null;
+};
+
+export default async function NoteEditorPage({ params }: NotePageProps) {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -25,16 +31,21 @@ export default async function LegacyNoteIdRedirectPage({ params }: NotePageProps
 
   await connectToDatabase();
 
-  const [folders, note] = await Promise.all([
-    Folder.find({ userId: session.user.id }).select("_id slug parentId").lean<FolderPathNode[]>(),
-    Note.findOne({ _id: id, userId: session.user.id })
-      .select("_id title slug folderId")
-      .lean<NotePathNode | null>(),
-  ]);
+  const note = await Note.findOne({ _id: id, userId: session.user.id })
+    .select("_id title content folderId")
+    .lean<EditorNote | null>();
 
   if (!note) {
     notFound();
   }
 
-  redirect(buildPrivateNoteHref(note, buildFolderSegmentsById(folders)));
+  return (
+    <AutoSyncNoteEditor
+      key={id}
+      noteId={typeof note._id === "string" ? note._id : note._id.toString()}
+      initialTitle={note.title || "Untitled"}
+      initialContent={note.content || ""}
+      initialFolderId={typeof note.folderId === "string" ? note.folderId : note.folderId?.toString() ?? null}
+    />
+  );
 }

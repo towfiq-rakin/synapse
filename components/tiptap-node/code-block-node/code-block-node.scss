@@ -5,6 +5,15 @@
   --tt-codeblock-bg: var(--tt-gray-light-a-50);
   --tt-codeblock-text: var(--tt-gray-light-a-800);
   --tt-codeblock-border: var(--tt-gray-light-a-200);
+  --tt-codeblock-token-comment: #6b7280;
+  --tt-codeblock-token-keyword: #1d4ed8;
+  --tt-codeblock-token-string: #047857;
+  --tt-codeblock-token-number: #b45309;
+  --tt-codeblock-token-title: #7c3aed;
+  --tt-codeblock-token-type: #0f766e;
+  --tt-codeblock-token-literal: #be123c;
+  --tt-codeblock-token-symbol: #b91c1c;
+  --tt-codeblock-token-meta: #334155;
 
   .dark & {
     --tt-inline-code-bg-color: var(--tt-gray-dark-a-100);
@@ -13,6 +22,15 @@
     --tt-codeblock-bg: var(--tt-gray-dark-a-50);
     --tt-codeblock-text: var(--tt-gray-dark-a-800);
     --tt-codeblock-border: var(--tt-gray-dark-a-200);
+    --tt-codeblock-token-comment: #94a3b8;
+    --tt-codeblock-token-keyword: #93c5fd;
+    --tt-codeblock-token-string: #6ee7b7;
+    --tt-codeblock-token-number: #fbbf24;
+    --tt-codeblock-token-title: #c4b5fd;
+    --tt-codeblock-token-type: #67e8f9;
+    --tt-codeblock-token-literal: #fda4af;
+    --tt-codeblock-token-symbol: #fca5a5;
+    --tt-codeblock-token-meta: #cbd5e1;
   }
 }
 
@@ -49,6 +67,54 @@
       border-radius: 0;
       -webkit-text-fill-color: inherit;
       color: inherit;
+    }
+
+    .hljs-comment,
+    .hljs-quote {
+      color: var(--tt-codeblock-token-comment);
+    }
+
+    .hljs-keyword,
+    .hljs-selector-tag,
+    .hljs-subst {
+      color: var(--tt-codeblock-token-keyword);
+    }
+
+    .hljs-string,
+    .hljs-attr,
+    .hljs-selector-attr,
+    .hljs-selector-pseudo {
+      color: var(--tt-codeblock-token-string);
+    }
+
+    .hljs-number,
+    .hljs-regexp,
+    .hljs-built_in {
+      color: var(--tt-codeblock-token-number);
+    }
+
+    .hljs-title,
+    .hljs-function {
+      color: var(--tt-codeblock-token-title);
+    }
+
+    .hljs-type,
+    .hljs-class .hljs-title {
+      color: var(--tt-codeblock-token-type);
+    }
+
+    .hljs-literal,
+    .hljs-boolean {
+      color: var(--tt-codeblock-token-literal);
+    }
+
+    .hljs-symbol,
+    .hljs-bullet {
+      color: var(--tt-codeblock-token-symbol);
+    }
+
+    .hljs-meta {
+      color: var(--tt-codeblock-token-meta);
     }
   }
 }

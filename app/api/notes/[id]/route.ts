@@ -3,15 +3,10 @@ import Note, { type NoteVisibility } from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { getExplorerPayload, resolveFolderIdFromBody } from "@/lib/explorer";
 import {
-  buildFolderSegmentsById,
-  buildUserNoteHref,
   generateUniqueSlug,
   parseFrontmatterTitle,
   slugFromText,
-  type FolderPathNode,
-  type NotePathNode,
 } from "@/lib/notes-path";
-import Folder from "@/lib/db/models/Folder";
 import { Types } from "mongoose";
 
 type RouteContext = {
@@ -83,10 +78,7 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 
   const explorer = await getExplorerPayload(userId);
-  const folders = await Folder.find({ userId }).select("_id slug parentId").lean<FolderPathNode[]>();
-  const href = explorer
-    ? buildUserNoteHref(explorer.user.username, note as NotePathNode, buildFolderSegmentsById(folders))
-    : undefined;
+  const href = `/notes/${id}`;
 
   return Response.json({ note, href, privatePath: href, explorer });
 }
@@ -227,10 +219,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     const explorer = await getExplorerPayload(userId);
-    const folders = await Folder.find({ userId }).select("_id slug parentId").lean<FolderPathNode[]>();
-    const href = explorer
-      ? buildUserNoteHref(explorer.user.username, note as NotePathNode, buildFolderSegmentsById(folders))
-      : undefined;
+    const href = `/notes/${id}`;
 
     return Response.json({ note, href, privatePath: href, explorer });
   } catch (error) {

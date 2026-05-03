@@ -1,22 +1,83 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { EditorContent, useEditor } from "@tiptap/react";
+import { Extension, markInputRule } from "@tiptap/core";
+import type { MarkType } from "@tiptap/pm/model";
+import { EditorContent, EditorContext, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import LinkExtension from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Markdown } from "@tiptap/markdown";
+import { Image } from "@tiptap/extension-image";
+import { TaskItem, TaskList } from "@tiptap/extension-list";
+import { TextAlign } from "@tiptap/extension-text-align";
+import { Typography } from "@tiptap/extension-typography";
+import { Highlight } from "@tiptap/extension-highlight";
+import { Subscript } from "@tiptap/extension-subscript";
+import { Superscript } from "@tiptap/extension-superscript";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import {
+  starInputRegex as boldStarInputRegex,
+  underscoreInputRegex as boldUnderscoreInputRegex,
+} from "@tiptap/extension-bold";
+import { inputRegex as codeInputRegex } from "@tiptap/extension-code";
+import {
+  starInputRegex as italicStarInputRegex,
+  underscoreInputRegex as italicUnderscoreInputRegex,
+} from "@tiptap/extension-italic";
+import { inputRegex as strikeInputRegex } from "@tiptap/extension-strike";
+import { Selection } from "@tiptap/extensions";
 import Mathematics from "@tiptap/extension-mathematics";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import { remark } from "remark";
-import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import remarkRehype from "remark-rehype";
-import rehypeKatex from "rehype-katex";
-import rehypeStringify from "rehype-stringify";
-import { parseFrontmatterTitle } from "@/lib/notes-path";
-import { cn } from "@/lib/utils";
+import matter from "gray-matter";
+import { common, createLowlight } from "lowlight";
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  Loader2,
+  Plus,
+  SquareCheck,
+  Tags,
+  Type,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+import { Button as TiptapButton } from "@/components/tiptap-ui-primitive/button";
+import { Toolbar, ToolbarGroup, ToolbarSeparator } from "@/components/tiptap-ui-primitive/toolbar";
+import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button";
+import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button";
+import { ColorHighlightPopover } from "@/components/tiptap-ui/color-highlight-popover";
+import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu";
+import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button";
+import { LinkPopover } from "@/components/tiptap-ui/link-popover";
+import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu";
+import { MarkButton } from "@/components/tiptap-ui/mark-button";
+import { TextAlignButton } from "@/components/tiptap-ui/text-align-button";
+import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button";
+import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
+import { MarkdownMathInputExtension } from "@/components/tiptap-extension/markdown-math-input-extension";
+import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
+import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
+import {
+  Breadcrumb,
+  BreadcrumbEllipsis,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
+import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
+import "@/components/tiptap-node/code-block-node/code-block-node.scss";
+import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss";
+import "@/components/tiptap-node/list-node/list-node.scss";
+import "@/components/tiptap-node/image-node/image-node.scss";
+import "@/components/tiptap-node/heading-node/heading-node.scss";
+import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
+import "@/components/editor/auto-sync-note-editor.scss";
 
 type AutoSyncNoteEditorProps = {
   noteId: string;
@@ -25,13 +86,46 @@ type AutoSyncNoteEditorProps = {
   initialFolderId: string | null;
 };
 
-type SyncState = "saving" | "saved" | "error";
-
 type SavePayload = {
   title: string;
   folderId: string | null;
   content: string;
   contentText: string;
+};
+
+type NoteFrontmatterState = {
+  title: string;
+  date: string;
+  tags: string;
+  authors: string;
+  draft: boolean;
+};
+
+type PreparedEditorContent = {
+  content: string;
+  contentType: "html" | "markdown";
+};
+
+type ParsedNoteContent = {
+  editorContent: PreparedEditorContent;
+  frontmatter: NoteFrontmatterState;
+  hadFrontmatter: boolean;
+};
+
+type FrontmatterFieldKey = keyof NoteFrontmatterState;
+
+type MarkdownMarkRuleConfig = {
+  find: RegExp;
+  type: MarkType;
+};
+
+const lowlight = createLowlight(common);
+const EMPTY_FRONTMATTER: NoteFrontmatterState = {
+  title: "",
+  date: "",
+  tags: "",
+  authors: "",
+  draft: false,
 };
 
 function normalizeTitle(title: string): string {
@@ -43,28 +137,423 @@ function isLikelyHtml(input: string): boolean {
   return /<\/?[a-z][\s\S]*>/i.test(input);
 }
 
-async function toEditorHtml(content: string): Promise<string> {
+function toEditorContent(content: string): PreparedEditorContent {
   if (!content.trim()) {
-    return "<p></p>";
+    return {
+      content: "",
+      contentType: "markdown",
+    };
   }
 
   if (isLikelyHtml(content)) {
-    return content;
+    return {
+      content,
+      contentType: "html",
+    };
   }
 
-  try {
-    const file = await remark()
-      .use(remarkGfm)
-      .use(remarkMath)
-      .use(remarkRehype)
-      .use(rehypeKatex)
-      .use(rehypeStringify)
-      .process(content);
+  return {
+    content,
+    contentType: "markdown",
+  };
+}
 
-    return String(file);
-  } catch {
-    return `<p>${content}</p>`;
+function toListInput(value: unknown): string {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => item.length > 0)
+      .join(", ");
   }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return "";
+}
+
+function splitListInput(value: string): string[] {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+}
+
+function toDateInput(value: unknown): string {
+  if (value instanceof Date) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  return "";
+}
+
+function toStringInput(value: unknown): string {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return String(value);
+  }
+
+  return "";
+}
+
+function toBooleanInput(value: unknown): boolean {
+  return typeof value === "boolean" ? value : false;
+}
+
+function parseNoteContent(rawContent: string): ParsedNoteContent {
+  const normalized = rawContent.replace(/\r\n/g, "\n");
+  const hasFrontmatter = matter.test(normalized);
+  const parsed = matter(normalized);
+  const data = parsed.data as Record<string, unknown>;
+
+  return {
+    editorContent: toEditorContent(parsed.content),
+    frontmatter: {
+      title: toStringInput(data.title),
+      date: toDateInput(data.date),
+      tags: toListInput(data.tags),
+      authors: toListInput(data.authors),
+      draft: toBooleanInput(data.draft),
+    },
+    hadFrontmatter: hasFrontmatter,
+  };
+}
+
+function serializeNoteContent(
+  frontmatterState: NoteFrontmatterState,
+  markdownBody: string,
+  hadFrontmatter: boolean,
+): string {
+  const data: Record<string, unknown> = {};
+  const title = frontmatterState.title.trim();
+  const date = frontmatterState.date.trim();
+  const tags = splitListInput(frontmatterState.tags);
+  const authors = splitListInput(frontmatterState.authors);
+
+  if (title.length > 0) {
+    data.title = title;
+  }
+
+  if (date.length > 0) {
+    data.date = date;
+  }
+
+  if (tags.length > 0) {
+    data.tags = tags;
+  }
+
+  if (authors.length > 0) {
+    data.authors = authors;
+  }
+
+  if (frontmatterState.draft) {
+    data.draft = true;
+  }
+
+  const shouldIncludeFrontmatter = hadFrontmatter || Object.keys(data).length > 0;
+  if (!shouldIncludeFrontmatter) {
+    return markdownBody;
+  }
+
+  const serializedBody = markdownBody.length > 0 ? markdownBody : "";
+  return matter.stringify(serializedBody, data);
+}
+
+function markdownMarkInputRule({ find, type }: MarkdownMarkRuleConfig) {
+  return markInputRule({
+    find,
+    type,
+  });
+}
+
+const ObsidianLiveMarkdown = Extension.create({
+  name: "obsidianLiveMarkdown",
+  priority: 1000,
+
+  addInputRules() {
+    const { bold, code, italic, strike } = this.editor.schema.marks;
+
+    if (!bold || !italic || !strike || !code) {
+      return [];
+    }
+
+    return [
+      markdownMarkInputRule({
+        find: boldStarInputRegex,
+        type: bold,
+      }),
+      markdownMarkInputRule({
+        find: boldUnderscoreInputRegex,
+        type: bold,
+      }),
+      markdownMarkInputRule({
+        find: strikeInputRegex,
+        type: strike,
+      }),
+      markdownMarkInputRule({
+        find: codeInputRegex,
+        type: code,
+      }),
+      markdownMarkInputRule({
+        find: italicStarInputRegex,
+        type: italic,
+      }),
+      markdownMarkInputRule({
+        find: italicUnderscoreInputRegex,
+        type: italic,
+      }),
+    ];
+  },
+});
+
+function NoteEditorToolbar({
+  editor,
+  title,
+  onFocusEditor,
+}: {
+  editor: Editor | null;
+  title: string;
+  onFocusEditor: () => void;
+}) {
+  return (
+    <div className="synapse-note-topbar">
+      <div className="synapse-note-breadcrumb">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/notes">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbEllipsis />
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{title || "Untitled"}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+
+      <Toolbar className="synapse-note-toolbar">
+        <ToolbarGroup>
+          <UndoRedoButton action="undo" />
+          <UndoRedoButton action="redo" />
+        </ToolbarGroup>
+
+        <ToolbarSeparator />
+
+        <ToolbarGroup>
+          <HeadingDropdownMenu modal={false} levels={[1, 2, 3, 4]} />
+          <ListDropdownMenu modal={false} types={["bulletList", "orderedList", "taskList"]} />
+          <BlockquoteButton />
+          <CodeBlockButton />
+        </ToolbarGroup>
+
+        <ToolbarSeparator />
+
+        <ToolbarGroup>
+          <MarkButton type="bold" />
+          <MarkButton type="italic" />
+          <MarkButton type="strike" />
+          <MarkButton type="code" />
+          <MarkButton type="underline" />
+          <ColorHighlightPopover />
+          <LinkPopover />
+        </ToolbarGroup>
+
+        <ToolbarSeparator />
+
+        <ToolbarGroup>
+          <TextAlignButton align="left" />
+          <TextAlignButton align="center" />
+          <TextAlignButton align="right" />
+        </ToolbarGroup>
+
+        <ToolbarSeparator />
+
+        <ToolbarGroup>
+          <ImageUploadButton text="Add" />
+        </ToolbarGroup>
+      </Toolbar>
+
+      <div className="synapse-note-actions">
+        <TiptapButton
+          type="button"
+          variant="ghost"
+          tooltip="Focus editor"
+          aria-label="Focus editor"
+          onClick={onFocusEditor}
+          disabled={!editor}
+        >
+          <FileText className="tiptap-button-icon" />
+        </TiptapButton>
+        <ThemeToggle />
+      </div>
+    </div>
+  );
+}
+
+function NoteFrontmatterPanel({
+  frontmatter,
+  onFieldChange,
+}: {
+  frontmatter: NoteFrontmatterState;
+  onFieldChange: <K extends keyof NoteFrontmatterState>(field: K, value: NoteFrontmatterState[K]) => void;
+}) {
+  const [isExpanded, setIsExpanded] = useState<boolean>(true);
+  const [showAddMenu, setShowAddMenu] = useState<boolean>(false);
+  const [manuallyVisibleFields, setManuallyVisibleFields] = useState<FrontmatterFieldKey[]>([]);
+
+  const fieldMeta: Record<
+    FrontmatterFieldKey,
+    { label: string; icon: LucideIcon; placeholder?: string }
+  > = {
+    title: { label: "title", icon: Type, placeholder: "Empty" },
+    date: { label: "Date", icon: CalendarDays, placeholder: "YYYY-MM-DD" },
+    tags: { label: "tags", icon: Tags, placeholder: "tag1, tag2" },
+    authors: { label: "authors", icon: Users, placeholder: "author1, author2" },
+    draft: { label: "draft", icon: SquareCheck },
+  };
+
+  const visibleFields = useMemo(() => {
+    const next: FrontmatterFieldKey[] = ["title"];
+
+    if (frontmatter.date.trim().length > 0) {
+      next.push("date");
+    }
+
+    if (frontmatter.tags.trim().length > 0) {
+      next.push("tags");
+    }
+
+    if (frontmatter.authors.trim().length > 0) {
+      next.push("authors");
+    }
+
+    if (frontmatter.draft) {
+      next.push("draft");
+    }
+
+    for (const field of manuallyVisibleFields) {
+      if (!next.includes(field)) {
+        next.push(field);
+      }
+    }
+
+    return next;
+  }, [
+    frontmatter.authors,
+    frontmatter.date,
+    frontmatter.draft,
+    frontmatter.tags,
+    manuallyVisibleFields,
+  ]);
+
+  const addableFields = (Object.keys(fieldMeta) as FrontmatterFieldKey[]).filter(
+    (key) => !visibleFields.includes(key),
+  );
+
+  function revealField(key: FrontmatterFieldKey) {
+    setManuallyVisibleFields((previous) => (previous.includes(key) ? previous : [...previous, key]));
+    setShowAddMenu(false);
+  }
+
+  return (
+    <section className="synapse-note-properties" aria-label="Note properties">
+      <button
+        type="button"
+        className="synapse-note-properties-header"
+        onClick={() => setIsExpanded((previous) => !previous)}
+      >
+        {isExpanded ? (
+          <ChevronDown className="synapse-note-properties-header-icon" />
+        ) : (
+          <ChevronRight className="synapse-note-properties-header-icon" />
+        )}
+        <span>Properties</span>
+      </button>
+
+      {isExpanded ? (
+        <div className="synapse-note-properties-body">
+          {visibleFields.map((fieldKey) => {
+            const meta = fieldMeta[fieldKey];
+            const Icon = meta.icon;
+
+            return (
+              <label key={fieldKey} className="synapse-note-property-row">
+                <span className="synapse-note-property-key">
+                  <Icon className="synapse-note-property-key-icon" />
+                  {meta.label}
+                </span>
+
+                {fieldKey === "draft" ? (
+                  <input
+                    type="checkbox"
+                    checked={frontmatter.draft}
+                    onChange={(event) => onFieldChange("draft", event.target.checked)}
+                    className="synapse-note-property-checkbox"
+                  />
+                ) : (
+                  <input
+                    value={frontmatter[fieldKey]}
+                    onChange={(event) =>
+                      onFieldChange(
+                        fieldKey,
+                        event.target.value as NoteFrontmatterState[typeof fieldKey],
+                      )
+                    }
+                    placeholder={meta.placeholder}
+                    className="synapse-note-property-input"
+                  />
+                )}
+              </label>
+            );
+          })}
+
+          {addableFields.length > 0 ? (
+            <div className="synapse-note-property-add-wrap" onMouseLeave={() => setShowAddMenu(false)}>
+              <button
+                type="button"
+                className="synapse-note-property-add"
+                onClick={() => setShowAddMenu((previous) => !previous)}
+              >
+                <Plus className="synapse-note-property-add-icon" />
+                Add property
+              </button>
+
+              {showAddMenu ? (
+                <div className="synapse-note-property-add-menu">
+                  {addableFields.map((field) => {
+                    const Icon = fieldMeta[field].icon;
+                    return (
+                      <button
+                        key={field}
+                        type="button"
+                        className="synapse-note-property-add-item"
+                        onClick={() => revealField(field)}
+                      >
+                        <Icon className="synapse-note-property-add-item-icon" />
+                        {fieldMeta[field].label}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
+  );
 }
 
 export default function AutoSyncNoteEditor({
@@ -75,120 +564,31 @@ export default function AutoSyncNoteEditor({
 }: AutoSyncNoteEditorProps) {
   const router = useRouter();
   const [derivedTitle, setDerivedTitle] = useState<string>(initialTitle || "Untitled");
-  const [contentHtml, setContentHtml] = useState<string>("<p></p>");
-  const [contentText, setContentText] = useState<string>("");
-  const [initialHtml, setInitialHtml] = useState<string>("<p></p>");
-  const [syncState, setSyncState] = useState<SyncState>("saved");
+  const [frontmatter, setFrontmatter] = useState<NoteFrontmatterState>(EMPTY_FRONTMATTER);
+  const [isToolbarHidden, setIsToolbarHidden] = useState<boolean>(false);
+  const [initialEditorContent, setInitialEditorContent] = useState<PreparedEditorContent>({
+    content: "",
+    contentType: "markdown",
+  });
   const [isPreparingEditor, setIsPreparingEditor] = useState<boolean>(true);
-  const [isHydrated, setIsHydrated] = useState<boolean>(false);
 
   const hydrationDoneRef = useRef<boolean>(false);
   const lastSavedRef = useRef<SavePayload | null>(null);
+  const latestPayloadRef = useRef<SavePayload | null>(null);
   const saveSequenceRef = useRef<number>(0);
+  const saveTimeoutRef = useRef<number | null>(null);
+  const isHydratedRef = useRef<boolean>(false);
+  const derivedTitleRef = useRef<string>(initialTitle || "Untitled");
+  const frontmatterRef = useRef<NoteFrontmatterState>(EMPTY_FRONTMATTER);
+  const hadFrontmatterRef = useRef<boolean>(false);
+  const folderIdRef = useRef<string | null>(initialFolderId ?? null);
+  const noteIdRef = useRef<string>(noteId);
+  const routerRef = useRef(router);
 
-  const editor = useEditor({
-    immediatelyRender: false,
-    extensions: [
-      StarterKit,
-      LinkExtension.configure({
-        openOnClick: false,
-        autolink: true,
-      }),
-      Placeholder.configure({
-        placeholder: "Use frontmatter at top to set title, e.g. ---\\ntitle: CoPC CP Contest\\n---",
-      }),
-      Mathematics.configure({
-        katexOptions: {
-          throwOnError: false,
-        },
-      }),
-    ],
-    editorProps: {
-      attributes: {
-        class: cn(
-          "min-h-[68vh] w-full rounded-lg border bg-background px-5 py-4 text-base leading-7 outline-none",
-          "prose prose-slate max-w-none",
-          "prose-headings:font-semibold prose-headings:text-foreground",
-          "prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground",
-          "prose-pre:rounded-md prose-pre:border prose-pre:bg-muted/30",
-          "prose-blockquote:border-l-2 prose-blockquote:text-muted-foreground",
-          "dark:prose-invert",
-        ),
-      },
-    },
-    onUpdate({ editor: currentEditor }) {
-      const nextHtml = currentEditor.getHTML();
-      const nextText = currentEditor.getText();
-      const frontmatterTitle = parseFrontmatterTitle(nextText);
+  function scheduleSave(nextPayload?: SavePayload) {
+    const payload = nextPayload ?? latestPayloadRef.current;
 
-      setContentHtml(nextHtml);
-      setContentText(nextText);
-      setDerivedTitle(normalizeTitle(frontmatterTitle ?? "Untitled"));
-    },
-  });
-
-  useEffect(() => {
-    let active = true;
-
-    setDerivedTitle(initialTitle || "Untitled");
-    setIsPreparingEditor(true);
-    setIsHydrated(false);
-    hydrationDoneRef.current = false;
-
-    async function prepare(): Promise<void> {
-      const prepared = await toEditorHtml(initialContent);
-
-      if (!active) {
-        return;
-      }
-
-      setInitialHtml(prepared);
-      setIsPreparingEditor(false);
-    }
-
-    void prepare();
-
-    return () => {
-      active = false;
-    };
-  }, [initialContent, initialFolderId, initialTitle]);
-
-  useEffect(() => {
-    if (!editor || isPreparingEditor || hydrationDoneRef.current) {
-      return;
-    }
-
-    editor.commands.setContent(initialHtml, {
-      emitUpdate: false,
-    });
-
-    const initialPayload: SavePayload = {
-      title: normalizeTitle(initialTitle || "Untitled"),
-      folderId: initialFolderId ?? null,
-      content: editor.getHTML(),
-      contentText: editor.getText(),
-    };
-
-    setContentHtml(initialPayload.content);
-    setContentText(initialPayload.contentText);
-    lastSavedRef.current = initialPayload;
-    hydrationDoneRef.current = true;
-    setIsHydrated(true);
-    setSyncState("saved");
-  }, [editor, initialFolderId, initialHtml, initialTitle, isPreparingEditor]);
-
-  const payload = useMemo<SavePayload>(
-    () => ({
-      title: normalizeTitle(derivedTitle),
-      folderId: initialFolderId || null,
-      content: contentHtml,
-      contentText,
-    }),
-    [contentHtml, contentText, derivedTitle, initialFolderId],
-  );
-
-  useEffect(() => {
-    if (!isHydrated) {
+    if (!isHydratedRef.current || !payload) {
       return;
     }
 
@@ -204,14 +604,16 @@ export default function AutoSyncNoteEditor({
       return;
     }
 
-    setSyncState("saving");
+    if (saveTimeoutRef.current) {
+      window.clearTimeout(saveTimeoutRef.current);
+    }
 
     const sequence = saveSequenceRef.current + 1;
     saveSequenceRef.current = sequence;
 
-    const timeoutId = window.setTimeout(async () => {
+    saveTimeoutRef.current = window.setTimeout(async () => {
       try {
-        const response = await fetch(`/api/notes/${noteId}`, {
+        const response = await fetch(`/api/notes/${noteIdRef.current}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -230,65 +632,275 @@ export default function AutoSyncNoteEditor({
         }
 
         if (typeof data.privatePath === "string" && data.privatePath.length > 0 && data.privatePath !== window.location.pathname) {
-          router.replace(data.privatePath);
+          routerRef.current.replace(data.privatePath);
         }
 
         lastSavedRef.current = payload;
-        setSyncState("saved");
       } catch {
         if (sequence !== saveSequenceRef.current) {
           return;
         }
-
-        setSyncState("error");
       }
     }, 700);
+  }
+
+  function updateLatestPayloadFromEditor(currentEditor: Editor, title = derivedTitleRef.current) {
+    const markdownBody = currentEditor.getMarkdown();
+    const payload: SavePayload = {
+      title: normalizeTitle(title),
+      folderId: folderIdRef.current,
+      content: serializeNoteContent(frontmatterRef.current, markdownBody, hadFrontmatterRef.current),
+      contentText: currentEditor.getText(),
+    };
+
+    latestPayloadRef.current = payload;
+    return payload;
+  }
+
+  function handleTitleChange(value: string) {
+    setDerivedTitle(value);
+    derivedTitleRef.current = value;
+
+    if (!latestPayloadRef.current) {
+      return;
+    }
+
+    const nextPayload = {
+      ...latestPayloadRef.current,
+      title: normalizeTitle(value),
+    };
+
+    latestPayloadRef.current = nextPayload;
+    scheduleSave(nextPayload);
+  }
+
+  function handleTitleBlur() {
+    const normalizedTitle = normalizeTitle(derivedTitleRef.current);
+
+    setDerivedTitle(normalizedTitle);
+    derivedTitleRef.current = normalizedTitle;
+
+    if (!latestPayloadRef.current) {
+      return;
+    }
+
+    const nextPayload = {
+      ...latestPayloadRef.current,
+      title: normalizedTitle,
+    };
+
+    latestPayloadRef.current = nextPayload;
+    scheduleSave(nextPayload);
+  }
+
+  function handleFrontmatterFieldChange<K extends keyof NoteFrontmatterState>(field: K, value: NoteFrontmatterState[K]) {
+    setFrontmatter((previous) => {
+      const next = {
+        ...previous,
+        [field]: value,
+      };
+
+      frontmatterRef.current = next;
+      hadFrontmatterRef.current = true;
+
+      if (field === "title" && typeof value === "string") {
+        const normalizedFromFrontmatter = normalizeTitle(value);
+        setDerivedTitle(normalizedFromFrontmatter);
+        derivedTitleRef.current = normalizedFromFrontmatter;
+      }
+
+      if (!latestPayloadRef.current || !editor) {
+        return next;
+      }
+
+      const nextPayload: SavePayload = {
+        ...latestPayloadRef.current,
+        title: normalizeTitle(derivedTitleRef.current),
+        content: serializeNoteContent(next, editor.getMarkdown(), hadFrontmatterRef.current),
+      };
+
+      latestPayloadRef.current = nextPayload;
+      scheduleSave(nextPayload);
+      return next;
+    });
+  }
+
+  function handleFocusEditor() {
+    editor?.chain().focus().run();
+    setIsToolbarHidden(true);
+  }
+
+  function handleChromeMouseEnter() {
+    if (isToolbarHidden) {
+      setIsToolbarHidden(false);
+    }
+  }
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    shouldRerenderOnTransaction: false,
+    extensions: [
+      StarterKit.configure({
+        horizontalRule: false,
+        link: false,
+        codeBlock: false,
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
+        languageClassPrefix: "language-",
+      }),
+      HorizontalRule,
+      LinkExtension.configure({
+        openOnClick: false,
+        autolink: true,
+        enableClickSelection: true,
+      }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      TaskList,
+      TaskItem.configure({ nested: true }),
+      Highlight.configure({ multicolor: true }),
+      Image,
+      Typography,
+      Superscript,
+      Subscript,
+      Selection,
+      Placeholder.configure({
+        placeholder: "Press '/' for ideas, or start writing...",
+      }),
+      Markdown.configure({
+        markedOptions: {
+          gfm: true,
+          breaks: true,
+        },
+      }),
+      Mathematics.configure({
+        katexOptions: {
+          throwOnError: false,
+        },
+      }),
+      MarkdownMathInputExtension,
+      ObsidianLiveMarkdown,
+      ImageUploadNode.configure({
+        accept: "image/*",
+        maxSize: MAX_FILE_SIZE,
+        limit: 3,
+        upload: handleImageUpload,
+        onError: (error) => console.error("Upload failed:", error),
+      }),
+    ],
+    editorProps: {
+      attributes: {
+        autocomplete: "off",
+        autocorrect: "off",
+        autocapitalize: "off",
+        "aria-label": "Synapse note editor",
+        class: "synapse-note-prosemirror",
+      },
+    },
+    onUpdate({ editor: currentEditor }) {
+      scheduleSave(updateLatestPayloadFromEditor(currentEditor, derivedTitleRef.current));
+    },
+  });
+
+  useEffect(() => {
+    noteIdRef.current = noteId;
+    routerRef.current = router;
+    folderIdRef.current = initialFolderId ?? null;
+  }, [initialFolderId, noteId, router]);
+
+  useEffect(() => {
+    let active = true;
+    const parsed = parseNoteContent(initialContent);
+    const nextTitle = normalizeTitle(parsed.frontmatter.title || initialTitle || "Untitled");
+
+    if (saveTimeoutRef.current) {
+      window.clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = null;
+    }
+
+    setDerivedTitle(nextTitle);
+    derivedTitleRef.current = nextTitle;
+    setFrontmatter(parsed.frontmatter);
+    frontmatterRef.current = parsed.frontmatter;
+    hadFrontmatterRef.current = parsed.hadFrontmatter;
+    folderIdRef.current = initialFolderId ?? null;
+    setIsToolbarHidden(false);
+    setIsPreparingEditor(true);
+    isHydratedRef.current = false;
+    hydrationDoneRef.current = false;
+    lastSavedRef.current = null;
+    latestPayloadRef.current = null;
+
+    if (active) {
+      setInitialEditorContent(parsed.editorContent);
+      setIsPreparingEditor(false);
+    }
 
     return () => {
-      window.clearTimeout(timeoutId);
+      active = false;
     };
-  }, [isHydrated, noteId, payload, router]);
+  }, [initialContent, initialFolderId, initialTitle, noteId]);
 
-  const syncIndicator =
-    syncState === "saving" ? (
-      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-        <Loader2 className="size-3.5 animate-spin" />
-        Syncing...
-      </span>
-    ) : syncState === "error" ? (
-      <span className="inline-flex items-center gap-1 text-xs text-destructive">
-        <AlertCircle className="size-3.5" />
-        Sync failed
-      </span>
-    ) : (
-      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-        <CheckCircle2 className="size-3.5" />
-        All changes synced
-      </span>
-    );
+  useEffect(() => {
+    if (!editor || isPreparingEditor || hydrationDoneRef.current) {
+      return;
+    }
+
+    editor.commands.setContent(initialEditorContent.content, {
+      emitUpdate: false,
+      contentType: initialEditorContent.contentType,
+    });
+
+    const initialPayload: SavePayload = {
+      title: normalizeTitle(derivedTitleRef.current),
+      folderId: initialFolderId ?? null,
+      content: serializeNoteContent(frontmatterRef.current, editor.getMarkdown(), hadFrontmatterRef.current),
+      contentText: editor.getText(),
+    };
+
+    latestPayloadRef.current = initialPayload;
+    lastSavedRef.current = initialPayload;
+    hydrationDoneRef.current = true;
+    isHydratedRef.current = true;
+  }, [editor, initialEditorContent, initialFolderId, initialTitle, isPreparingEditor]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        window.clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
-    <section className="rounded-xl border bg-card p-4 text-card-foreground sm:p-6">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <Link href="/" className="text-sm text-muted-foreground hover:underline">
-          Back to workspace
-        </Link>
-        {syncIndicator}
-      </div>
+    <section className="synapse-note-shell">
+      <EditorContext.Provider value={{ editor }}>
+        <div className={`synapse-note-chrome${isToolbarHidden ? " is-hidden" : ""}`} onMouseEnter={handleChromeMouseEnter}>
+          <NoteEditorToolbar editor={editor} title={derivedTitle} onFocusEditor={handleFocusEditor} />
+        </div>
 
-      <p className="mb-3 text-xs text-muted-foreground">
-        Title is read from frontmatter: <span className="font-mono">---</span> <span className="font-mono">title: ...</span> <span className="font-mono">---</span>
-      </p>
+        <article className="synapse-note-page">
+          <input
+            value={derivedTitle}
+            onChange={(event) => handleTitleChange(event.target.value)}
+            onBlur={handleTitleBlur}
+            aria-label="Note title"
+            placeholder="Untitled"
+            className="synapse-note-title"
+          />
 
-      <div className="mt-4">
-        {isPreparingEditor || !editor ? (
-          <div className="min-h-[68vh] rounded-lg border bg-muted/20 p-4 text-sm text-muted-foreground">
-            Preparing editor...
-          </div>
-        ) : (
-          <EditorContent editor={editor} />
-        )}
-      </div>
+          <NoteFrontmatterPanel frontmatter={frontmatter} onFieldChange={handleFrontmatterFieldChange} />
+
+          {isPreparingEditor || !editor ? (
+            <div className="synapse-note-loading">
+              <Loader2 className="size-4 animate-spin" />
+              Preparing editor
+            </div>
+          ) : (
+            <EditorContent editor={editor} className="synapse-note-content" />
+          )}
+        </article>
+      </EditorContext.Provider>
     </section>
   );
 }

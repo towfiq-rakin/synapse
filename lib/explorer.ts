@@ -6,7 +6,6 @@ import { connectToDatabase } from "@/lib/db/mongoose";
 import {
   buildFolderSegmentsById,
   buildUserFolderHref,
-  buildUserNoteHref,
   findFolderIdBySegments,
   generateUniqueSlug,
   normalizePathSegments,
@@ -14,7 +13,6 @@ import {
   toId,
   toNullableId,
   type FolderPathNode,
-  type NotePathNode,
 } from "@/lib/notes-path";
 
 type StringLikeId = { toString(): string } | string;
@@ -171,20 +169,13 @@ export async function getExplorerPayload(userId: string): Promise<ExplorerPayloa
     notes: notes.map((note) => {
       const folderId = toNullableId(note.folderId);
       const folderPath = folderId ? folderSegmentsById.get(folderId) ?? [] : [];
-      const noteNode: NotePathNode = {
-        _id: note._id,
-        title: note.title,
-        slug: note.slug,
-        folderId: note.folderId,
-      };
-
       return {
         id: toId(note._id),
         title: note.title || "Untitled",
         slug: note.slug || slugFromText(note.title),
         folderId,
         path: [...folderPath, note.slug || slugFromText(note.title)],
-        href: buildUserNoteHref(user.username, noteNode, folderSegmentsById),
+        href: `/notes/${toId(note._id)}`,
         visibility: note.visibility,
         tags: note.tags,
         createdAt: note.createdAt,

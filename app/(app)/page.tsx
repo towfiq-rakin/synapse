@@ -1,17 +1,5 @@
-"use client";
-
-import dynamic from "next/dynamic";
-
-const SimpleEditor = dynamic(
-  () =>
-    import("@/components/tiptap-templates/simple/simple-editor").then(
-      (module) => module.SimpleEditor,
-    ),
-  {
-    ssr: false,
-  },
-);
+import { redirect } from "next/navigation";
 
 export default function AppIndexPage() {
-  return <SimpleEditor />;
+  redirect("/notes");
 }
