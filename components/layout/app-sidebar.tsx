@@ -157,13 +157,13 @@ function RecentItemButton({
 }
 
 type AppSidebarProps = {
-  explorerOpen?: boolean
-  onExplorerToggle?: () => void
+  activePanel?: "explorer" | "search" | "recents" | null
+  onPanelChange?: (panel: "explorer" | "search" | "recents" | null) => void
 }
 
 export default function AppSidebar({
-  explorerOpen = false,
-  onExplorerToggle,
+  activePanel = null,
+  onPanelChange,
 }: AppSidebarProps) {
   const { setOpen, state } = useSidebar()
   const router = useRouter()
@@ -245,7 +245,7 @@ export default function AppSidebar({
     }
 
     setOpen(false)
-    onExplorerToggle?.()
+    onPanelChange?.(activePanel === "explorer" ? null : "explorer")
   }
 
   function handleRecentsOpenChange(nextOpen: boolean) {
@@ -276,7 +276,7 @@ export default function AppSidebar({
                   <NavItemButton
                     icon={item.label === "New Note" && creatingNote ? Loader2 : item.icon}
                     label={item.label}
-                    isActive={item.label === "Explorer" && explorerOpen}
+                    isActive={item.label === "Explorer" && activePanel === "explorer"}
                     onClick={() => handleNavClick(item.label)}
                   />
                 </SidebarMenuItem>
@@ -296,8 +296,7 @@ export default function AppSidebar({
                         "cursor-pointer",
                         "transition-[background-color,color] duration-200 ease-out",
                         "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                        "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-                        "data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                        "focus-visible:ring-2 focus-visible:ring-sidebar-ring"
                       )}
                     >
                       <span className="flex size-8 shrink-0 items-center justify-center">
