@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useDeferredValue, useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import {
   ChevronRight,
   Clock3,
+  FileText,
   Files,
   Loader2,
   Search,
@@ -26,6 +27,15 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import {
+  Command,
+  CommandDialog,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command"
 import { cn } from "@/lib/utils"
 
 const primarySidebarItems = [
@@ -34,21 +44,86 @@ const primarySidebarItems = [
   { label: "Explorer", icon: Files },
 ] as const
 
-type RecentNote = {
+const RECENT_SEARCHES_STORAGE_KEY = "synapse-note-searches"
+const MAX_RECENT_SEARCHES = 6
+const MAX_SEARCH_RESULTS = 20
+
+type NoteSummary = {
   id: string
   title: string
   href: string
 }
 
-async function fetchRecentNotes(): Promise<RecentNote[]> {
+async function fetchNotes(): Promise<NoteSummary[]> {
   const response = await fetch("/api/notes", { cache: "no-store" })
 
   if (!response.ok) {
     return []
   }
 
-  const data = (await response.json()) as { notes?: RecentNote[] }
-  return (data.notes ?? []).slice(0, 8)
+  const data = (await response.json()) as { notes?: NoteSummary[] }
+  return data.notes ?? []
+}
+
+function normalizeSearchTerm(value: string) {
+  return value.trim().toLowerCase()
+}
+
+function getSearchMatchScore(title: string, query: string) {
+  const normalizedTitle = title.toLowerCase()
+
+  if (normalizedTitle === query) return 0
+  if (normalizedTitle.startsWith(query)) return 1
+  if (normalizedTitle.includes(query)) return 2
+
+  return null
+}
+
+function filterNotesByTitle(notes: NoteSummary[], query: string) {
+  const normalizedQuery = normalizeSearchTerm(query)
+
+  if (!normalizedQuery) {
+    return []
+  }
+
+  return notes
+    .map((note, index) => ({
+      note,
+      index,
+      score: getSearchMatchScore(note.title || "Untitled", normalizedQuery),
+    }))
+    .filter((entry) => entry.score !== null)
+    .sort((left, right) => {
+      if (left.score !== right.score) {
+        return (left.score ?? Number.POSITIVE_INFINITY) - (right.score ?? Number.POSITIVE_INFINITY)
+      }
+
+      return left.index - right.index
+    })
+    .slice(0, MAX_SEARCH_RESULTS)
+    .map((entry) => entry.note)
+}
+
+function parseStoredRecentSearches(value: string | null) {
+  if (!value) {
+    return []
+  }
+
+  try {
+    const parsed = JSON.parse(value) as unknown
+
+    if (!Array.isArray(parsed)) {
+      return []
+    }
+
+    return parsed
+      .filter((entry): entry is string => typeof entry === "string")
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+      .slice(0, MAX_RECENT_SEARCHES)
+  } catch {
+    return []
+  }
 }
 
 function NavItemButton({
@@ -165,47 +240,60 @@ export default function AppSidebar({
   activePanel = null,
   onPanelChange,
 }: AppSidebarProps) {
-  const { setOpen, state } = useSidebar()
+  const { isMobile, setOpen, setOpenMobile, state } = useSidebar()
   const router = useRouter()
   const pathname = usePathname()
-  const [recentNotes, setRecentNotes] = useState<RecentNote[]>([])
-  const [loadingRecents, setLoadingRecents] = useState(false)
+  const [allNotes, setAllNotes] = useState<NoteSummary[]>([])
+  const [loadingNotes, setLoadingNotes] = useState(false)
   const [creatingNote, setCreatingNote] = useState(false)
   const [recentsOpen, setRecentsOpen] = useState(true)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
+  const deferredSearchQuery = useDeferredValue(searchQuery)
+  const recentNotes = allNotes.slice(0, 8)
+  const matchingNotes = filterNotesByTitle(allNotes, deferredSearchQuery)
+  const hasSearchQuery = normalizeSearchTerm(deferredSearchQuery).length > 0
 
-  async function refreshRecents() {
-    setLoadingRecents(true)
+  async function refreshNotes() {
+    setLoadingNotes(true)
     try {
-      setRecentNotes(await fetchRecentNotes())
+      setAllNotes(await fetchNotes())
     } finally {
-      setLoadingRecents(false)
+      setLoadingNotes(false)
     }
   }
 
   useEffect(() => {
     let active = true
 
-    async function loadRecents() {
-      setLoadingRecents(true)
+    async function loadNotes() {
+      setLoadingNotes(true)
       try {
-        const notes = await fetchRecentNotes()
+        const notes = await fetchNotes()
 
         if (active) {
-          setRecentNotes(notes)
+          setAllNotes(notes)
         }
       } finally {
         if (active) {
-          setLoadingRecents(false)
+          setLoadingNotes(false)
         }
       }
     }
 
-    void loadRecents()
+    void loadNotes()
 
     return () => {
       active = false
     }
   }, [pathname])
+
+  useEffect(() => {
+    setRecentSearches(
+      parseStoredRecentSearches(window.localStorage.getItem(RECENT_SEARCHES_STORAGE_KEY))
+    )
+  }, [])
 
   async function createNote() {
     setCreatingNote(true)
@@ -224,19 +312,69 @@ export default function AppSidebar({
         return
       }
 
-      const data = (await response.json()) as { href?: string; notes?: RecentNote[] }
+      const data = (await response.json()) as { href?: string }
       if (data.href) {
         router.push(data.href)
       }
-      await refreshRecents()
+      await refreshNotes()
     } finally {
       setCreatingNote(false)
     }
   }
 
+  function persistRecentSearches(nextSearches: string[]) {
+    setRecentSearches(nextSearches)
+    window.localStorage.setItem(RECENT_SEARCHES_STORAGE_KEY, JSON.stringify(nextSearches))
+  }
+
+  function rememberSearch(query: string) {
+    const normalizedQuery = query.trim()
+
+    if (!normalizedQuery) {
+      return
+    }
+
+    const nextSearches = [
+      normalizedQuery,
+      ...recentSearches.filter(
+        (entry) => normalizeSearchTerm(entry) !== normalizeSearchTerm(normalizedQuery)
+      ),
+    ].slice(0, MAX_RECENT_SEARCHES)
+
+    persistRecentSearches(nextSearches)
+  }
+
+  function handleSearchOpenChange(nextOpen: boolean) {
+    setSearchOpen(nextOpen)
+
+    if (!nextOpen) {
+      setSearchQuery("")
+    }
+  }
+
+  function openSearchDialog(initialQuery = "") {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+
+    setSearchQuery(initialQuery)
+    setSearchOpen(true)
+  }
+
+  function openSearchResult(note: NoteSummary) {
+    rememberSearch(note.title || "Untitled")
+    setSearchOpen(false)
+    router.push(note.href)
+  }
+
   function handleNavClick(label: string) {
     if (label === "New Note") {
       void createNote()
+      return
+    }
+
+    if (label === "Search") {
+      openSearchDialog()
       return
     }
 
@@ -334,7 +472,7 @@ export default function AppSidebar({
                   )}
                 >
                   <SidebarMenu className="mt-1 gap-1">
-                    {loadingRecents && recentNotes.length === 0 ? (
+                    {loadingNotes && recentNotes.length === 0 ? (
                       <SidebarMenuItem>
                         <RecentItemButton>
                           Loading notes...
@@ -342,7 +480,7 @@ export default function AppSidebar({
                       </SidebarMenuItem>
                     ) : null}
 
-                    {!loadingRecents && recentNotes.length === 0 ? (
+                    {!loadingNotes && recentNotes.length === 0 ? (
                       <SidebarMenuItem>
                         <RecentItemButton onClick={() => void createNote()}>
                           Create first note
@@ -367,6 +505,83 @@ export default function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <CommandDialog
+        open={searchOpen}
+        onOpenChange={handleSearchOpenChange}
+        title="Search Notes"
+        description="Search note titles and reopen recent searches."
+        className="max-w-xl"
+      >
+        <Command shouldFilter={false} loop>
+          <CommandInput
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            placeholder="Search notes by title..."
+          />
+          <CommandList className="max-h-[26rem] px-1 pb-2">
+            {hasSearchQuery ? (
+              <CommandGroup heading="Matching notes">
+                {loadingNotes && allNotes.length === 0 ? (
+                  <div className="px-2 py-3 text-sm text-muted-foreground">
+                    Loading notes...
+                  </div>
+                ) : null}
+
+                {!loadingNotes && matchingNotes.length === 0 ? (
+                  <div className="px-2 py-3 text-sm text-muted-foreground">
+                    No note titles match &quot;{searchQuery.trim()}&quot;.
+                  </div>
+                ) : null}
+
+                {matchingNotes.map((note) => (
+                  <CommandItem
+                    key={note.id}
+                    value={`${note.title} ${note.href}`}
+                    onSelect={() => openSearchResult(note)}
+                  >
+                    <FileText className="size-4 text-muted-foreground" />
+                    <span className="min-w-0 flex-1 truncate">
+                      {note.title || "Untitled"}
+                    </span>
+                    {pathname === note.href ? (
+                      <span className="text-xs text-muted-foreground">Open</span>
+                    ) : null}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            ) : (
+              <div className="px-3 py-4 text-sm text-muted-foreground">
+                Type to filter note titles instantly.
+              </div>
+            )}
+
+            {recentSearches.length > 0 ? (
+              <>
+                {hasSearchQuery ? <CommandSeparator /> : null}
+                <CommandGroup heading="Recent searches">
+                  {recentSearches.map((term) => (
+                    <CommandItem
+                      key={term}
+                      value={`recent-${term}`}
+                      onSelect={() => setSearchQuery(term)}
+                    >
+                      <Clock3 className="size-4 text-muted-foreground" />
+                      <span className="min-w-0 flex-1 truncate">{term}</span>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </>
+            ) : null}
+
+            {!hasSearchQuery && recentSearches.length === 0 ? (
+              <div className="px-3 pb-4 text-sm text-muted-foreground">
+                Recent searches will appear here after you open a note from search.
+              </div>
+            ) : null}
+          </CommandList>
+        </Command>
+      </CommandDialog>
     </Sidebar>
   )
 }
