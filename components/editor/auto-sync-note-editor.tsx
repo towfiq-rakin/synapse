@@ -17,6 +17,13 @@ import { Highlight } from "@tiptap/extension-highlight";
 import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import rehypeHighlight from "rehype-highlight";
+import rehypeKatex from "rehype-katex";
+import rehypeStringify from "rehype-stringify";
+import { remark } from "remark";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import remarkRehype from "remark-rehype";
 import {
   starInputRegex as boldStarInputRegex,
   underscoreInputRegex as boldUnderscoreInputRegex,
@@ -31,6 +38,7 @@ import { Selection } from "@tiptap/extensions";
 import Mathematics from "@tiptap/extension-mathematics";
 import matter from "gray-matter";
 import { common, createLowlight } from "lowlight";
+import { toast } from "sonner";
 import {
   CalendarDays,
   ChevronDown,
@@ -43,6 +51,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
+import { AppOptionsPopover } from "@/components/layout/app-options-popover";
 import { Toolbar, ToolbarGroup, ToolbarSeparator } from "@/components/tiptap-ui-primitive/toolbar";
 import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button";
 import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button";
@@ -266,6 +275,187 @@ function serializeNoteContent(
   return matter.stringify(serializedBody, data);
 }
 
+function toDownloadFilename(title: string, extension: "md" | "pdf"): string {
+  const sanitizedBase = normalizeTitle(title)
+    .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return `${sanitizedBase || "note"}.${extension}`;
+}
+
+function downloadUtf8TextFile(filename: string, content: string) {
+  const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+  const objectUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+
+  anchor.href = objectUrl;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+
+  window.setTimeout(() => {
+    URL.revokeObjectURL(objectUrl);
+  }, 0);
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildPrintDocument(title: string, bodyHtml: string): string {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${escapeHtml(title)}</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 14mm 12mm;
+      }
+
+      :root {
+        color-scheme: light;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #ffffff;
+        color: #111827;
+        font-family: "Georgia", "Times New Roman", serif;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      body {
+        padding: 16mm 0;
+      }
+
+      .print-note {
+        width: min(100%, 760px);
+        margin: 0 auto;
+        padding: 0 8mm;
+      }
+
+      .print-note__title {
+        margin: 0 0 1.4rem;
+        font-size: 2rem;
+        line-height: 1.1;
+        letter-spacing: -0.04em;
+      }
+
+      .print-note__content {
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+
+      .print-note__content > * + * {
+        margin-top: 1em;
+      }
+
+      .print-note__content h1,
+      .print-note__content h2,
+      .print-note__content h3,
+      .print-note__content h4,
+      .print-note__content h5,
+      .print-note__content h6 {
+        line-height: 1.2;
+        margin-top: 1.5em;
+        margin-bottom: 0.45em;
+      }
+
+      .print-note__content ul,
+      .print-note__content ol {
+        padding-left: 1.4rem;
+      }
+
+      .print-note__content blockquote {
+        margin-left: 0;
+        padding-left: 1rem;
+        border-left: 3px solid #d1d5db;
+        color: #374151;
+      }
+
+      .print-note__content pre {
+        overflow-x: auto;
+        padding: 0.9rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.8rem;
+        background: #f8fafc;
+        white-space: pre-wrap;
+      }
+
+      .print-note__content code {
+        font-family: "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+      }
+
+      .print-note__content :not(pre) > code {
+        padding: 0.12rem 0.35rem;
+        border-radius: 0.35rem;
+        background: #f3f4f6;
+      }
+
+      .print-note__content hr {
+        border: 0;
+        border-top: 1px solid #d1d5db;
+        margin: 1.5rem 0;
+      }
+
+      .print-note__content a {
+        color: #0f766e;
+      }
+
+      .print-note__content img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .print-note__content table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .print-note__content th,
+      .print-note__content td {
+        border: 1px solid #d1d5db;
+        padding: 0.55rem 0.7rem;
+        text-align: left;
+        vertical-align: top;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="print-note">
+      <h1 class="print-note__title">${escapeHtml(title)}</h1>
+      <article class="print-note__content">${bodyHtml}</article>
+    </main>
+    <script>
+      window.addEventListener("load", () => {
+        window.setTimeout(() => window.print(), 120);
+      });
+      window.addEventListener("afterprint", () => {
+        window.close();
+      });
+    </script>
+  </body>
+</html>`;
+}
+
 function markdownMarkInputRule({ find, type }: MarkdownMarkRuleConfig) {
   return markInputRule({
     find,
@@ -315,8 +505,14 @@ const ObsidianLiveMarkdown = Extension.create({
 
 function NoteEditorToolbar({
   title,
+  exportDisabled,
+  onExportMarkdown,
+  onExportPdf,
 }: {
   title: string;
+  exportDisabled: boolean;
+  onExportMarkdown: () => void;
+  onExportPdf: () => void;
 }) {
   return (
     <div className="synapse-note-topbar">
@@ -383,6 +579,11 @@ function NoteEditorToolbar({
       <div className="synapse-note-actions">
         <SidebarTrigger className="md:hidden" />
         <ThemeToggle />
+        <AppOptionsPopover
+          exportDisabled={exportDisabled}
+          onExportMarkdown={onExportMarkdown}
+          onExportPdf={onExportPdf}
+        />
       </div>
     </div>
   );
@@ -845,11 +1046,45 @@ export default function AutoSyncNoteEditor({
     };
   }, []);
 
+  function handleExportMarkdown() {
+    if (!editor) {
+      toast.error("Editor is still loading.");
+      return;
+    }
+
+    const payload = updateLatestPayloadFromEditor(editor, derivedTitleRef.current);
+    downloadUtf8TextFile(toDownloadFilename(payload.title, "md"), payload.content);
+  }
+
+  function handleExportPdf() {
+    if (!editor) {
+      toast.error("Editor is still loading.");
+      return;
+    }
+
+    const payload = updateLatestPayloadFromEditor(editor, derivedTitleRef.current);
+    const printWindow = window.open("", "_blank");
+
+    if (!printWindow) {
+      toast.error("Pop-up blocked. Allow pop-ups to export PDF.");
+      return;
+    }
+
+    printWindow.document.open();
+    printWindow.document.write(buildPrintDocument(payload.title, editor.getHTML()));
+    printWindow.document.close();
+  }
+
   return (
     <section className="synapse-note-shell">
       <EditorContext.Provider value={{ editor }}>
         <div className="synapse-note-chrome">
-          <NoteEditorToolbar title={derivedTitle} />
+          <NoteEditorToolbar
+            title={derivedTitle}
+            exportDisabled={isPreparingEditor || !editor}
+            onExportMarkdown={handleExportMarkdown}
+            onExportPdf={handleExportPdf}
+          />
         </div>
 
         <article className="synapse-note-page">
