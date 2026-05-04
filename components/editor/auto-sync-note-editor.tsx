@@ -309,6 +309,26 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+async function renderPrintableNoteHtml(markdown: string): Promise<string> {
+  if (!markdown.trim()) {
+    return "<p>This note is empty.</p>";
+  }
+
+  const file = await remark()
+    .use(remarkGfm)
+    .use(remarkMath)
+    .use(remarkRehype)
+    .use(rehypeKatex)
+    .use(rehypeHighlight, {
+      detect: false,
+      ignoreMissing: true,
+    })
+    .use(rehypeStringify)
+    .process(markdown);
+
+  return String(file);
+}
+
 function buildPrintDocument(title: string, bodyHtml: string): string {
   return `<!doctype html>
 <html lang="en">
@@ -395,7 +415,8 @@ function buildPrintDocument(title: string, bodyHtml: string): string {
         padding: 0.9rem 1rem;
         border: 1px solid #d1d5db;
         border-radius: 0.8rem;
-        background: #f8fafc;
+        background: #f5f7fa;
+        color: #1f2937;
         white-space: pre-wrap;
       }
 
@@ -436,6 +457,61 @@ function buildPrintDocument(title: string, bodyHtml: string): string {
         padding: 0.55rem 0.7rem;
         text-align: left;
         vertical-align: top;
+      }
+
+      .print-note__content .hljs {
+        display: block;
+        overflow-x: auto;
+        background: transparent;
+        color: #1f2937;
+      }
+
+      .print-note__content .hljs-comment,
+      .print-note__content .hljs-quote {
+        color: #6b7280;
+        font-style: italic;
+      }
+
+      .print-note__content .hljs-keyword,
+      .print-note__content .hljs-selector-tag,
+      .print-note__content .hljs-subst {
+        color: #c026d3;
+      }
+
+      .print-note__content .hljs-number,
+      .print-note__content .hljs-literal,
+      .print-note__content .hljs-variable,
+      .print-note__content .hljs-template-variable,
+      .print-note__content .hljs-tag .hljs-attr {
+        color: #b45309;
+      }
+
+      .print-note__content .hljs-string,
+      .print-note__content .hljs-doctag {
+        color: #15803d;
+      }
+
+      .print-note__content .hljs-title,
+      .print-note__content .hljs-section,
+      .print-note__content .hljs-selector-id {
+        color: #1d4ed8;
+      }
+
+      .print-note__content .hljs-attribute,
+      .print-note__content .hljs-name,
+      .print-note__content .hljs-type,
+      .print-note__content .hljs-symbol,
+      .print-note__content .hljs-bullet,
+      .print-note__content .hljs-built_in,
+      .print-note__content .hljs-addition {
+        color: #0f766e;
+      }
+
+      .print-note__content .hljs-deletion,
+      .print-note__content .hljs-selector-attr,
+      .print-note__content .hljs-selector-pseudo,
+      .print-note__content .hljs-meta {
+        color: #b91c1c;
       }
     </style>
   </head>
@@ -1056,7 +1132,7 @@ export default function AutoSyncNoteEditor({
     downloadUtf8TextFile(toDownloadFilename(payload.title, "md"), payload.content);
   }
 
-  function handleExportPdf() {
+  async function handleExportPdf() {
     if (!editor) {
       toast.error("Editor is still loading.");
       return;
@@ -1070,9 +1146,15 @@ export default function AutoSyncNoteEditor({
       return;
     }
 
-    printWindow.document.open();
-    printWindow.document.write(buildPrintDocument(payload.title, editor.getHTML()));
-    printWindow.document.close();
+    try {
+      const printableHtml = await renderPrintableNoteHtml(editor.getMarkdown());
+      printWindow.document.open();
+      printWindow.document.write(buildPrintDocument(payload.title, printableHtml));
+      printWindow.document.close();
+    } catch {
+      printWindow.close();
+      toast.error("Could not prepare PDF export.");
+    }
   }
 
   return (
