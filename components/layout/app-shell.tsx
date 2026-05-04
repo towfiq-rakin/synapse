@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import { PanelLeftIcon } from "lucide-react"
+import { AppOptionsPopover } from "@/components/layout/app-options-popover"
 import AppSidebar from "@/components/layout/app-sidebar"
 import ExplorerSidebar from "@/components/layout/explorer-sidebar"
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle"
@@ -18,6 +19,11 @@ import { cn } from "@/lib/utils"
 type AppShellProps = {
   children: React.ReactNode
   defaultOpen: boolean
+  user: {
+    name: string | null
+    email: string | null
+    image: string | null
+  } | null
 }
 
 type SidebarPanel = "explorer" | "search" | "recents" | null
@@ -56,7 +62,7 @@ function DesktopSidebarControl({
   )
 }
 
-export default function AppShell({ children, defaultOpen }: AppShellProps) {
+export default function AppShell({ children, defaultOpen, user }: AppShellProps) {
   const [activePanel, setActivePanel] = useState<SidebarPanel>(null)
   const pathname = usePathname()
   const showMobileShellHeader = !pathname.startsWith("/notes/")
@@ -67,6 +73,7 @@ export default function AppShell({ children, defaultOpen }: AppShellProps) {
       <AppSidebar
         activePanel={activePanel}
         onPanelChange={setActivePanel}
+        user={user}
       />
       <ExplorerSidebar open={activePanel === "explorer"} />
       <SidebarInset
@@ -76,12 +83,20 @@ export default function AppShell({ children, defaultOpen }: AppShellProps) {
         )}
       >
         {showMobileShellHeader ? (
-          <header className="sticky top-0 z-20 flex items-center justify-between px-3 py-3 md:hidden">
+          <header className="sticky top-0 z-20 flex items-center justify-between pl-3 pr-2 py-3 md:hidden">
             <SidebarTrigger />
-            {showMobileShellThemeToggle ? <ThemeToggle /> : null}
+            {showMobileShellThemeToggle ? (
+              <div className="flex items-center gap-1">
+                <ThemeToggle />
+                <AppOptionsPopover />
+              </div>
+            ) : null}
           </header>
         ) : null}
-        <DesktopSidebarControl activePanel={activePanel} onPanelChange={setActivePanel} />
+        <DesktopSidebarControl
+          activePanel={activePanel}
+          onPanelChange={setActivePanel}
+        />
         <div className="synapse-editor-shell min-h-0 flex-1 overflow-auto overscroll-contain">{children}</div>
       </SidebarInset>
     </SidebarProvider>

@@ -3,18 +3,24 @@
 import { useDeferredValue, useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import {
+  BadgeCheck,
+  ChevronsUpDown,
   ChevronRight,
+  CircleUserRound,
   Clock3,
   FileText,
   Files,
   Loader2,
+  LogOut,
   Search,
+  Settings,
   SquarePen,
 } from "lucide-react"
 
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -36,6 +42,19 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 const primarySidebarItems = [
@@ -43,6 +62,9 @@ const primarySidebarItems = [
   { label: "Search", icon: Search },
   { label: "Explorer", icon: Files },
 ] as const
+const collapsedIconButtonClass =
+  "group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-xl group-data-[collapsible=icon]:px-0"
+const railIconSlotClass = "flex size-8 shrink-0 items-center justify-center"
 
 const RECENT_SEARCHES_STORAGE_KEY = "synapse-note-searches"
 const MAX_RECENT_SEARCHES = 6
@@ -137,7 +159,8 @@ function NavItemButton({
   isActive?: boolean
   onClick?: () => void
 }) {
-  return (
+  const { isMobile, state } = useSidebar()
+  const button = (
     <button
       type="button"
       onClick={onClick}
@@ -147,17 +170,18 @@ function NavItemButton({
         "transition-[background-color,color] duration-200 ease-out",
         "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+        collapsedIconButtonClass,
         isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
       )}
     >
-      <span className="flex size-8 shrink-0 items-center justify-center">
+      <span className={railIconSlotClass}>
         <Icon className="size-4" />
       </span>
 
       <span
         className={cn(
           "synapse-sidebar-label grid min-w-0 flex-1",
-          "grid-cols-[1fr] pl-1 opacity-100"
+          "grid-cols-[1fr] pl-1 opacity-100 group-data-[collapsible=icon]:hidden"
         )}
       >
         <span className="min-w-0 overflow-hidden whitespace-nowrap">
@@ -165,6 +189,15 @@ function NavItemButton({
         </span>
       </span>
     </button>
+  )
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{button}</TooltipTrigger>
+      <TooltipContent side="right" align="center" hidden={state !== "collapsed" || isMobile}>
+        {label}
+      </TooltipContent>
+    </Tooltip>
   )
 }
 
@@ -234,11 +267,17 @@ function RecentItemButton({
 type AppSidebarProps = {
   activePanel?: "explorer" | "search" | "recents" | null
   onPanelChange?: (panel: "explorer" | "search" | "recents" | null) => void
+  user: {
+    name: string | null
+    email: string | null
+    image: string | null
+  } | null
 }
 
 export default function AppSidebar({
   activePanel = null,
   onPanelChange,
+  user,
 }: AppSidebarProps) {
   const { isMobile, setOpen, setOpenMobile, state } = useSidebar()
   const router = useRouter()
@@ -254,6 +293,7 @@ export default function AppSidebar({
   const recentNotes = allNotes.slice(0, 8)
   const matchingNotes = filterNotesByTitle(allNotes, deferredSearchQuery)
   const hasSearchQuery = normalizeSearchTerm(deferredSearchQuery).length > 0
+  const showCollapsedTooltip = state === "collapsed" && !isMobile
 
   async function refreshNotes() {
     setLoadingNotes(true)
@@ -396,6 +436,9 @@ export default function AppSidebar({
     setRecentsOpen(nextOpen)
   }
 
+  const userName = user?.name?.trim() || "Synapse User"
+  const userEmail = user?.email?.trim() || "account@synapse.app"
+  const hasUserImage = Boolean(user?.image)
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="h-11 border-b border-sidebar-border p-0">
@@ -406,7 +449,7 @@ export default function AppSidebar({
       </SidebarHeader>
 
       <SidebarContent className="gap-0">
-        <SidebarGroup className="px-3 pt-2">
+        <SidebarGroup className="px-3 pt-2 group-data-[collapsible=icon]:px-2">
           <SidebarGroupContent>
             <SidebarMenu>
               {primarySidebarItems.map((item) => (
@@ -426,41 +469,49 @@ export default function AppSidebar({
                 className="group/recents"
               >
                 <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <button
-                      type="button"
-                      className={cn(
-                        "group/nav-item flex h-10 w-full items-center rounded-lg text-left text-[15px] text-sidebar-foreground outline-hidden",
-                        "cursor-pointer",
-                        "transition-[background-color,color] duration-200 ease-out",
-                        "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                        "focus-visible:ring-2 focus-visible:ring-sidebar-ring"
-                      )}
-                    >
-                      <span className="flex size-8 shrink-0 items-center justify-center">
-                        <Clock3 className="size-4" />
-                      </span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CollapsibleTrigger asChild>
+                        <button
+                          type="button"
+                          className={cn(
+                            "group/nav-item flex h-10 w-full items-center rounded-lg text-left text-[15px] text-sidebar-foreground outline-hidden",
+                            "cursor-pointer",
+                            "transition-[background-color,color] duration-200 ease-out",
+                            "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                            "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+                            collapsedIconButtonClass
+                          )}
+                        >
+                          <span className={railIconSlotClass}>
+                            <Clock3 className="size-4" />
+                          </span>
 
-                      <span
-                        className={cn(
-                          "synapse-sidebar-label grid min-w-0 flex-1",
-                          "grid-cols-[1fr] pl-1 opacity-100"
-                        )}
-                      >
-                        <span className="min-w-0 overflow-hidden whitespace-nowrap">
-                          Recents
-                        </span>
-                      </span>
+                          <span
+                            className={cn(
+                              "synapse-sidebar-label grid min-w-0 flex-1",
+                              "grid-cols-[1fr] pl-1 opacity-100 group-data-[collapsible=icon]:hidden"
+                            )}
+                          >
+                            <span className="min-w-0 overflow-hidden whitespace-nowrap">
+                              Recents
+                            </span>
+                          </span>
 
-                      <ChevronRight
-                        className={cn(
-                          "synapse-sidebar-toggle-icon mr-2 size-4 shrink-0 text-sidebar-foreground/60",
-                          "transition-transform duration-200 ease-out group-data-[state=open]/recents:rotate-90",
-                          "group-data-[collapsible=icon]:hidden"
-                        )}
-                      />
-                    </button>
-                  </CollapsibleTrigger>
+                          <ChevronRight
+                            className={cn(
+                              "synapse-sidebar-toggle-icon mr-2 size-4 shrink-0 text-sidebar-foreground/60",
+                              "transition-transform duration-200 ease-out group-data-[state=open]/recents:rotate-90",
+                              "group-data-[collapsible=icon]:hidden"
+                            )}
+                          />
+                        </button>
+                      </CollapsibleTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" align="center" hidden={!showCollapsedTooltip}>
+                      Recents
+                    </TooltipContent>
+                  </Tooltip>
                 </SidebarMenuItem>
 
                 <CollapsibleContent
@@ -505,6 +556,103 @@ export default function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="border-t border-sidebar-border p-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className={cn(
+                "flex h-12 w-full items-center rounded-xl text-left text-sidebar-foreground outline-hidden",
+                "cursor-pointer transition-colors duration-200 ease-out",
+                "focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                collapsedIconButtonClass
+              )}
+            >
+              <span className={cn(railIconSlotClass, "overflow-hidden rounded-full text-sidebar-foreground ring-1 ring-sidebar-border")}>
+                {hasUserImage ? (
+                  <span
+                    aria-hidden="true"
+                    className="size-full bg-cover bg-center bg-no-repeat"
+                    style={{ backgroundImage: `url("${user?.image}")` }}
+                  />
+                ) : (
+                  <CircleUserRound className="size-[18px]" />
+                )}
+              </span>
+
+              <span
+                className={cn(
+                  "synapse-sidebar-label grid min-w-0 flex-1",
+                  "grid-cols-[1fr] pl-2 opacity-100 group-data-[collapsible=icon]:hidden"
+                )}
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-[13px] font-medium leading-4">
+                    {userName}
+                  </span>
+                  <span className="block truncate pt-0.5 text-[12px] leading-4 text-sidebar-foreground/60">
+                    {userEmail}
+                  </span>
+                </span>
+              </span>
+
+              <span className="synapse-sidebar-label flex shrink-0 items-center pl-2 pr-3 opacity-100 group-data-[collapsible=icon]:hidden">
+                <ChevronsUpDown className="size-4 text-sidebar-foreground/60" />
+              </span>
+            </button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent
+            side="right"
+            align="end"
+            sideOffset={12}
+            alignOffset={-10}
+            className="w-64 min-w-64 rounded-xl p-1.5"
+          >
+            <DropdownMenuLabel className="px-2 py-2">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sidebar-foreground ring-1 ring-border">
+                  {hasUserImage ? (
+                    <span
+                      aria-hidden="true"
+                      className="size-full bg-cover bg-center bg-no-repeat"
+                      style={{ backgroundImage: `url("${user?.image}")` }}
+                    />
+                  ) : (
+                    <CircleUserRound className="size-[18px]" />
+                  )}
+                </span>
+
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium text-foreground">
+                    {userName}
+                  </span>
+                  <span className="block truncate text-xs font-normal text-muted-foreground">
+                    {userEmail}
+                  </span>
+                </span>
+              </div>
+            </DropdownMenuLabel>
+
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <Settings className="size-4" />
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <BadgeCheck className="size-4" />
+              Account
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <LogOut className="size-4 text-red-600" />
+              <p className="text-red-600">Log out</p>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarFooter>
 
       <CommandDialog
         open={searchOpen}

@@ -55,6 +55,7 @@ import { MarkButton } from "@/components/tiptap-ui/mark-button";
 import { TextAlignButton } from "@/components/tiptap-ui/text-align-button";
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button";
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
+import { AppOptionsPopover } from "@/components/layout/app-options-popover";
 import { MarkdownMathInputExtension } from "@/components/tiptap-extension/markdown-math-input-extension";
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
@@ -383,6 +384,7 @@ function NoteEditorToolbar({
       <div className="synapse-note-actions">
         <SidebarTrigger className="md:hidden" />
         <ThemeToggle />
+        <AppOptionsPopover />
       </div>
     </div>
   );

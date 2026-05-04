@@ -533,9 +533,9 @@ export default function ExplorerSidebar({ open }: ExplorerSidebarProps) {
       <aside
         data-state={open ? "open" : "closed"}
         className={cn(
-          "fixed inset-y-0 left-(--sidebar-width-icon) z-30 hidden w-56 flex-col border-x border-sidebar-border bg-sidebar text-sidebar-foreground shadow-sm md:flex",
+          "fixed inset-y-0 left-(--sidebar-width-icon) z-30 hidden w-56 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex",
           "transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          open ? "translate-x-0 opacity-100" : "pointer-events-none -translate-x-3 opacity-0"
+          open ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-3 opacity-0"
         )}
       >
         <div className="flex h-11 items-center gap-1 border-b border-sidebar-border px-2">
