@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import { PanelLeftIcon } from "lucide-react"
-import { AppOptionsPopover } from "@/components/layout/app-options-popover"
 import AppSidebar from "@/components/layout/app-sidebar"
 import ExplorerSidebar from "@/components/layout/explorer-sidebar"
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle"
@@ -85,12 +84,7 @@ export default function AppShell({ children, defaultOpen, user }: AppShellProps)
         {showMobileShellHeader ? (
           <header className="sticky top-0 z-20 flex items-center justify-between pl-3 pr-2 py-3 md:hidden">
             <SidebarTrigger />
-            {showMobileShellThemeToggle ? (
-              <div className="flex items-center gap-1">
-                <ThemeToggle />
-                <AppOptionsPopover />
-              </div>
-            ) : null}
+            {showMobileShellThemeToggle ? <ThemeToggle /> : null}
           </header>
         ) : null}
         <DesktopSidebarControl

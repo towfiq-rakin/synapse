@@ -416,6 +416,13 @@
   padding-top: 0.15rem;
 }
 
+.synapse-note-prosemirror .search-highlight {
+  background-color: #fef08a; /* Bright yellow */
+  color: #000;
+  border-radius: 2px;
+  padding: 2px 0;
+}
+
 .synapse-note-loading {
   display: inline-flex;
   align-items: center;

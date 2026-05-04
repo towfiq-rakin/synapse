@@ -2,6 +2,7 @@
 
 import { useDeferredValue, useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
+import { signOut } from "next-auth/react"
 import {
   BadgeCheck,
   ChevronsUpDown,
@@ -646,7 +647,7 @@ export default function AppSidebar({
               Account
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}>
               <LogOut className="size-4 text-red-600" />
               <p className="text-red-600">Log out</p>
             </DropdownMenuItem>
