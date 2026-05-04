@@ -18,6 +18,11 @@ import { cn } from "@/lib/utils"
 type AppShellProps = {
   children: React.ReactNode
   defaultOpen: boolean
+  user: {
+    name: string | null
+    email: string | null
+    image: string | null
+  } | null
 }
 
 type SidebarPanel = "explorer" | "search" | "recents" | null
@@ -56,7 +61,7 @@ function DesktopSidebarControl({
   )
 }
 
-export default function AppShell({ children, defaultOpen }: AppShellProps) {
+export default function AppShell({ children, defaultOpen, user }: AppShellProps) {
   const [activePanel, setActivePanel] = useState<SidebarPanel>(null)
   const pathname = usePathname()
   const showMobileShellHeader = !pathname.startsWith("/notes/")
@@ -67,6 +72,7 @@ export default function AppShell({ children, defaultOpen }: AppShellProps) {
       <AppSidebar
         activePanel={activePanel}
         onPanelChange={setActivePanel}
+        user={user}
       />
       <ExplorerSidebar open={activePanel === "explorer"} />
       <SidebarInset

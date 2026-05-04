@@ -16,8 +16,17 @@ export default async function AppLayout({ children }: AppLayoutProps) {
 
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
+  const sidebarUser = session.user
+    ? {
+        name: session.user.name ?? null,
+        email: session.user.email ?? null,
+        image: session.user.image ?? null,
+      }
+    : null
 
   return (
-    <AppShell defaultOpen={defaultOpen}>{children}</AppShell>
+    <AppShell defaultOpen={defaultOpen} user={sidebarUser}>
+      {children}
+    </AppShell>
   );
 }
