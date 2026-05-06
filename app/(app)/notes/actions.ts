@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Types } from "mongoose";
-import { auth } from "@/lib/auth";
+import { getAuthenticatedUserId } from "@/lib/auth";
 import Folder from "@/lib/db/models/Folder";
 import Note, { type NoteVisibility } from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
@@ -50,13 +50,13 @@ async function resolveFolderId(userId: string, input: string): Promise<string | 
 }
 
 async function requireUserId(): Promise<string> {
-  const session = await auth();
+  const userId = await getAuthenticatedUserId();
 
-  if (!session?.user?.id) {
+  if (!userId) {
     redirect("/login");
   }
 
-  return session.user.id;
+  return userId;
 }
 
 export async function createNoteAction(formData: FormData): Promise<void> {

@@ -2,7 +2,7 @@
 
 import { useDeferredValue, useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
-import { signOut } from "next-auth/react"
+import { useClerk } from "@clerk/nextjs"
 import {
   BadgeCheck,
   ChevronsUpDown,
@@ -56,6 +56,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import SettingsDialog from "@/components/layout/settings-dialog"
 import { cn } from "@/lib/utils"
 
 const primarySidebarItems = [
@@ -272,6 +273,7 @@ type AppSidebarProps = {
     name: string | null
     email: string | null
     image: string | null
+    username?: string | null
   } | null
 }
 
@@ -281,6 +283,7 @@ export default function AppSidebar({
   user,
 }: AppSidebarProps) {
   const { isMobile, setOpen, setOpenMobile, state } = useSidebar()
+  const { signOut } = useClerk()
   const router = useRouter()
   const pathname = usePathname()
   const [allNotes, setAllNotes] = useState<NoteSummary[]>([])
@@ -288,6 +291,8 @@ export default function AppSidebar({
   const [creatingNote, setCreatingNote] = useState(false)
   const [recentsOpen, setRecentsOpen] = useState(true)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [settingsSection, setSettingsSection] = useState<"account" | "appearance" | "editor" | "workspace">("appearance")
   const [searchQuery, setSearchQuery] = useState("")
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const deferredSearchQuery = useDeferredValue(searchQuery)
@@ -391,6 +396,11 @@ export default function AppSidebar({
     if (!nextOpen) {
       setSearchQuery("")
     }
+  }
+
+  function openSettingsDialog(section: "account" | "appearance" | "editor" | "workspace") {
+    setSettingsSection(section)
+    setSettingsOpen(true)
   }
 
   function openSearchDialog(initialQuery = "") {
@@ -638,16 +648,16 @@ export default function AppSidebar({
             </DropdownMenuLabel>
 
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => openSettingsDialog("appearance")}>
               <Settings className="size-4" />
               Settings
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => openSettingsDialog("account")}>
               <BadgeCheck className="size-4" />
               Account
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}>
+            <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/login" })}>
               <LogOut className="size-4 text-red-600" />
               <p className="text-red-600">Log out</p>
             </DropdownMenuItem>
@@ -731,6 +741,13 @@ export default function AppSidebar({
           </CommandList>
         </Command>
       </CommandDialog>
+
+      <SettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        initialSection={settingsSection}
+        user={user}
+      />
     </Sidebar>
   )
 }

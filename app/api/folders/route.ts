@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { getAuthenticatedUserId } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import {
   createFolderForUser,
@@ -7,10 +7,6 @@ import {
   resolveFolderIdFromBody,
 } from "@/lib/explorer";
 
-async function getAuthenticatedUserId(): Promise<string | null> {
-  const session = await auth();
-  return session?.user?.id ?? null;
-}
 
 export async function POST(request: Request) {
   const userId = await getAuthenticatedUserId();

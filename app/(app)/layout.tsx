@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth";
 import AppShell from "@/components/layout/app-shell";
 
 type AppLayoutProps = {
@@ -8,21 +7,20 @@ type AppLayoutProps = {
 };
 
 export default async function AppLayout({ children }: AppLayoutProps) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
+  // Middleware guarantees authentication for all (app) routes.
+  // We still fetch the user to pass profile data to the sidebar.
+  const user = await getSessionUser();
 
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
-  const sidebarUser = session.user
-    ? {
-        name: session.user.name ?? null,
-        email: session.user.email ?? null,
-        image: session.user.image ?? null,
+  const sidebarUser = user
+      ? {
+        name: user.name,
+        email: user.email,
+        image: user.image,
+        username: user.username,
       }
-    : null
+    : null;
 
   return (
     <AppShell defaultOpen={defaultOpen} user={sidebarUser}>

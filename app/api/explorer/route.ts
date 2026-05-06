@@ -1,10 +1,5 @@
-import { auth } from "@/lib/auth";
+import { getAuthenticatedUserId } from "@/lib/auth";
 import { getExplorerPayload } from "@/lib/explorer";
-
-async function getAuthenticatedUserId(): Promise<string | null> {
-  const session = await auth();
-  return session?.user?.id ?? null;
-}
 
 export async function GET() {
   const userId = await getAuthenticatedUserId();

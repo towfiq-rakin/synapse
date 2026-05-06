@@ -1,30 +1,32 @@
 import { Schema, model, models, type Model } from "mongoose";
 
 export interface IUser {
+  clerkId?: string;
   email: string;
-  passwordHash: string;
   username: string;
   name: string;
   avatarUrl: string;
   bio: string;
   role: "user" | "admin";
-  emailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const userSchema = new Schema<IUser>(
   {
+    clerkId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+      immutable: true,
+    },
     email: {
       type: String,
       required: true,
       unique: true,
       trim: true,
       lowercase: true,
-    },
-    passwordHash: {
-      type: String,
-      required: true,
     },
     username: {
       type: String,
@@ -54,16 +56,13 @@ const userSchema = new Schema<IUser>(
       enum: ["user", "admin"],
       default: "user",
     },
-    emailVerified: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
     timestamps: true,
   },
 );
 
+userSchema.index({ clerkId: 1 }, { unique: true, sparse: true });
 userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ username: 1 }, { unique: true });
 

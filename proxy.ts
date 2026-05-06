@@ -1,14 +1,30 @@
-import { auth } from "@/lib/auth";
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth;
-  const isAppRoute = req.nextUrl.pathname.startsWith("/app");
+const isPublicRoute = createRouteMatcher([
+  '/login(.*)',
+  '/signup(.*)',
+  '/sso-callback(.*)',
+])
 
-  if (isAppRoute && !isLoggedIn) {
-    return Response.redirect(new URL("/login", req.url));
+const isProtectedRoute = createRouteMatcher([
+  '/',
+  '/notes(.*)',
+  '/api/notes(.*)',
+  '/api/folders(.*)',
+  '/api/explorer(.*)',
+])
+
+export default clerkMiddleware(async (auth, req) => {
+  if (!isPublicRoute(req) && isProtectedRoute(req)) {
+    await auth.protect()
   }
-});
+})
 
 export const config = {
-  matcher: ["/app/:path*"],
-};
+  matcher: [
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
+  ],
+}

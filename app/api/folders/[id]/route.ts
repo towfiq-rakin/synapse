@@ -1,5 +1,5 @@
 import { Types } from "mongoose"
-import { auth } from "@/lib/auth"
+import { getAuthenticatedUserId } from "@/lib/auth"
 import Folder from "@/lib/db/models/Folder"
 import Note from "@/lib/db/models/Note"
 import { connectToDatabase } from "@/lib/db/mongoose"
@@ -10,10 +10,6 @@ type RouteContext = {
   params: Promise<{ id: string }>
 }
 
-async function getAuthenticatedUserId(): Promise<string | null> {
-  const session = await auth()
-  return session?.user?.id ?? null
-}
 
 export async function PATCH(request: Request, context: RouteContext) {
   const userId = await getAuthenticatedUserId()

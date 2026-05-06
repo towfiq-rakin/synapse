@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { getAuthenticatedUserId } from "@/lib/auth";
 import Note, { type NoteVisibility } from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { getExplorerPayload, resolveFolderIdFromBody } from "@/lib/explorer";
@@ -43,10 +43,7 @@ function isVisibility(value: unknown): value is NoteVisibility {
   return value === "private" || value === "public";
 }
 
-async function getAuthenticatedUserId(): Promise<string | null> {
-  const session = await auth();
-  return session?.user?.id ?? null;
-}
+
 
 function normalizeFolderId(value: unknown): string | null {
   if (!value) {

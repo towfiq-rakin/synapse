@@ -1,20 +1,48 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getAuthenticatedUserId } from "@/lib/auth";
 import Note from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
-import { Button } from "@/components/ui/button";
-import { createQuickNoteAction } from "./actions";
+import { generateUniqueSlug } from "@/lib/notes-path";
+
+const WELCOME_NOTE_TITLE = "Welcome to Synapse";
+const WELCOME_NOTE_CONTENT = `# Welcome to Synapse
+
+This workspace is ready to use.
+
+- Rename this note or delete it when you want a clean slate.
+- Create folders from the sidebar to organize topics.
+- Everything you write here auto-syncs as you edit.
+`;
+
+async function createWelcomeNote(userId: string) {
+  const slug = await generateUniqueSlug(WELCOME_NOTE_TITLE, async (candidate) => {
+    const existing = await Note.exists({ userId, folderId: null, slug: candidate });
+    return Boolean(existing);
+  });
+
+  return Note.create({
+    userId,
+    title: WELCOME_NOTE_TITLE,
+    slug,
+    folderId: null,
+    content: WELCOME_NOTE_CONTENT,
+    contentText: WELCOME_NOTE_CONTENT,
+    type: "note",
+    visibility: "private",
+    tags: ["welcome"],
+  });
+}
 
 export default async function NotesPage() {
-  const session = await auth();
+  const userId = await getAuthenticatedUserId();
 
-  if (!session?.user?.id) {
+  if (!userId) {
     redirect("/login");
   }
 
   await connectToDatabase();
 
-  const latest = await Note.findOne({ userId: session.user.id })
+  const latest = await Note.findOne({ userId })
     .sort({ updatedAt: -1 })
     .select("_id")
     .lean<{ _id: { toString(): string } | string } | null>();
@@ -24,16 +52,6 @@ export default async function NotesPage() {
     redirect(`/notes/${latestId}`);
   }
 
-  return (
-    <section className="mx-auto max-w-2xl rounded-xl border bg-card p-6 text-card-foreground">
-      <h2 className="text-2xl font-semibold">Start your first note</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        The editor opens immediately after creating a note, and all edits are auto-synced.
-      </p>
-
-      <form action={createQuickNoteAction} className="mt-6">
-        <Button type="submit">Create first note</Button>
-      </form>
-    </section>
-  );
+  const welcomeNote = await createWelcomeNote(userId);
+  redirect(`/notes/${welcomeNote._id.toString()}`);
 }

@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { Types } from "mongoose";
-import { auth } from "@/lib/auth";
+import { getAuthenticatedUserId } from "@/lib/auth";
 import AutoSyncNoteEditor from "@/components/editor/auto-sync-note-editor";
 import Note from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
@@ -17,9 +17,9 @@ type EditorNote = {
 };
 
 export default async function NoteEditorPage({ params }: NotePageProps) {
-  const session = await auth();
+  const userId = await getAuthenticatedUserId();
 
-  if (!session?.user?.id) {
+  if (!userId) {
     redirect("/login");
   }
 
@@ -31,7 +31,7 @@ export default async function NoteEditorPage({ params }: NotePageProps) {
 
   await connectToDatabase();
 
-  const note = await Note.findOne({ _id: id, userId: session.user.id })
+  const note = await Note.findOne({ _id: id, userId })
     .select("_id title content folderId")
     .lean<EditorNote | null>();
 

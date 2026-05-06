@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getAuthenticatedUserId } from "@/lib/auth";
 import AutoSyncNoteEditor from "@/components/editor/auto-sync-note-editor";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
@@ -49,7 +49,7 @@ async function renderNoteHtml(content: string): Promise<string> {
 }
 
 export default async function PublicPathPage({ params }: PublicPathPageProps) {
-  const session = await auth();
+  const currentUserId = await getAuthenticatedUserId();
   const { username, notePath } = await params;
   const normalizedPath = normalizePathSegments(notePath);
 
@@ -75,7 +75,7 @@ export default async function PublicPathPage({ params }: PublicPathPageProps) {
   }
 
   const userId = typeof user._id === "string" ? user._id : user._id.toString();
-  const isOwner = session?.user?.id === userId;
+  const isOwner = currentUserId === userId;
 
   const folders = await Folder.find({ userId })
     .select("_id slug parentId")
