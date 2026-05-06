@@ -16,10 +16,11 @@ import {
 import { getFriendlyClerkError, isBlank } from "./auth-validation";
 
 type OAuthProvider = "google" | "github";
-type PendingAction = OAuthProvider | "credentials" | null;
+type PendingAction = OAuthProvider | "credentials" | "verification" | null;
 type LoginFieldErrors = {
   identifier?: string;
   password?: string;
+  code?: string;
 };
 const AUTH_CARD_CLASS =
   "flex min-h-[34rem] flex-col rounded-[24px] border border-border/70 bg-card/95 p-5 text-card-foreground shadow-[0_24px_80px_-36px_rgba(15,23,42,0.45)] backdrop-blur sm:p-7";
@@ -34,6 +35,8 @@ export default function CustomLoginForm() {
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [needsVerification, setNeedsVerification] = useState(false);
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
@@ -42,7 +45,9 @@ export default function CustomLoginForm() {
   }, [isLoaded, isSignedIn, router]);
 
   const isBusy = !isLoaded || !client || !setActive || !signIn || pendingAction !== null;
-  const canSubmitCredentials = identifier.trim().length > 0 && password.length > 0 && !isBusy;
+  const canSubmitCredentials = needsVerification
+    ? verificationCode.trim().length > 0 && !isBusy
+    : identifier.trim().length > 0 && password.length > 0 && !isBusy;
 
   async function handleOAuthSignIn(provider: OAuthProvider) {
     if (!client || isBusy) {
@@ -73,12 +78,18 @@ export default function CustomLoginForm() {
 
     const nextErrors: LoginFieldErrors = {};
 
-    if (isBlank(identifier)) {
-      nextErrors.identifier = "Enter your email address or username.";
-    }
+    if (needsVerification) {
+      if (isBlank(verificationCode)) {
+        nextErrors.code = "Enter the verification code.";
+      }
+    } else {
+      if (isBlank(identifier)) {
+        nextErrors.identifier = "Enter your email address or username.";
+      }
 
-    if (isBlank(password)) {
-      nextErrors.password = "Enter your password.";
+      if (isBlank(password)) {
+        nextErrors.password = "Enter your password.";
+      }
     }
 
     if (Object.keys(nextErrors).length > 0) {
@@ -92,14 +103,71 @@ export default function CustomLoginForm() {
     setFieldErrors({});
 
     try {
+      if (needsVerification) {
+        setPendingAction("verification");
+        
+        let verifyResult;
+        if (client.signIn.status === 'needs_client_trust' || client.signIn.status === 'needs_second_factor') {
+            const factor = client.signIn.supportedSecondFactors?.find(
+                (f) => f.strategy === 'email_code' || f.strategy === 'phone_code'
+            );
+            
+            if (factor?.strategy === 'email_code') {
+                verifyResult = await client.signIn.attemptSecondFactor({ strategy: 'email_code', code: verificationCode });
+            } else {
+                throw new Error("Unsupported verification method.");
+            }
+        } else if (client.signIn.status === 'needs_first_factor') {
+            verifyResult = await client.signIn.attemptFirstFactor({ strategy: 'email_code', code: verificationCode });
+        } else {
+            throw new Error("Unexpected sign in status: " + client.signIn.status);
+        }
+
+        if (verifyResult.status === "complete" && verifyResult.createdSessionId) {
+            await setActive({ session: verifyResult.createdSessionId, redirectUrl: "/notes" });
+            return;
+        }
+
+        setErrorMessage("Verification failed or incomplete.");
+        setPendingAction(null);
+        return;
+      }
+
       const result = await client.signIn.create({
         identifier: identifier.trim(),
         password,
       });
 
+      console.log('Login result status:', result.status, result);
+
       if (result.status === "complete" && result.createdSessionId) {
         await setActive({ session: result.createdSessionId, redirectUrl: "/notes" });
         return;
+      }
+
+      if (result.status === "needs_first_factor" || result.status === "needs_second_factor" || result.status === "needs_client_trust") {
+          // send code
+          if (result.status === "needs_client_trust" || result.status === "needs_second_factor") {
+              const factor = result.supportedSecondFactors?.find(
+                  (f) => f.strategy === 'email_code' || f.strategy === 'phone_code'
+              );
+              if (factor?.strategy === 'email_code') {
+                  await result.prepareSecondFactor({ strategy: 'email_code' });
+                  setNeedsVerification(true);
+                  setPendingAction(null);
+                  return;
+              }
+          } else if (result.status === "needs_first_factor") {
+              const factor = result.supportedFirstFactors?.find(
+                 (f) => f.strategy === 'email_code'
+              );
+              if (factor?.strategy === 'email_code') {
+                  await result.prepareFirstFactor({ strategy: 'email_code', emailAddressId: factor.emailAddressId });
+                  setNeedsVerification(true);
+                  setPendingAction(null);
+                  return;
+              }
+          }
       }
 
       setErrorMessage("This sign-in needs an additional verification step that is not implemented in this form yet.");
@@ -109,6 +177,7 @@ export default function CustomLoginForm() {
       setFieldErrors({
         identifier: friendlyError.fieldErrors.identifier,
         password: friendlyError.fieldErrors.password,
+        code: friendlyError.fieldErrors.code,
       });
       setErrorMessage(friendlyError.message);
       setPendingAction(null);
@@ -159,44 +228,76 @@ export default function CustomLoginForm() {
         </div>
 
         <form className="flex flex-1 flex-col" noValidate onSubmit={handleCredentialSignIn}>
-          <div className="space-y-4">
-            <AuthField
-              autoComplete="username"
-              disabled={isBusy}
-              error={fieldErrors.identifier}
-              label="Email address or username"
-              placeholder="Enter your email address or username"
-              required
-              value={identifier}
-              onChange={(event) => {
-                setIdentifier(event.target.value);
-                setFieldErrors((current) => ({ ...current, identifier: undefined }));
-                setErrorMessage(null);
-              }}
-            />
+          {needsVerification ? (
+             <div className="space-y-4">
+               <AuthField
+                 autoComplete="one-time-code"
+                 disabled={isBusy}
+                 error={fieldErrors.code}
+                 label="Verification Code"
+                 placeholder="Enter the code sent to your email"
+                 required
+                 value={verificationCode}
+                 onChange={(event) => {
+                   setVerificationCode(event.target.value);
+                   setFieldErrors((current) => ({ ...current, code: undefined }));
+                   setErrorMessage(null);
+                 }}
+               />
+               <Button
+                 type="button"
+                 variant="link"
+                 className="p-0 h-auto"
+                 onClick={() => {
+                   setNeedsVerification(false);
+                   setVerificationCode("");
+                   setErrorMessage(null);
+                   setFieldErrors({});
+                 }}
+               >
+                 Back to login
+               </Button>
+             </div>
+          ) : (
+            <div className="space-y-4">
+              <AuthField
+                autoComplete="username"
+                disabled={isBusy}
+                error={fieldErrors.identifier}
+                label="Email address or username"
+                placeholder="Enter your email address or username"
+                required
+                value={identifier}
+                onChange={(event) => {
+                  setIdentifier(event.target.value);
+                  setFieldErrors((current) => ({ ...current, identifier: undefined }));
+                  setErrorMessage(null);
+                }}
+              />
 
-            <PasswordField
-              autoComplete="current-password"
-              disabled={isBusy}
-              error={fieldErrors.password}
-              label="Password"
-              placeholder="Enter your password"
-              required
-              value={password}
-              onChange={(event) => {
-                setPassword(event.target.value);
-                setFieldErrors((current) => ({ ...current, password: undefined }));
-                setErrorMessage(null);
-              }}
-            />
-          </div>
+              <PasswordField
+                autoComplete="current-password"
+                disabled={isBusy}
+                error={fieldErrors.password}
+                label="Password"
+                placeholder="Enter your password"
+                required
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  setFieldErrors((current) => ({ ...current, password: undefined }));
+                  setErrorMessage(null);
+                }}
+              />
+            </div>
+          )}
 
           <Button
             type="submit"
             className="mt-6 h-11 w-full rounded-xl bg-[linear-gradient(90deg,#6d5efc_0%,#7c3aed_100%)] text-white hover:opacity-95"
             disabled={!canSubmitCredentials}
           >
-            {pendingAction === "credentials" ? <Loader2 className="size-4 animate-spin" /> : null}
+            {pendingAction === "credentials" || pendingAction === "verification" ? <Loader2 className="size-4 animate-spin" /> : null}
             Continue
           </Button>
         </form>
