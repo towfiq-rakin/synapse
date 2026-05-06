@@ -3,7 +3,7 @@
   background:
     radial-gradient(
       circle at top left,
-      color-mix(in oklab, var(--foreground) 4%, transparent),
+      color-mix(in oklab, var(--primary) 8%, transparent),
       transparent 26rem
     ),
     var(--background);
@@ -344,7 +344,7 @@
 }
 
 .synapse-note-prosemirror a {
-  color: color-mix(in oklab, var(--primary) 82%, #0891b2);
+  color: color-mix(in oklab, var(--primary) 88%, var(--foreground));
   text-decoration: underline;
   text-underline-offset: 0.18em;
 }
@@ -434,70 +434,52 @@
 
 .dark .synapse-note-shell {
   background:
-    radial-gradient(circle at 18% 0%, hsl(190 90% 52% / 0.08), transparent 28rem),
-    #151515;
+    radial-gradient(
+      circle at 18% 0%,
+      color-mix(in oklab, var(--primary) 12%, transparent),
+      transparent 28rem
+    ),
+    radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--accent) 8%, transparent),
+      transparent 20rem
+    ),
+    var(--background);
 }
 
 .dark .synapse-note-chrome {
-  border-bottom-color: rgb(255 255 255 / 0.06);
+  border-bottom-color: color-mix(in oklab, var(--border) 74%, transparent);
   background:
     linear-gradient(
       180deg,
-      rgb(14 14 14 / 0.85),
-      rgb(14 14 14 / 0.65)
+      color-mix(in oklab, var(--background) 88%, transparent),
+      color-mix(in oklab, var(--background) 70%, transparent)
     ),
-    rgb(10 10 10 / 0.75);
+    color-mix(in oklab, var(--background) 74%, transparent);
   box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.06) inset,
-    0 -1px 0 rgb(255 255 255 / 0.02) inset,
-    0 14px 36px rgb(0 0 0 / 0.38);
+    0 1px 0 color-mix(in oklab, var(--foreground) 6%, transparent) inset,
+    0 -1px 0 color-mix(in oklab, var(--foreground) 2%, transparent) inset,
+    0 14px 36px color-mix(in oklab, black 32%, transparent);
 }
 
 .dark .synapse-note-chrome::before {
   background:
     linear-gradient(
       180deg,
-      rgb(20 20 20 / 0.28) 0%,
-      rgb(20 20 20 / 0.14) 40%,
-      rgb(20 20 20 / 0.05) 100%
+      color-mix(in oklab, var(--foreground) 4%, transparent) 0%,
+      color-mix(in oklab, var(--foreground) 2%, transparent) 40%,
+      transparent 100%
     ),
-    radial-gradient(circle at top left, rgb(94 234 212 / 0.05), transparent 44%),
-    radial-gradient(circle at top right, rgb(255 255 255 / 0.02), transparent 30%);
-}
-
-.dark .synapse-note-properties {
-  border-color: #3a3a3a;
-  background: #232323;
-}
-
-.dark .synapse-note-property-input {
-  color: #e6dfcf;
-}
-
-.dark .synapse-note-property-row,
-.dark .synapse-note-properties-body {
-  border-color: #414141;
-}
-
-.dark .synapse-note-property-key,
-.dark .synapse-note-property-add {
-  color: #c2b28d;
-}
-
-.dark .synapse-note-property-add-menu {
-  border-color: #3a3a3a;
-  background: #2a2a2a;
-}
-
-.dark .synapse-note-toolbar [data-slot="tiptap-button"]:hover,
-.dark .synapse-note-toolbar [data-slot="tiptap-button"][data-active-state="on"],
-.dark .synapse-note-actions [data-slot="tiptap-button"]:hover {
-  background: #2a2a2a;
-}
-
-.dark .synapse-note-prosemirror pre {
-  border-color: #2a2a2a;
-  background: #1d1d1d;
+    radial-gradient(
+      circle at top left,
+      color-mix(in oklab, var(--primary) 8%, transparent),
+      transparent 44%
+    ),
+    radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--foreground) 3%, transparent),
+      transparent 30%
+    );
 }
 
 @media (max-width: 720px) {

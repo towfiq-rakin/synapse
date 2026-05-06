@@ -176,33 +176,106 @@
       Global colors 
   **************************************************/
 
-  /* Global colors - Light mode */
-  --tt-bg-color: var(--white);
-  --tt-border-color: var(--tt-gray-light-a-200);
-  --tt-border-color-tint: var(--tt-gray-light-a-100);
-  --tt-sidebar-bg-color: var(--tt-gray-light-100);
-  --tt-scrollbar-color: var(--tt-gray-light-a-200);
-  --tt-cursor-color: var(--tt-brand-color-500);
-  --tt-selection-color: rgba(157, 138, 255, 0.2);
-  --tt-card-bg-color: var(--white);
-  --tt-card-border-color: var(--tt-gray-light-a-100);
+  /* Global colors - profile-aware */
+  --tt-bg-color: var(--background);
+  --tt-border-color: var(--border);
+  --tt-border-color-tint: color-mix(in oklab, var(--border) 64%, transparent);
+  --tt-sidebar-bg-color: color-mix(in oklab, var(--muted) 74%, var(--background));
+  --tt-scrollbar-color: color-mix(in oklab, var(--border) 78%, transparent);
+  --tt-cursor-color: var(--primary);
+  --tt-selection-color: color-mix(in oklab, var(--primary) 22%, transparent);
+  --tt-card-bg-color: var(--card);
+  --tt-card-border-color: color-mix(in oklab, var(--border) 66%, transparent);
 }
 
 /* Global colors - Dark mode */
 .dark {
-  --tt-bg-color: var(--black);
-  --tt-border-color: var(--tt-gray-dark-a-200);
-  --tt-border-color-tint: var(--tt-gray-dark-a-100);
-  --tt-sidebar-bg-color: var(--tt-gray-dark-100);
-  --tt-scrollbar-color: var(--tt-gray-dark-a-200);
-  --tt-cursor-color: var(--tt-brand-color-400);
-  --tt-selection-color: rgba(122, 82, 255, 0.2);
-  --tt-card-bg-color: var(--tt-gray-dark-50);
-  --tt-card-border-color: var(--tt-gray-dark-a-50);
+  --tt-bg-color: var(--background);
+  --tt-border-color: var(--border);
+  --tt-border-color-tint: color-mix(in oklab, var(--border) 64%, transparent);
+  --tt-sidebar-bg-color: color-mix(in oklab, var(--muted) 78%, var(--background));
+  --tt-scrollbar-color: color-mix(in oklab, var(--border) 78%, transparent);
+  --tt-cursor-color: var(--primary);
+  --tt-selection-color: color-mix(in oklab, var(--primary) 28%, transparent);
+  --tt-card-bg-color: var(--card);
+  --tt-card-border-color: color-mix(in oklab, var(--border) 66%, transparent);
 
   --tt-shadow-elevated-md:
     0px 16px 48px 0px rgba(0, 0, 0, 0.5), 0px 12px 24px 0px rgba(0, 0, 0, 0.24),
     0px 6px 8px 0px rgba(0, 0, 0, 0.22), 0px 2px 3px 0px rgba(0, 0, 0, 0.12);
+}
+
+/* TipTap semantic tokens remapped to the active app profile. */
+:root {
+  --tt-gray-light-a-50: color-mix(in oklab, var(--foreground) 3%, transparent);
+  --tt-gray-light-a-100: color-mix(in oklab, var(--foreground) 5%, transparent);
+  --tt-gray-light-a-200: color-mix(in oklab, var(--foreground) 9%, transparent);
+  --tt-gray-light-a-300: color-mix(in oklab, var(--foreground) 16%, transparent);
+  --tt-gray-light-a-400: color-mix(in oklab, var(--foreground) 28%, transparent);
+  --tt-gray-light-a-500: color-mix(in oklab, var(--foreground) 44%, transparent);
+  --tt-gray-light-a-600: color-mix(in oklab, var(--foreground) 60%, transparent);
+  --tt-gray-light-a-700: color-mix(in oklab, var(--foreground) 74%, transparent);
+  --tt-gray-light-a-800: color-mix(in oklab, var(--foreground) 86%, transparent);
+  --tt-gray-light-a-900: color-mix(in oklab, var(--foreground) 94%, transparent);
+
+  --tt-gray-light-50: color-mix(in oklab, var(--background) 96%, var(--foreground));
+  --tt-gray-light-100: color-mix(in oklab, var(--background) 92%, var(--foreground));
+  --tt-gray-light-200: color-mix(in oklab, var(--background) 88%, var(--foreground));
+  --tt-gray-light-300: color-mix(in oklab, var(--background) 80%, var(--foreground));
+  --tt-gray-light-400: color-mix(in oklab, var(--background) 66%, var(--foreground));
+  --tt-gray-light-500: color-mix(in oklab, var(--background) 52%, var(--foreground));
+  --tt-gray-light-600: color-mix(in oklab, var(--background) 38%, var(--foreground));
+  --tt-gray-light-700: color-mix(in oklab, var(--background) 28%, var(--foreground));
+  --tt-gray-light-800: color-mix(in oklab, var(--background) 18%, var(--foreground));
+  --tt-gray-light-900: color-mix(in oklab, var(--background) 10%, var(--foreground));
+
+  --tt-brand-color-50: color-mix(in oklab, var(--background) 94%, var(--primary));
+  --tt-brand-color-100: color-mix(in oklab, var(--background) 88%, var(--primary));
+  --tt-brand-color-200: color-mix(in oklab, var(--background) 78%, var(--primary));
+  --tt-brand-color-300: color-mix(in oklab, var(--background) 66%, var(--primary));
+  --tt-brand-color-400: color-mix(in oklab, var(--background) 54%, var(--primary));
+  --tt-brand-color-500: color-mix(in oklab, var(--background) 40%, var(--primary));
+  --tt-brand-color-600: color-mix(in oklab, var(--background) 28%, var(--primary));
+  --tt-brand-color-700: color-mix(in oklab, var(--background) 18%, var(--primary));
+  --tt-brand-color-800: color-mix(in oklab, var(--background) 10%, var(--primary));
+  --tt-brand-color-900: color-mix(in oklab, var(--background) 4%, var(--primary));
+  --tt-brand-color-950: color-mix(in oklab, black 18%, var(--primary));
+}
+
+.dark {
+  --tt-gray-dark-a-50: color-mix(in oklab, var(--foreground) 5%, transparent);
+  --tt-gray-dark-a-100: color-mix(in oklab, var(--foreground) 8%, transparent);
+  --tt-gray-dark-a-200: color-mix(in oklab, var(--foreground) 12%, transparent);
+  --tt-gray-dark-a-300: color-mix(in oklab, var(--foreground) 20%, transparent);
+  --tt-gray-dark-a-400: color-mix(in oklab, var(--foreground) 32%, transparent);
+  --tt-gray-dark-a-500: color-mix(in oklab, var(--foreground) 48%, transparent);
+  --tt-gray-dark-a-600: color-mix(in oklab, var(--foreground) 62%, transparent);
+  --tt-gray-dark-a-700: color-mix(in oklab, var(--foreground) 76%, transparent);
+  --tt-gray-dark-a-800: color-mix(in oklab, var(--foreground) 88%, transparent);
+  --tt-gray-dark-a-900: color-mix(in oklab, var(--foreground) 96%, transparent);
+
+  --tt-gray-dark-50: color-mix(in oklab, var(--background) 94%, var(--foreground));
+  --tt-gray-dark-100: color-mix(in oklab, var(--background) 88%, var(--foreground));
+  --tt-gray-dark-200: color-mix(in oklab, var(--background) 82%, var(--foreground));
+  --tt-gray-dark-300: color-mix(in oklab, var(--background) 72%, var(--foreground));
+  --tt-gray-dark-400: color-mix(in oklab, var(--background) 60%, var(--foreground));
+  --tt-gray-dark-500: color-mix(in oklab, var(--background) 48%, var(--foreground));
+  --tt-gray-dark-600: color-mix(in oklab, var(--background) 36%, var(--foreground));
+  --tt-gray-dark-700: color-mix(in oklab, var(--background) 26%, var(--foreground));
+  --tt-gray-dark-800: color-mix(in oklab, var(--background) 16%, var(--foreground));
+  --tt-gray-dark-900: color-mix(in oklab, var(--background) 8%, var(--foreground));
+
+  --tt-brand-color-50: color-mix(in oklab, var(--background) 88%, var(--primary));
+  --tt-brand-color-100: color-mix(in oklab, var(--background) 80%, var(--primary));
+  --tt-brand-color-200: color-mix(in oklab, var(--background) 70%, var(--primary));
+  --tt-brand-color-300: color-mix(in oklab, var(--background) 58%, var(--primary));
+  --tt-brand-color-400: color-mix(in oklab, var(--background) 46%, var(--primary));
+  --tt-brand-color-500: color-mix(in oklab, var(--background) 34%, var(--primary));
+  --tt-brand-color-600: color-mix(in oklab, var(--background) 24%, var(--primary));
+  --tt-brand-color-700: color-mix(in oklab, var(--background) 16%, var(--primary));
+  --tt-brand-color-800: color-mix(in oklab, var(--background) 10%, var(--primary));
+  --tt-brand-color-900: color-mix(in oklab, var(--background) 4%, var(--primary));
+  --tt-brand-color-950: color-mix(in oklab, black 28%, var(--primary));
 }
 
 /* Text colors */

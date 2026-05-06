@@ -1,9 +1,9 @@
 body {
   --tt-toolbar-height: 44px;
-  --tt-theme-text: var(--tt-gray-light-900);
+  --tt-theme-text: var(--foreground);
 
   .dark & {
-    --tt-theme-text: var(--tt-gray-dark-900);
+    --tt-theme-text: var(--foreground);
   }
 }
 

@@ -63,9 +63,9 @@ function getPasswordErrorResponse(error: unknown) {
 }
 
 export async function POST(request: Request) {
-  const { userId } = await auth.protect({ reverification: "strict_mfa" })
+  const { isAuthenticated, userId } = await auth()
 
-  if (!userId) {
+  if (!isAuthenticated || !userId) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
 

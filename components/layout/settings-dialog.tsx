@@ -2,8 +2,7 @@
 
 import { startTransition, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useReverification, useUser } from "@clerk/nextjs"
-import { isReverificationCancelledError } from "@clerk/nextjs/errors"
+import { useUser } from "@clerk/nextjs"
 import { useTheme } from "next-themes"
 import {
   BadgeCheck,
@@ -11,7 +10,6 @@ import {
   Check,
   CircleUserRound,
   ImagePlus,
-  LaptopMinimal,
   Loader2,
   MoonStar,
   Settings2,
@@ -25,6 +23,7 @@ import { toast } from "sonner"
 import { AuthField, PasswordField } from "@/app/(auth)/_components/auth-form-ui"
 import { getFriendlyClerkError, isValidPassword } from "@/app/(auth)/_components/auth-validation"
 import { Button } from "@/components/ui/button"
+import { ColorProfilePicker } from "@/components/settings/color-profile-picker"
 import {
   Dialog,
   DialogContent,
@@ -63,35 +62,30 @@ const sections: Array<{
   id: SettingsSection
   label: string
   eyebrow: string
-  description: string
   icon: React.ComponentType<{ className?: string }>
 }> = [
   {
     id: "account",
     label: "Account",
     eyebrow: "Profile",
-    description: "Identity, plan status, and sign-in details.",
     icon: BadgeCheck,
   },
   {
     id: "appearance",
     label: "Appearance",
     eyebrow: "Look and feel",
-    description: "Theme, density, and reading surface choices.",
     icon: Sparkles,
   },
   {
     id: "editor",
     label: "Editor",
     eyebrow: "Writing flow",
-    description: "Controls for focus, discoverability, and preview behavior.",
     icon: BookOpenText,
   },
   {
     id: "workspace",
     label: "Workspace",
     eyebrow: "Shared defaults",
-    description: "Naming, defaults, and lightweight collaboration rules.",
     icon: Settings2,
   },
 ]
@@ -99,14 +93,12 @@ const sections: Array<{
 function SectionButton({
   label,
   eyebrow,
-  description,
   icon: Icon,
   active,
   onClick,
 }: {
   label: string
   eyebrow: string
-  description: string
   icon: React.ComponentType<{ className?: string }>
   active: boolean
   onClick: () => void
@@ -135,9 +127,6 @@ function SectionButton({
           {eyebrow}
         </span>
         <span className="mt-1 block text-sm font-medium text-foreground">{label}</span>
-        <span className="mt-1 block text-xs leading-5 text-muted-foreground">
-          {description}
-        </span>
       </span>
     </button>
   )
@@ -245,18 +234,6 @@ export default function SettingsDialog({
   const router = useRouter()
   const { user: clerkUser, isLoaded } = useUser()
   const { resolvedTheme, setTheme } = useTheme()
-  const updatePasswordWithReverification = useReverification(
-    (payload: {
-      currentPassword: string
-      newPassword: string
-      signOutOfOtherSessions: boolean
-    }) =>
-      fetch("/api/settings/password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-  )
   const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection)
   const [density, setDensity] = useState<"compact" | "comfortable">("comfortable")
   const [fontSize, setFontSize] = useState<"small" | "medium" | "large">("medium")
@@ -283,6 +260,7 @@ export default function SettingsDialog({
   }>({})
   const [passwordStatus, setPasswordStatus] = useState("")
   const [savingPassword, setSavingPassword] = useState(false)
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const themeMode = resolvedTheme === "dark" ? "dark" : "light"
@@ -315,12 +293,25 @@ export default function SettingsDialog({
     setUsername(usernameValue)
     setUsernameError("")
     setUsernameStatus("")
+    setPasswordDialogOpen(false)
+    resetPasswordForm()
+  }, [open, usernameValue])
+
+  useEffect(() => {
+    if (passwordDialogOpen) {
+      return
+    }
+
+    resetPasswordForm()
+  }, [passwordDialogOpen])
+
+  function resetPasswordForm() {
     setCurrentPassword("")
     setNewPassword("")
     setConfirmPassword("")
     setPasswordErrors({})
     setPasswordStatus("")
-  }, [open, usernameValue])
+  }
 
   function refreshShell() {
     startTransition(() => {
@@ -441,16 +432,22 @@ export default function SettingsDialog({
     setPasswordStatus("")
 
     try {
-      const result = (await updatePasswordWithReverification({
-        currentPassword,
-        newPassword,
-        signOutOfOtherSessions: signOutOtherSessions,
-      })) as SettingsActionResult
+      const response = await fetch("/api/settings/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+          signOutOfOtherSessions: signOutOtherSessions,
+        }),
+      })
+      const result = (await response.json().catch(() => null)) as SettingsActionResult | null
 
-      if (!result?.success) {
+      if (!response.ok || !result?.success) {
         setPasswordErrors({
           currentPassword: result?.fieldErrors?.currentPassword,
           newPassword: result?.fieldErrors?.newPassword,
+          confirmPassword: result?.fieldErrors?.confirmPassword,
         })
         setPasswordStatus(result?.error || "Could not update password.")
         return
@@ -460,14 +457,10 @@ export default function SettingsDialog({
       setNewPassword("")
       setConfirmPassword("")
       setPasswordErrors({})
-      setPasswordStatus("Password updated.")
+      setPasswordStatus("")
+      setPasswordDialogOpen(false)
       toast.success("Password updated.")
     } catch (error) {
-      if (isReverificationCancelledError(error)) {
-        setPasswordStatus("Verification was cancelled.")
-        return
-      }
-
       const friendly = getFriendlyClerkError(error)
       setPasswordStatus(friendly.message)
       setPasswordErrors({
@@ -483,7 +476,7 @@ export default function SettingsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="max-h-[min(88vh,820px)] max-w-[calc(100vw-1rem)] gap-0 overflow-hidden rounded-[28px] border border-border/80 p-0 shadow-2xl sm:!max-w-6xl"
+        className="h-[min(88dvh,820px)] max-w-[calc(100vw-1rem)] gap-0 overflow-hidden rounded-[28px] border border-border/80 p-0 shadow-2xl sm:!max-w-6xl"
       >
         <div className="grid min-h-0 md:grid-cols-[260px_minmax(0,1fr)]">
           <aside className="border-b border-border bg-muted/45 md:border-r md:border-b-0">
@@ -495,9 +488,6 @@ export default function SettingsDialog({
                 <h2 className="mt-2 text-xl font-semibold tracking-tight text-foreground">
                   Workspace controls
                 </h2>
-                <p className="mt-2 max-w-[20rem] text-sm leading-6 text-muted-foreground">
-                  Account, editor, and workspace preferences in one focused surface.
-                </p>
               </div>
               <Button
                 type="button"
@@ -518,7 +508,6 @@ export default function SettingsDialog({
                     <SectionButton
                       label={section.label}
                       eyebrow={section.eyebrow}
-                      description={section.description}
                       icon={section.icon}
                       active={activeSection === section.id}
                       onClick={() => setActiveSection(section.id)}
@@ -531,13 +520,10 @@ export default function SettingsDialog({
 
           <div className="min-h-0 overflow-y-auto bg-background">
             <div className="border-b border-border/80 px-5 py-5 sm:px-7 sm:py-6">
-              <DialogHeader className="gap-3">
+              <DialogHeader>
                 <DialogTitle className="text-2xl font-semibold tracking-tight">
                   {sections.find((section) => section.id === activeSection)?.label}
                 </DialogTitle>
-                <DialogDescription className="max-w-2xl text-sm leading-6">
-                  {sections.find((section) => section.id === activeSection)?.description}
-                </DialogDescription>
               </DialogHeader>
             </div>
 
@@ -634,152 +620,80 @@ export default function SettingsDialog({
                   <div className="rounded-[24px] border border-border/80 bg-background p-4">
                     <div className="pb-4">
                       <h3 className="text-sm font-medium text-foreground">Password</h3>
-                      <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                        Password changes require Clerk reverification before the update is applied.
-                      </p>
                     </div>
-                    <form className="grid gap-4" onSubmit={handlePasswordSave}>
-                      <div className="grid gap-4 lg:grid-cols-2">
-                        <PasswordField
-                          label="Current password"
-                          value={currentPassword}
-                          onChange={(event) => setCurrentPassword(event.target.value)}
-                          error={passwordErrors.currentPassword}
-                          autoComplete="current-password"
-                          className="bg-background"
-                        />
-                        <div className="grid gap-4">
-                          <PasswordField
-                            label="New password"
-                            value={newPassword}
-                            onChange={(event) => setNewPassword(event.target.value)}
-                            error={passwordErrors.newPassword}
-                            autoComplete="new-password"
-                            className="bg-background"
-                          />
-                          <PasswordField
-                            label="Confirm new password"
-                            value={confirmPassword}
-                            onChange={(event) => setConfirmPassword(event.target.value)}
-                            error={passwordErrors.confirmPassword}
-                            autoComplete="new-password"
-                            className="bg-background"
-                          />
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-muted/35 p-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-foreground">
-                            Sign out other sessions
-                          </p>
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            Recommended after a password change.
-                          </p>
-                        </div>
-                        <ToggleButton
-                          pressed={signOutOtherSessions}
-                          label={signOutOtherSessions ? "Enabled" : "Disabled"}
-                          onClick={() => setSignOutOtherSessions((value) => !value)}
-                        />
-                      </div>
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <p className="text-sm text-muted-foreground">
-                          Clerk will prompt for extra verification before saving the new password.
-                        </p>
-                        <Button type="submit" variant="outline" disabled={savingPassword}>
-                          {savingPassword ? <Loader2 className="size-4 animate-spin" /> : null}
-                          Update password
-                        </Button>
-                      </div>
-                      {passwordStatus ? (
-                        <p className="text-sm text-muted-foreground">{passwordStatus}</p>
-                      ) : null}
-                    </form>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-sm text-muted-foreground">
+                        Change password in focused modal.
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setPasswordDialogOpen(true)}
+                      >
+                        Change password
+                      </Button>
+                    </div>
                   </div>
                 </>
               ) : null}
 
               {activeSection === "appearance" ? (
                 <>
-                  <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-                    <div className="space-y-4">
-                      <SettingRow
-                        title="Theme mode"
-                        description="Switch the app shell immediately between light and dark."
-                      >
-                        <SegmentedChoice
-                          value={themeMode}
-                          onChange={(value) => setTheme(value)}
-                          options={[
-                            { value: "light", label: "Light", icon: SunMedium },
-                            { value: "dark", label: "Dark", icon: MoonStar },
-                          ]}
-                        />
-                      </SettingRow>
+                  <div className="space-y-4">
+                    <SettingRow
+                      title="Theme mode"
+                      description="Switch app shell between light and dark."
+                    >
+                      <SegmentedChoice
+                        value={themeMode}
+                        onChange={(value) => setTheme(value)}
+                        options={[
+                          { value: "light", label: "Light", icon: SunMedium },
+                          { value: "dark", label: "Dark", icon: MoonStar },
+                        ]}
+                      />
+                    </SettingRow>
 
-                      <SettingRow
-                        title="Interface density"
-                        description="Controls how roomy lists, rails, and cards should feel."
-                      >
-                        <SegmentedChoice
-                          value={density}
-                          onChange={setDensity}
-                          options={[
-                            { value: "compact", label: "Compact" },
-                            { value: "comfortable", label: "Comfortable" },
-                          ]}
-                        />
-                      </SettingRow>
-
-                      <SettingRow
-                        title="Reading size"
-                        description="Preview text scale for notes and setting descriptions."
-                      >
-                        <SegmentedChoice
-                          value={fontSize}
-                          onChange={setFontSize}
-                          options={[
-                            { value: "small", label: "Small" },
-                            { value: "medium", label: "Medium" },
-                            { value: "large", label: "Large" },
-                          ]}
-                        />
-                      </SettingRow>
-                    </div>
-
-                    <div className="rounded-[24px] border border-border/80 bg-muted/35 p-4">
-                      <div className="rounded-[22px] border border-border bg-background p-4">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                            Preview card
-                          </p>
-                          <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-[11px] text-muted-foreground">
-                            Live
-                          </span>
-                        </div>
-                        <div
-                          className={cn(
-                            "mt-4 rounded-[20px] border border-border bg-muted/40 px-4 py-5 transition-all duration-200",
-                            density === "compact" ? "space-y-2.5" : "space-y-4",
-                            fontSize === "small" && "text-sm",
-                            fontSize === "medium" && "text-[15px]",
-                            fontSize === "large" && "text-base"
-                          )}
-                        >
-                          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                            <LaptopMinimal className="size-3.5" />
-                            Synapse canvas
-                          </div>
-                          <p className="font-medium text-foreground">
-                            A clean settings surface should feel editorial, not mechanical.
-                          </p>
-                          <p className="leading-6 text-muted-foreground">
-                            This preview mirrors the current theme and spacing choices across the
-                            workspace.
-                          </p>
-                        </div>
+                    <div className="rounded-[24px] border border-border/80 bg-background p-4">
+                      <div className="pb-4">
+                        <h3 className="text-sm font-medium text-foreground">
+                          Color profile
+                        </h3>
+                        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                          Choose a TweakCN color palette for the app interface.
+                        </p>
                       </div>
+                      <ColorProfilePicker />
                     </div>
+
+                    <SettingRow
+                      title="Interface density"
+                      description="Controls spacing for lists, rails, and cards."
+                    >
+                      <SegmentedChoice
+                        value={density}
+                        onChange={setDensity}
+                        options={[
+                          { value: "compact", label: "Compact" },
+                          { value: "comfortable", label: "Comfortable" },
+                        ]}
+                      />
+                    </SettingRow>
+
+                    <SettingRow
+                      title="Reading size"
+                      description="Preview text scale for notes."
+                    >
+                      <SegmentedChoice
+                        value={fontSize}
+                        onChange={setFontSize}
+                        options={[
+                          { value: "small", label: "Small" },
+                          { value: "medium", label: "Medium" },
+                          { value: "large", label: "Large" },
+                        ]}
+                      />
+                    </SettingRow>
                   </div>
                 </>
               ) : null}
@@ -896,7 +810,7 @@ export default function SettingsDialog({
             <Separator />
             <DialogFooter className="items-center justify-between gap-3 px-5 py-4 sm:flex-row sm:px-7">
               <p className="text-sm text-muted-foreground">
-                Frontend preview only. No persistence or backend wiring yet.
+                Some settings still local only.
               </p>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Done
@@ -905,6 +819,80 @@ export default function SettingsDialog({
           </div>
         </div>
       </DialogContent>
+
+      <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+        <DialogContent className="max-h-[min(90dvh,42rem)] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-[28px] border border-border/80 p-0 shadow-2xl sm:max-w-lg">
+          <form className="grid gap-5 p-5 sm:p-6" onSubmit={handlePasswordSave}>
+            <DialogHeader className="gap-3">
+              <DialogTitle className="text-xl font-semibold tracking-tight">
+                Change password
+              </DialogTitle>
+              <DialogDescription className="text-sm leading-6">
+                Enter current password, then choose new one.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4">
+              <PasswordField
+                label="Current password"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                error={passwordErrors.currentPassword}
+                autoComplete="current-password"
+                className="bg-background"
+              />
+              <PasswordField
+                label="New password"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                error={passwordErrors.newPassword}
+                autoComplete="new-password"
+                className="bg-background"
+              />
+              <PasswordField
+                label="Confirm new password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                error={passwordErrors.confirmPassword}
+                autoComplete="new-password"
+                className="bg-background"
+              />
+            </div>
+
+            <div className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-muted/35 p-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">Sign out other sessions</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Recommended after password change.
+                </p>
+              </div>
+              <ToggleButton
+                pressed={signOutOtherSessions}
+                label={signOutOtherSessions ? "Enabled" : "Disabled"}
+                onClick={() => setSignOutOtherSessions((value) => !value)}
+              />
+            </div>
+
+            {passwordStatus ? (
+              <p className="text-sm text-muted-foreground">{passwordStatus}</p>
+            ) : null}
+
+            <DialogFooter className="gap-3 sm:justify-between">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setPasswordDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" variant="outline" disabled={savingPassword}>
+                {savingPassword ? <Loader2 className="size-4 animate-spin" /> : null}
+                Update password
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   )
 }
