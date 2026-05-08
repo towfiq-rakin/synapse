@@ -60,6 +60,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AppOptionsPopover } from "@/components/layout/app-options-popover";
+import type { ShareState } from "@/components/notes/share-note-dialog";
 import { Toolbar, ToolbarGroup, ToolbarSeparator } from "@/components/tiptap-ui-primitive/toolbar";
 import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button";
 import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button";
@@ -86,6 +87,10 @@ import {
 } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
+import {
+  LAST_OPENED_NOTE_COOKIE,
+  LAST_OPENED_NOTE_COOKIE_MAX_AGE_SECONDS,
+} from "@/lib/note-selection";
 import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
 import "@/components/tiptap-node/code-block-node/code-block-node.scss";
 import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss";
@@ -637,6 +642,7 @@ function NoteEditorToolbar({
   onDeleted,
   onFind,
   onReplace,
+  onShareUpdated,
 }: {
   noteId: string;
   noteTitle: string;
@@ -650,6 +656,7 @@ function NoteEditorToolbar({
   onDeleted?: () => void;
   onFind?: () => void;
   onReplace?: () => void;
+  onShareUpdated?: (state: ShareState) => void;
 }) {
   return (
     <div className="synapse-note-topbar">
@@ -728,6 +735,7 @@ function NoteEditorToolbar({
           onDeleted={onDeleted}
           onFind={onFind}
           onReplace={onReplace}
+          onShareUpdated={onShareUpdated}
         />
       </div>
     </div>
@@ -895,6 +903,7 @@ export default function AutoSyncNoteEditor({
   initialFolderId,
 }: AutoSyncNoteEditorProps) {
   const router = useRouter();
+  const [, setShareState] = useState<ShareState | null>(null);
   const [derivedTitle, setDerivedTitle] = useState<string>(initialTitle || "Untitled");
   const [frontmatter, setFrontmatter] = useState<NoteFrontmatterState>(EMPTY_FRONTMATTER);
   const [initialEditorContent, setInitialEditorContent] = useState<PreparedEditorContent>({
@@ -1139,6 +1148,11 @@ export default function AutoSyncNoteEditor({
   }, [initialFolderId, noteId, router]);
 
   useEffect(() => {
+    const secure = window.location.protocol === "https:" ? "; Secure" : "";
+    document.cookie = `${LAST_OPENED_NOTE_COOKIE}=${encodeURIComponent(noteId)}; Path=/; Max-Age=${LAST_OPENED_NOTE_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax${secure}`;
+  }, [noteId]);
+
+  useEffect(() => {
     let active = true;
     const parsed = parseNoteContent(initialContent);
     const nextTitle = normalizeTitle(parsed.frontmatter.title || initialTitle || "Untitled");
@@ -1248,6 +1262,10 @@ export default function AutoSyncNoteEditor({
   function handleMoved(newFolderId: string | null) {
     setCurrentFolderId(newFolderId);
     folderIdRef.current = newFolderId;
+  }
+
+  function handleShareUpdated(state: ShareState) {
+    setShareState(state);
   }
 
   // ── Find/Replace helpers ────────────────────────────────────────────────────
@@ -1385,6 +1403,7 @@ export default function AutoSyncNoteEditor({
             onDeleted={handleDeleted}
             onFind={() => openFindBar("find")}
             onReplace={() => openFindBar("replace")}
+            onShareUpdated={handleShareUpdated}
           />
 
           {/* Find / Replace Popup */}

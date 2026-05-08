@@ -5,8 +5,11 @@ export interface IUser {
   email: string;
   username: string;
   name: string;
+  displayName?: string;
   avatarUrl: string;
   bio: string;
+  isPublicProfile: boolean;
+  publishedAt: Date | null;
   role: "user" | "admin";
   createdAt: Date;
   updatedAt: Date;
@@ -43,6 +46,11 @@ const userSchema = new Schema<IUser>(
       required: true,
       trim: true,
     },
+    displayName: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     avatarUrl: {
       type: String,
       default: "",
@@ -50,6 +58,14 @@ const userSchema = new Schema<IUser>(
     bio: {
       type: String,
       default: "",
+    },
+    isPublicProfile: {
+      type: Boolean,
+      default: false,
+    },
+    publishedAt: {
+      type: Date,
+      default: null,
     },
     role: {
       type: String,

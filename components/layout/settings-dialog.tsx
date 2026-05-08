@@ -48,6 +48,9 @@ type SettingsDialogProps = {
     email: string | null
     image: string | null
     username?: string | null
+    displayName?: string | null
+    bio?: string | null
+    isPublicProfile?: boolean
   } | null
 }
 
@@ -56,6 +59,11 @@ type SettingsActionResult = {
   error?: string
   fieldErrors?: Record<string, string | undefined>
   username?: string
+  profile?: {
+    displayName?: string | null
+    bio?: string | null
+    isPublicProfile?: boolean
+  }
 }
 
 const sections: Array<{
@@ -248,6 +256,12 @@ export default function SettingsDialog({
   const [usernameError, setUsernameError] = useState("")
   const [usernameStatus, setUsernameStatus] = useState("")
   const [savingUsername, setSavingUsername] = useState(false)
+  const [publicProfileEnabled, setPublicProfileEnabled] = useState(Boolean(user?.isPublicProfile))
+  const [publicProfileDisplayName, setPublicProfileDisplayName] = useState(user?.displayName ?? "")
+  const [publicProfileBio, setPublicProfileBio] = useState(user?.bio ?? "")
+  const [publicProfileError, setPublicProfileError] = useState("")
+  const [publicProfileStatus, setPublicProfileStatus] = useState("")
+  const [savingPublicProfile, setSavingPublicProfile] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
@@ -293,9 +307,14 @@ export default function SettingsDialog({
     setUsername(usernameValue)
     setUsernameError("")
     setUsernameStatus("")
+    setPublicProfileEnabled(Boolean(user?.isPublicProfile))
+    setPublicProfileDisplayName(user?.displayName ?? "")
+    setPublicProfileBio(user?.bio ?? "")
+    setPublicProfileError("")
+    setPublicProfileStatus("")
     setPasswordDialogOpen(false)
     resetPasswordForm()
-  }, [open, usernameValue])
+  }, [open, user?.bio, user?.displayName, user?.isPublicProfile, usernameValue])
 
   useEffect(() => {
     if (passwordDialogOpen) {
@@ -469,6 +488,43 @@ export default function SettingsDialog({
       })
     } finally {
       setSavingPassword(false)
+    }
+  }
+
+  async function handlePublicProfileSave(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setPublicProfileError("")
+    setPublicProfileStatus("")
+    setSavingPublicProfile(true)
+
+    try {
+      const response = await fetch("/api/settings/public-profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          isPublicProfile: publicProfileEnabled,
+          displayName: publicProfileDisplayName,
+          bio: publicProfileBio,
+        }),
+      })
+
+      const data = (await response.json().catch(() => null)) as SettingsActionResult | null
+
+      if (!response.ok || !data?.success) {
+        setPublicProfileError(data?.error || "Could not update public profile.")
+        return
+      }
+
+      setPublicProfileEnabled(Boolean(data.profile?.isPublicProfile ?? publicProfileEnabled))
+      setPublicProfileDisplayName(data.profile?.displayName ?? "")
+      setPublicProfileBio(data.profile?.bio ?? "")
+      setPublicProfileStatus(publicProfileEnabled ? "Public profile is live." : "Public profile disabled.")
+      refreshShell()
+      toast.success(publicProfileEnabled ? "Public profile updated." : "Public profile hidden.")
+    } catch {
+      setPublicProfileError("Could not update public profile right now.")
+    } finally {
+      setSavingPublicProfile(false)
     }
   }
 
@@ -755,6 +811,83 @@ export default function SettingsDialog({
 
               {activeSection === "workspace" ? (
                 <>
+                  <div className="rounded-[24px] border border-border/80 bg-background p-4">
+                    <div className="pb-4">
+                      <h3 className="text-sm font-medium text-foreground">Public profile</h3>
+                      <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                        Control whether published notes appear in your public Synapse workspace.
+                      </p>
+                    </div>
+                    <form className="grid gap-4" onSubmit={handlePublicProfileSave}>
+                      <SettingRow
+                        title="Workspace visibility"
+                        description="Published notes become reachable on your public profile only when this is enabled."
+                      >
+                        <ToggleButton
+                          pressed={publicProfileEnabled}
+                          label={publicProfileEnabled ? "Public" : "Private"}
+                          onClick={() => setPublicProfileEnabled((value) => !value)}
+                        />
+                      </SettingRow>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="grid gap-2">
+                          <label className="text-sm font-medium text-foreground" htmlFor="public-display-name">
+                            Public display name
+                          </label>
+                          <Input
+                            id="public-display-name"
+                            value={publicProfileDisplayName}
+                            onChange={(event) => setPublicProfileDisplayName(event.target.value)}
+                            placeholder="Optional"
+                            className="bg-background"
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <label className="text-sm font-medium text-foreground" htmlFor="public-username-preview">
+                            Public path
+                          </label>
+                          <Input
+                            id="public-username-preview"
+                            value={usernameValue ? `/u/${usernameValue}` : "/u/username"}
+                            readOnly
+                            className="bg-background text-muted-foreground"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <label className="text-sm font-medium text-foreground" htmlFor="public-bio">
+                          Public bio
+                        </label>
+                        <Textarea
+                          id="public-bio"
+                          value={publicProfileBio}
+                          onChange={(event) => setPublicProfileBio(event.target.value)}
+                          placeholder="Optional short note for your public workspace."
+                          className="min-h-24 bg-background"
+                        />
+                      </div>
+
+                      {publicProfileError ? (
+                        <p className="text-sm text-destructive">{publicProfileError}</p>
+                      ) : null}
+                      {publicProfileStatus ? (
+                        <p className="text-sm text-muted-foreground">{publicProfileStatus}</p>
+                      ) : null}
+
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-sm text-muted-foreground">
+                          Unlisted share links stay off the public explorer even when your profile is public.
+                        </p>
+                        <Button type="submit" variant="outline" disabled={savingPublicProfile}>
+                          {savingPublicProfile ? <Loader2 className="size-4 animate-spin" /> : null}
+                          Save public profile
+                        </Button>
+                      </div>
+                    </form>
+                  </div>
+
                   <SettingRow
                     title="Workspace name"
                     description="Used in onboarding copy and future shared surfaces."

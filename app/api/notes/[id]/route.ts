@@ -1,5 +1,6 @@
 import { getAuthenticatedUserId } from "@/lib/auth";
-import Note, { type NoteVisibility } from "@/lib/db/models/Note";
+import Note from "@/lib/db/models/Note";
+import User from "@/lib/db/models/User";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { getExplorerPayload, resolveFolderIdFromBody } from "@/lib/explorer";
 import {
@@ -8,6 +9,13 @@ import {
   slugFromText,
 } from "@/lib/notes-path";
 import { Types } from "mongoose";
+import {
+  buildPublishedSnapshot,
+  generateUniqueShareId,
+  normalizeNoteForResponse,
+} from "@/lib/publishing/note";
+import { buildNoteShareState } from "@/lib/publishing/public-links";
+import { normalizeNoteVisibility } from "@/lib/publishing/visibility";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -39,12 +47,6 @@ function normalizeTags(input: unknown): string[] | undefined {
     .slice(0, 50);
 }
 
-function isVisibility(value: unknown): value is NoteVisibility {
-  return value === "private" || value === "public";
-}
-
-
-
 function normalizeFolderId(value: unknown): string | null {
   if (!value) {
     return null;
@@ -68,16 +70,24 @@ export async function GET(_request: Request, context: RouteContext) {
 
   await connectToDatabase();
 
-  const note = await Note.findOne({ _id: id, userId }).lean();
+  const [note, owner] = await Promise.all([
+    Note.findOne({ _id: id, userId }).lean(),
+    User.findById(userId).select("username isPublicProfile").lean<{ username: string; isPublicProfile?: boolean | null } | null>(),
+  ]);
 
   if (!note) {
     return Response.json({ error: "Note not found" }, { status: 404 });
   }
 
+  if (!owner) {
+    return Response.json({ error: "User not found" }, { status: 404 });
+  }
+
   const explorer = await getExplorerPayload(userId);
   const href = `/notes/${id}`;
+  const share = await buildNoteShareState(note, owner);
 
-  return Response.json({ note, href, privatePath: href, explorer });
+  return Response.json({ note: normalizeNoteForResponse(note), href, privatePath: href, explorer, share });
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
@@ -107,7 +117,12 @@ export async function PATCH(request: Request, context: RouteContext) {
     contentText?: string;
     folderId?: string | null;
     slug?: string | undefined;
-    visibility?: NoteVisibility;
+    visibility?: "private" | "unlisted" | "published";
+    shareId?: string | null;
+    publicHtml?: string | null;
+    publicMarkdown?: string | null;
+    publicToc?: { id: string; text: string; level: number }[] | null;
+    publishedAt?: Date | null;
     tags?: string[];
   } = {};
 
@@ -134,13 +149,6 @@ export async function PATCH(request: Request, context: RouteContext) {
     explicitSlug = true;
   }
 
-  if (body.visibility !== undefined) {
-    if (!isVisibility(body.visibility)) {
-      return Response.json({ error: "Invalid visibility" }, { status: 400 });
-    }
-    updates.visibility = body.visibility;
-  }
-
   if (body.tags !== undefined) {
     const tags = normalizeTags(body.tags);
     if (tags === undefined) {
@@ -161,11 +169,17 @@ export async function PATCH(request: Request, context: RouteContext) {
     nextFolderId = resolvedFolderId;
   }
 
-  const current = await Note.findOne({ _id: id, userId }).select("title folderId slug contentText").lean<{
+  const current = await Note.findOne({ _id: id, userId }).select(
+    "title folderId slug content contentText visibility shareId publishedAt",
+  ).lean<{
     title: string;
     folderId: { toString(): string } | string | null;
     slug?: string;
+    content: string;
     contentText: string;
+    visibility?: unknown;
+    shareId: string | null;
+    publishedAt: Date | null;
   } | null>();
 
   if (!current) {
@@ -204,6 +218,35 @@ export async function PATCH(request: Request, context: RouteContext) {
     updates.slug = slug || slugFromText(effectiveTitle);
   }
 
+  const effectiveVisibility = normalizeNoteVisibility(current.visibility);
+  const effectiveContent = typeof updates.content === "string" ? updates.content : current.content;
+  const shouldRefreshSnapshot = effectiveVisibility === "unlisted" || effectiveVisibility === "published";
+
+  if (shouldRefreshSnapshot) {
+    const shareId =
+      effectiveVisibility === "unlisted"
+        ? current.shareId ?? (await generateUniqueShareId(async (candidate) => Boolean(await Note.exists({ shareId: candidate }))))
+        : current.shareId ?? null;
+
+    Object.assign(
+      updates,
+      await buildPublishedSnapshot(
+        {
+          title: effectiveTitle,
+          content: effectiveContent,
+          contentText: effectiveContentText,
+          visibility: effectiveVisibility,
+          shareId: current.shareId,
+          publishedAt: current.publishedAt,
+        },
+        effectiveVisibility,
+        shareId,
+      ),
+    );
+  } else if (effectiveVisibility !== "private" && current.visibility === "public") {
+    updates.visibility = effectiveVisibility;
+  }
+
   try {
     const note = await Note.findOneAndUpdate(
       { _id: id, userId },
@@ -218,7 +261,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     const explorer = await getExplorerPayload(userId);
     const href = `/notes/${id}`;
 
-    return Response.json({ note, href, privatePath: href, explorer });
+    return Response.json({ note: normalizeNoteForResponse(note), href, privatePath: href, explorer });
   } catch (error) {
     if (
       typeof error === "object" &&

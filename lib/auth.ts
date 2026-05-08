@@ -154,5 +154,8 @@ export async function getSessionUser() {
     email: localUser.email,
     image: localUser.avatarUrl || user.imageUrl || null,
     username: localUser.username,
+    displayName: localUser.displayName || null,
+    bio: localUser.bio || null,
+    isPublicProfile: Boolean(localUser.isPublicProfile),
   };
 }

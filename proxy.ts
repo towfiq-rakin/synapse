@@ -1,13 +1,15 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
 const isPublicRoute = createRouteMatcher([
+  '/',
   '/login(.*)',
   '/signup(.*)',
   '/sso-callback(.*)',
+  '/u(.*)',
+  '/share(.*)',
 ])
 
 const isProtectedRoute = createRouteMatcher([
-  '/',
   '/notes(.*)',
   '/api/notes(.*)',
   '/api/folders(.*)',

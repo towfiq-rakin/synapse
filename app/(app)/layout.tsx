@@ -19,6 +19,9 @@ export default async function AppLayout({ children }: AppLayoutProps) {
         email: user.email,
         image: user.image,
         username: user.username,
+        displayName: user.displayName,
+        bio: user.bio,
+        isPublicProfile: user.isPublicProfile,
       }
     : null;
 

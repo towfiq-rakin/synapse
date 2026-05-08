@@ -2,7 +2,13 @@ import { Schema, model, models, type Model, type Types } from "mongoose";
 import { userIdField, type IUserOwnedDocument } from "./shared/ownership";
 
 export type NoteType = "note" | "blog";
-export type NoteVisibility = "private" | "public";
+export type NoteVisibility = "private" | "unlisted" | "published";
+
+export interface INoteTocItem {
+  id: string;
+  text: string;
+  level: number;
+}
 
 export interface INote extends IUserOwnedDocument {
   title: string;
@@ -12,10 +18,39 @@ export interface INote extends IUserOwnedDocument {
   contentText: string;
   type: NoteType;
   visibility: NoteVisibility;
+  shareId: string | null;
+  publicHtml: string | null;
+  publicMarkdown: string | null;
+  publicToc: INoteTocItem[] | null;
+  publishedAt: Date | null;
   tags: string[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+const noteTocItemSchema = new Schema<INoteTocItem>(
+  {
+    id: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    text: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    level: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 6,
+    },
+  },
+  {
+    _id: false,
+  },
+);
 
 const noteSchema = new Schema<INote>(
   {
@@ -55,8 +90,29 @@ const noteSchema = new Schema<INote>(
     },
     visibility: {
       type: String,
-      enum: ["private", "public"],
+      enum: ["private", "unlisted", "published"],
       default: "private",
+    },
+    shareId: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    publicHtml: {
+      type: String,
+      default: null,
+    },
+    publicMarkdown: {
+      type: String,
+      default: null,
+    },
+    publicToc: {
+      type: [noteTocItemSchema],
+      default: null,
+    },
+    publishedAt: {
+      type: Date,
+      default: null,
     },
     tags: {
       type: [String],
@@ -76,6 +132,15 @@ noteSchema.index(
     unique: true,
     partialFilterExpression: {
       slug: { $exists: true, $type: "string", $ne: "" },
+    },
+  },
+);
+noteSchema.index(
+  { shareId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      shareId: { $exists: true, $type: "string", $ne: "" },
     },
   },
 );
