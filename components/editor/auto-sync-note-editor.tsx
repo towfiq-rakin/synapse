@@ -2,8 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Extension, markInputRule } from "@tiptap/core";
-import type { MarkType } from "@tiptap/pm/model";
+import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey, TextSelection } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { EditorContent, EditorContext, useEditor, type Editor } from "@tiptap/react";
@@ -26,16 +25,6 @@ import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import remarkRehype from "remark-rehype";
-import {
-  starInputRegex as boldStarInputRegex,
-  underscoreInputRegex as boldUnderscoreInputRegex,
-} from "@tiptap/extension-bold";
-import { inputRegex as codeInputRegex } from "@tiptap/extension-code";
-import {
-  starInputRegex as italicStarInputRegex,
-  underscoreInputRegex as italicUnderscoreInputRegex,
-} from "@tiptap/extension-italic";
-import { inputRegex as strikeInputRegex } from "@tiptap/extension-strike";
 import { Selection } from "@tiptap/extensions";
 import Mathematics from "@tiptap/extension-mathematics";
 import matter from "gray-matter";
@@ -72,6 +61,7 @@ import { MarkButton } from "@/components/tiptap-ui/mark-button";
 import { TextAlignButton } from "@/components/tiptap-ui/text-align-button";
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button";
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
+import { LiveMarkdownInputExtension } from "@/components/tiptap-extension/live-markdown-input-extension";
 import { MarkdownMathInputExtension } from "@/components/tiptap-extension/markdown-math-input-extension";
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
@@ -129,11 +119,6 @@ type ParsedNoteContent = {
 };
 
 type FrontmatterFieldKey = keyof NoteFrontmatterState;
-
-type MarkdownMarkRuleConfig = {
-  find: RegExp;
-  type: MarkType;
-};
 
 const lowlight = createLowlight(common);
 const EMPTY_FRONTMATTER: NoteFrontmatterState = {
@@ -539,53 +524,6 @@ function buildPrintDocument(title: string, bodyHtml: string): string {
   </body>
 </html>`;
 }
-
-function markdownMarkInputRule({ find, type }: MarkdownMarkRuleConfig) {
-  return markInputRule({
-    find,
-    type,
-  });
-}
-
-const ObsidianLiveMarkdown = Extension.create({
-  name: "obsidianLiveMarkdown",
-  priority: 1000,
-
-  addInputRules() {
-    const { bold, code, italic, strike } = this.editor.schema.marks;
-
-    if (!bold || !italic || !strike || !code) {
-      return [];
-    }
-
-    return [
-      markdownMarkInputRule({
-        find: boldStarInputRegex,
-        type: bold,
-      }),
-      markdownMarkInputRule({
-        find: boldUnderscoreInputRegex,
-        type: bold,
-      }),
-      markdownMarkInputRule({
-        find: strikeInputRegex,
-        type: strike,
-      }),
-      markdownMarkInputRule({
-        find: codeInputRegex,
-        type: code,
-      }),
-      markdownMarkInputRule({
-        find: italicStarInputRegex,
-        type: italic,
-      }),
-      markdownMarkInputRule({
-        find: italicUnderscoreInputRegex,
-        type: italic,
-      }),
-    ];
-  },
-});
 
 const SearchHighlightKey = new PluginKey("searchHighlight");
 
@@ -1068,6 +1006,10 @@ export default function AutoSyncNoteEditor({
   const editor = useEditor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: false,
+    // Restrict markdown input/paste transformations to our live-markdown + math rules
+    // to avoid duplicate rule execution from overlapping StarterKit rules.
+    enableInputRules: ["liveMarkdownInputExtension", "markdownMathInputExtension"],
+    enablePasteRules: ["liveMarkdownInputExtension", "markdownMathInputExtension", "link"],
     extensions: [
       StarterKit.configure({
         horizontalRule: false,
@@ -1108,7 +1050,8 @@ export default function AutoSyncNoteEditor({
         },
       }),
       MarkdownMathInputExtension,
-      ObsidianLiveMarkdown,
+      // Keep this after dependent marks/nodes so its rules resolve against the final schema.
+      LiveMarkdownInputExtension,
       SearchHighlightExtension,
       ImageUploadNode.configure({
         accept: "image/*",
