@@ -131,7 +131,29 @@
   --shadow-xl: 0px 1px 2px 0px hsl(0 0% 0% / 0.18), 0px 8px 10px -1px hsl(0 0% 0% / 0.18);
   --shadow-2xl: 0px 1px 2px 0px hsl(0 0% 0% / 0.45);
   --tracking-normal: 0em;
+  --synapse-reading-size-multiplier: 1;
+  --synapse-density-multiplier: 1;
 
+}
+
+:root[data-reading-size="small"] {
+  --synapse-reading-size-multiplier: 0.92;
+}
+
+:root[data-reading-size="medium"] {
+  --synapse-reading-size-multiplier: 1;
+}
+
+:root[data-reading-size="large"] {
+  --synapse-reading-size-multiplier: 1.1;
+}
+
+:root[data-interface-density="compact"] {
+  --synapse-density-multiplier: 0.9;
+}
+
+:root[data-interface-density="comfortable"] {
+  --synapse-density-multiplier: 1;
 }
 
 html {
@@ -265,7 +287,7 @@ html {
 
 .public-docs-content {
   color: var(--foreground);
-  font-size: 1rem;
+  font-size: calc(1rem * var(--synapse-reading-size-multiplier));
   line-height: 1.75;
 }
 
@@ -444,7 +466,34 @@ html {
 
 .public-docs-content .katex-display {
   overflow-x: auto;
-  padding-bottom: 0.25rem;
+  overflow-y: hidden;
+  padding: 0.75rem 0;
+}
+
+.public-docs-content .katex {
+  font-size: 1.02em;
+}
+
+.public-docs-content .synapse-mermaid-render {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: color-mix(in oklab, var(--card) 82%, var(--muted));
+  padding: 1rem;
+}
+
+.public-docs-content .synapse-mermaid-render[data-invalid="true"] {
+  border-color: color-mix(in oklab, #dc2626 38%, var(--border));
+  background: color-mix(in oklab, #dc2626 10%, var(--background));
+  color: #dc2626;
+  font-size: 0.94rem;
+}
+
+.public-docs-content .synapse-mermaid-render svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
 }
 
 .public-docs-content .hljs {
@@ -536,6 +585,12 @@ html {
 
 .synapse-editor-shell .tiptap-toolbar[data-variant="fixed"] {
   padding-left: 3.25rem;
+}
+
+[data-slot="sidebar-menu-button"] {
+  min-height: calc(2rem * var(--synapse-density-multiplier));
+  padding-top: calc(0.5rem * var(--synapse-density-multiplier));
+  padding-bottom: calc(0.5rem * var(--synapse-density-multiplier));
 }
 
 @media (max-width: 767px) {

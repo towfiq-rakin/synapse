@@ -66,6 +66,10 @@ type AppOptionsPopoverProps = {
   onReplace?: () => void
   /** Called after successful share/publish update */
   onShareUpdated?: (state: ShareState) => void
+  /** Toggle markdown source editing mode */
+  onToggleSourceMode?: () => void
+  /** Whether source mode is active */
+  isSourceMode?: boolean
 }
 
 // ─── Rename Dialog ─────────────────────────────────────────────────────────────
@@ -357,6 +361,8 @@ export function AppOptionsPopover({
   onFind,
   onReplace,
   onShareUpdated,
+  onToggleSourceMode,
+  isSourceMode = false,
 }: AppOptionsPopoverProps) {
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [renameOpen, setRenameOpen] = useState(false)
@@ -395,9 +401,17 @@ export function AppOptionsPopover({
               <BookOpenText className="size-4" />
               Reading view
             </Button>
-            <Button type="button" variant="ghost" className="h-8 w-full justify-start gap-2 px-2 text-sm font-normal">
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-8 w-full justify-start gap-2 px-2 text-sm font-normal"
+              onClick={() => {
+                closePopover()
+                onToggleSourceMode?.()
+              }}
+            >
               <Code2 className="size-4" />
-              Source mode
+              {isSourceMode ? "Visual mode" : "Source mode"}
             </Button>
             <Button
               type="button"

@@ -1,4 +1,5 @@
 import type { INoteTocItem, NoteVisibility } from "@/lib/db/models/Note";
+import matter from "gray-matter";
 import Folder, { type IFolder } from "@/lib/db/models/Folder";
 import Note, { type INote } from "@/lib/db/models/Note";
 import User, { type IUser } from "@/lib/db/models/User";
@@ -192,6 +193,54 @@ function hasExpectedCodeHighlighting(note: Pick<PublicWorkspaceNote, "content" |
   }
 
   return true;
+}
+
+function normalizeLineEndings(value: string) {
+  return value.replace(/\r\n/g, "\n");
+}
+
+function extractMarkdownBody(content: string | null | undefined) {
+  if (typeof content !== "string") {
+    return "";
+  }
+
+  const normalized = normalizeLineEndings(content).trim();
+
+  if (!normalized) {
+    return "";
+  }
+
+  const parsed = matter(normalized);
+  return normalizeLineEndings(parsed.content).trim();
+}
+
+function isLikelyHtml(value: string) {
+  return /<\/?[a-z][\s\S]*>/i.test(value);
+}
+
+function hasFreshSnapshotContent(
+  note: Pick<PublicWorkspaceNote, "content" | "publicMarkdown">,
+) {
+  const body = extractMarkdownBody(note.content);
+
+  if (!body) {
+    return note.publicMarkdown === null || note.publicMarkdown?.trim() === "";
+  }
+
+  if (isLikelyHtml(body)) {
+    // Legacy HTML notes keep markdown snapshot as null; freshness is checked by HTML guards.
+    return note.publicMarkdown === null;
+  }
+
+  if (typeof note.publicMarkdown !== "string") {
+    return false;
+  }
+
+  return normalizeLineEndings(note.publicMarkdown).trim() === body;
+}
+
+function hasSafePublicLinks(html: string) {
+  return !/(?:href\s*=\s*["'][^"']*(?:%5B|%5D|\[|\]|\(|\))[^"']*["'])/i.test(html);
 }
 
 function buildWorkspaceNote(
@@ -461,9 +510,11 @@ export async function getResolvedPublicSnapshot(
 ): Promise<ResolvedPublicSnapshot> {
   if (
     note.publicHtml &&
+    hasSafePublicLinks(note.publicHtml) &&
     Array.isArray(note.publicToc) &&
     hasMatchingHeadingAnchors(note.publicHtml, note.publicToc) &&
-    hasExpectedCodeHighlighting(note)
+    hasExpectedCodeHighlighting(note) &&
+    hasFreshSnapshotContent(note)
   ) {
     return {
       html: note.publicHtml,

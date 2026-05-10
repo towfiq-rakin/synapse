@@ -26,6 +26,14 @@ import {
   COLOR_PROFILE_STORAGE_KEY,
   DEFAULT_COLOR_PROFILE,
 } from "@/lib/color-profiles";
+import {
+  DEFAULT_INTERFACE_DENSITY,
+  DEFAULT_READING_SIZE,
+  INTERFACE_DENSITY_STORAGE_KEY,
+  INTERFACE_DENSITY_VALUES,
+  READING_SIZE_STORAGE_KEY,
+  READING_SIZE_VALUES,
+} from "@/lib/ui-preferences";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -130,6 +138,31 @@ const colorProfileScript = `
 })();
 `;
 
+const uiPreferenceScript = `
+(() => {
+  try {
+    var densityValues = ${JSON.stringify(INTERFACE_DENSITY_VALUES)};
+    var readingSizeValues = ${JSON.stringify(READING_SIZE_VALUES)};
+    var densityKey = ${JSON.stringify(INTERFACE_DENSITY_STORAGE_KEY)};
+    var readingSizeKey = ${JSON.stringify(READING_SIZE_STORAGE_KEY)};
+    var defaultDensity = ${JSON.stringify(DEFAULT_INTERFACE_DENSITY)};
+    var defaultReadingSize = ${JSON.stringify(DEFAULT_READING_SIZE)};
+
+    var densityStored = localStorage.getItem(densityKey);
+    var density = densityValues.indexOf(densityStored || "") === -1 ? defaultDensity : densityStored;
+
+    var readingSizeStored = localStorage.getItem(readingSizeKey);
+    var readingSize = readingSizeValues.indexOf(readingSizeStored || "") === -1 ? defaultReadingSize : readingSizeStored;
+
+    document.documentElement.dataset.interfaceDensity = density;
+    document.documentElement.dataset.readingSize = readingSize;
+  } catch (_) {
+    document.documentElement.dataset.interfaceDensity = ${JSON.stringify(DEFAULT_INTERFACE_DENSITY)};
+    document.documentElement.dataset.readingSize = ${JSON.stringify(DEFAULT_READING_SIZE)};
+  }
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -140,6 +173,8 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       data-color-profile={DEFAULT_COLOR_PROFILE}
+      data-interface-density={DEFAULT_INTERFACE_DENSITY}
+      data-reading-size={DEFAULT_READING_SIZE}
       className={cn(
         "h-full",
         "antialiased",
@@ -163,6 +198,12 @@ export default function RootLayout({
           strategy="beforeInteractive"
         >
           {colorProfileScript}
+        </Script>
+        <Script
+          id="synapse-ui-preferences"
+          strategy="beforeInteractive"
+        >
+          {uiPreferenceScript}
         </Script>
         <ClerkProvider>
           <ThemeProvider

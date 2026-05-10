@@ -1,4 +1,4 @@
-import slugify from "slugify";
+import { slugifyNoteTitle } from "./slugify-note-title";
 
 type StringLikeId = { toString(): string } | string;
 type NullableId = StringLikeId | null;
@@ -30,13 +30,7 @@ export function toNullableId(value: NullableId): string | null {
 }
 
 export function slugFromText(input: string, fallback = "untitled"): string {
-  const computed = slugify(input, {
-    lower: true,
-    strict: true,
-    trim: true,
-  });
-
-  return computed || fallback;
+  return slugifyNoteTitle(input, fallback);
 }
 
 export function normalizePathSegments(segments: string[]): string[] {

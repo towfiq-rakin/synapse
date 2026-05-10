@@ -123,6 +123,57 @@ function isExternalHref(href: string): boolean {
   return /^(https?:)?\/\//i.test(href);
 }
 
+function normalizePublicHref(rawHref: string): string | null {
+  const value = rawHref.trim().replace(/^<|>$/g, "");
+
+  if (
+    !value ||
+    /\s/.test(value) ||
+    /^(?:javascript|data|vbscript):/i.test(value) ||
+    /[\[\]()<>]/.test(value)
+  ) {
+    return null;
+  }
+
+  if (value.startsWith("/")) {
+    return value;
+  }
+
+  if (/^mailto:/i.test(value)) {
+    return value;
+  }
+
+  if (/^www\./i.test(value)) {
+    return `https://${value}`;
+  }
+
+  const hasExplicitScheme = /^[a-z][a-z0-9+.-]*:/i.test(value);
+
+  if (hasExplicitScheme && !/^https?:\/\//i.test(value)) {
+    return null;
+  }
+
+  if (!hasExplicitScheme) {
+    if (value.startsWith("//")) {
+      return null;
+    }
+
+    return value;
+  }
+
+  try {
+    const parsed = new URL(value);
+
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return null;
+    }
+
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
 function stripHtmlToText(value: string): string {
   return sanitizeHtml(value, { allowedTags: [], allowedAttributes: {} })
     .replace(/\s+/g, " ")
@@ -138,9 +189,20 @@ function sanitizePublicHtml(html: string): string {
     transformTags: {
       a: (tagName: string, attributes: Record<string, string>) => {
         const href = typeof attributes.href === "string" ? attributes.href : "";
+        const normalizedHref = normalizePublicHref(href);
         const nextAttributes = { ...attributes };
 
-        if (isExternalHref(href)) {
+        if (!normalizedHref) {
+          delete nextAttributes.href;
+          delete nextAttributes.target;
+          delete nextAttributes.rel;
+
+          return { tagName, attribs: nextAttributes };
+        }
+
+        nextAttributes.href = normalizedHref;
+
+        if (isExternalHref(normalizedHref)) {
           nextAttributes.target = "_blank";
           nextAttributes.rel = "noopener noreferrer";
         } else {

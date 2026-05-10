@@ -35,6 +35,16 @@ import {
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import {
+  DEFAULT_INTERFACE_DENSITY,
+  DEFAULT_READING_SIZE,
+  INTERFACE_DENSITY_STORAGE_KEY,
+  INTERFACE_DENSITY_VALUES,
+  READING_SIZE_STORAGE_KEY,
+  READING_SIZE_VALUES,
+  type InterfaceDensity,
+  type ReadingSize,
+} from "@/lib/ui-preferences"
 import { cn } from "@/lib/utils"
 
 type SettingsSection = "account" | "appearance" | "editor" | "workspace"
@@ -243,8 +253,8 @@ export default function SettingsDialog({
   const { user: clerkUser, isLoaded } = useUser()
   const { resolvedTheme, setTheme } = useTheme()
   const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection)
-  const [density, setDensity] = useState<"compact" | "comfortable">("comfortable")
-  const [fontSize, setFontSize] = useState<"small" | "medium" | "large">("medium")
+  const [density, setDensity] = useState<InterfaceDensity>(DEFAULT_INTERFACE_DENSITY)
+  const [fontSize, setFontSize] = useState<ReadingSize>(DEFAULT_READING_SIZE)
   const [showRecentSearches, setShowRecentSearches] = useState(true)
   const [showSlashHints, setShowSlashHints] = useState(true)
   const [openLinksInPeek, setOpenLinksInPeek] = useState(false)
@@ -298,6 +308,43 @@ export default function SettingsDialog({
       setActiveSection(initialSection)
     }
   }, [initialSection, open])
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return
+    }
+
+    const storedDensity = window.localStorage.getItem(INTERFACE_DENSITY_STORAGE_KEY)
+    const storedReadingSize = window.localStorage.getItem(READING_SIZE_STORAGE_KEY)
+
+    const nextDensity = INTERFACE_DENSITY_VALUES.includes(storedDensity as InterfaceDensity)
+      ? (storedDensity as InterfaceDensity)
+      : DEFAULT_INTERFACE_DENSITY
+    const nextReadingSize = READING_SIZE_VALUES.includes(storedReadingSize as ReadingSize)
+      ? (storedReadingSize as ReadingSize)
+      : DEFAULT_READING_SIZE
+
+    setDensity(nextDensity)
+    setFontSize(nextReadingSize)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return
+    }
+
+    document.documentElement.dataset.interfaceDensity = density
+    window.localStorage.setItem(INTERFACE_DENSITY_STORAGE_KEY, density)
+  }, [density])
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return
+    }
+
+    document.documentElement.dataset.readingSize = fontSize
+    window.localStorage.setItem(READING_SIZE_STORAGE_KEY, fontSize)
+  }, [fontSize])
 
   useEffect(() => {
     if (!open) {
@@ -799,9 +846,8 @@ export default function SettingsDialog({
                           Editorial defaults
                         </h3>
                         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                          The editor section is intentionally dense and utility-first. Controls
-                          here are visual only for now, but they are structured to map cleanly
-                          onto persisted user preferences later.
+                          Interface density and reading size preferences are now applied globally
+                          and persisted for future sessions.
                         </p>
                       </div>
                     </div>

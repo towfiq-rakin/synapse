@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { enhanceMermaidCodeBlocks } from "@/lib/mermaid/render-mermaid";
 
 type PublicNoteContentProps = {
   html: string;
@@ -49,7 +50,12 @@ export default function PublicNoteContent({ html }: PublicNoteContentProps) {
       return;
     }
 
+    let active = true;
     const cleanups: Array<() => void> = [];
+
+    void enhanceMermaidCodeBlocks(root, () => active).catch(() => {
+      // Individual diagram errors render inline fallbacks in the helper.
+    });
 
     for (const pre of root.querySelectorAll("pre")) {
       if (pre.dataset.copyReady === "true") {
@@ -90,6 +96,7 @@ export default function PublicNoteContent({ html }: PublicNoteContentProps) {
     }
 
     return () => {
+      active = false;
       cleanups.forEach((cleanup) => cleanup());
     };
   }, [html]);
