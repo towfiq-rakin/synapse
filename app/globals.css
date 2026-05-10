@@ -598,3 +598,15 @@ html {
     padding-left: 0.5rem;
   }
 }
+
+.public-note-content .katex-display,
+.print-note__content .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.75rem 0;
+}
+
+.public-note-content .katex,
+.print-note__content .katex {
+  font-size: 1.02em;
+}

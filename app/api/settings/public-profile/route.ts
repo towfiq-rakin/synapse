@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getAuthenticatedUserId } from "@/lib/auth";
 import User from "@/lib/db/models/User";
 import { connectToDatabase } from "@/lib/db/mongoose";
+import { ensureProfileIndexNote, ensurePublishedProfileIndexNote } from "@/lib/profile-index-note";
 import { normalizePublicProfile } from "@/lib/publishing/profile";
 
 function normalizeOptionalText(value: unknown, maxLength: number): string {
@@ -52,6 +53,12 @@ export async function PATCH(request: Request) {
 
   user.publishedAt = body.isPublicProfile ? user.publishedAt ?? new Date() : null;
   await user.save();
+
+  if (body.isPublicProfile) {
+    await ensurePublishedProfileIndexNote(localUserId);
+  } else {
+    await ensureProfileIndexNote(localUserId);
+  }
 
   return Response.json({
     success: true,

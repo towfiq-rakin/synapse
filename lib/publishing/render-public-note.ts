@@ -106,7 +106,7 @@ const SAFE_ATTRIBUTES: Record<string, string[]> = {
   li: ["class"],
   math: ["display", "xmlns"],
   ol: ["class"],
-  span: ["aria-hidden", "class"],
+  span: ["aria-hidden", "class", "style"],
   svg: ["aria-hidden", "focusable", "height", "viewBox", "width", "xmlns"],
   path: ["d", "fill", "stroke", "stroke-width"],
   ul: ["class"],
@@ -182,6 +182,17 @@ function sanitizePublicHtml(html: string): string {
   return sanitizeHtml(html, {
     allowedTags: [...SAFE_TAGS],
     allowedAttributes: SAFE_ATTRIBUTES,
+    allowedStyles: {
+      span: {
+        top: [/^-?\d+(?:\.\d+)?(?:em|px|r?em|vh|vw|%)$/],
+        height: [/^-?\d+(?:\.\d+)?(?:em|px|r?em|vh|vw|%)$/],
+        "vertical-align": [/^-?\d+(?:\.\d+)?(?:em|px|r?em|vh|vw|%)$/, /^[-a-z]+$/],
+        "margin-left": [/^-?\d+(?:\.\d+)?(?:em|px|r?em|vh|vw|%)$/],
+        "margin-right": [/^-?\d+(?:\.\d+)?(?:em|px|r?em|vh|vw|%)$/],
+        position: [/^(?:absolute|relative)$/],
+        "font-size": [/^-?\d+(?:\.\d+)?(?:em|px|r?em|vh|vw|%)$/]
+      }
+    },
     allowedSchemes: ["http", "https", "mailto"],
     allowProtocolRelative: true,
     transformTags: {
@@ -260,7 +271,11 @@ async function renderMarkdownHtml(markdown: string): Promise<{ html: string; toc
     .use(remarkGfm)
     .use(remarkMath)
     .use(remarkRehype)
-    .use(rehypeKatex)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .use(rehypeKatex as any, {
+      throwOnError: false,
+      output: "html",
+    })
     .use(rehypeHighlight, {
       detect: false,
       ignoreMissing: true,
