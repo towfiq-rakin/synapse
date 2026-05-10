@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey, TextSelection } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
@@ -37,6 +37,7 @@ import {
   Plus,
   Replace,
   ReplaceAll,
+  Sparkles,
   SquareCheck,
   Tags,
   Type,
@@ -96,6 +97,8 @@ import "@/components/tiptap-node/image-node/image-node.scss";
 import "@/components/tiptap-node/heading-node/heading-node.scss";
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
 import "@/components/editor/auto-sync-note-editor.scss";
+import { AiAssistantPanel } from "@/components/ai/ai-assistant-panel";
+import "@/components/ai/ai-assistant-panel.scss";
 
 type AutoSyncNoteEditorProps = {
   noteId: string;
@@ -614,6 +617,7 @@ function NoteEditorToolbar({
   onShareUpdated,
   onToggleSourceMode,
   isSourceMode,
+  onOpenAi,
 }: {
   noteId: string;
   noteTitle: string;
@@ -630,6 +634,7 @@ function NoteEditorToolbar({
   onShareUpdated?: (state: ShareState) => void;
   onToggleSourceMode?: () => void;
   isSourceMode: boolean;
+  onOpenAi?: () => void;
 }) {
   return (
     <div className="synapse-note-topbar">
@@ -695,6 +700,16 @@ function NoteEditorToolbar({
 
       <div className="synapse-note-actions">
         <SidebarTrigger className="md:hidden" />
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={onOpenAi}
+          title="Open AI assistant"
+          aria-label="Open AI assistant"
+          className="synapse-ai-trigger"
+        >
+          <Sparkles className="size-4" />
+        </Button>
         <ThemeToggle />
         <AppOptionsPopover
           noteId={noteId}
@@ -889,6 +904,10 @@ export default function AutoSyncNoteEditor({
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(initialFolderId ?? null);
   const [isSourceMode, setIsSourceMode] = useState<boolean>(false);
   const [sourceMarkdown, setSourceMarkdown] = useState<string>("");
+
+  // AI assistant state
+  const [aiPanelOpen, setAiPanelOpen] = useState<boolean>(false);
+  const [aiSelectedText, setAiSelectedText] = useState<string>("");
 
   // Find/Replace bar state
   const [findReplaceMode, setFindReplaceMode] = useState<"find" | "replace" | null>(null);
@@ -1325,6 +1344,61 @@ export default function AutoSyncNoteEditor({
     setIsSourceMode(false);
   }
 
+  // ── AI assistant helpers ──────────────────────────────────────────────────────
+
+  function getSelectedText(currentEditor: Editor): string {
+    const { from, to } = currentEditor.state.selection;
+    if (from === to) return "";
+    return currentEditor.state.doc.textBetween(from, to, "\n");
+  }
+
+  function handleOpenAi() {
+    if (!editor) return;
+    const sel = getSelectedText(editor);
+    setAiSelectedText(sel);
+    setAiPanelOpen(true);
+  }
+
+  const handleAiInsert = useCallback(
+    (text: string) => {
+      if (!editor) return;
+      editor.chain().focus().insertContent(text, { contentType: "markdown" }).run();
+    },
+    [editor],
+  );
+
+  const handleAiReplaceSelection = useCallback(
+    (text: string) => {
+      if (!editor) return;
+      const { from, to } = editor.state.selection;
+      if (from === to) {
+        // No selection — fallback to insert
+        editor.chain().focus().insertContent(text, { contentType: "markdown" }).run();
+        return;
+      }
+      editor
+        .chain()
+        .focus()
+        .setTextSelection({ from, to })
+        .insertContent(text, { contentType: "markdown" })
+        .run();
+    },
+    [editor],
+  );
+
+  const handleAiAppend = useCallback(
+    (text: string) => {
+      if (!editor) return;
+      const endPos = editor.state.doc.content.size;
+      editor
+        .chain()
+        .focus(endPos)
+        .insertContent("\n\n" + text, { contentType: "markdown" })
+        .run();
+    },
+    [editor],
+  );
+
   // ── Find/Replace helpers ────────────────────────────────────────────────────
 
   function openFindBar(mode: "find" | "replace") {
@@ -1463,6 +1537,7 @@ export default function AutoSyncNoteEditor({
           onShareUpdated={handleShareUpdated}
           onToggleSourceMode={handleToggleSourceMode}
           isSourceMode={isSourceMode}
+          onOpenAi={handleOpenAi}
         />
 
           {/* Find / Replace Popup */}
@@ -1630,6 +1705,18 @@ export default function AutoSyncNoteEditor({
           )}
         </article>
       </EditorContext.Provider>
+
+      <AiAssistantPanel
+        open={aiPanelOpen}
+        onOpenChange={setAiPanelOpen}
+        noteId={noteId}
+        noteTitle={derivedTitle}
+        currentMarkdown={getCurrentMarkdownBody()}
+        selectedText={aiSelectedText}
+        onInsert={handleAiInsert}
+        onReplaceSelection={handleAiReplaceSelection}
+        onAppend={handleAiAppend}
+      />
     </section>
   );
 }

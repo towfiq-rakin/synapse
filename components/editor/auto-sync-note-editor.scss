@@ -13,7 +13,7 @@
 .synapse-note-chrome {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 40;
   isolation: isolate;
   min-height: 2.75rem;
   border-bottom: 1px solid color-mix(in oklab, white 48%, var(--border));
@@ -123,6 +123,21 @@
 .synapse-note-actions [data-slot="tiptap-button"]:hover {
   background: var(--accent);
   color: var(--accent-foreground);
+}
+
+.synapse-ai-trigger {
+  color: color-mix(in oklab, var(--primary) 72%, var(--muted-foreground));
+  border-radius: 0.55rem;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.synapse-ai-trigger:hover {
+  background: color-mix(in oklab, var(--primary) 14%, var(--accent));
+  color: var(--primary);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 16%, transparent);
 }
 
 .synapse-note-page {
