@@ -8,6 +8,8 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import remarkRehype from "remark-rehype";
 import sanitizeHtml from "sanitize-html";
+import { getOptimizedCloudinaryImageUrl } from "@/lib/cloudinary";
+import { looksLikeLegacyHtmlDocument, normalizeMarkdownForRendering } from "@/lib/content-format";
 
 export type PublicNoteTocItem = {
   id: string;
@@ -115,10 +117,6 @@ function normalizeLineEndings(value: string): string {
   return value.replace(/\r\n/g, "\n");
 }
 
-function isLikelyHtml(value: string): boolean {
-  return /<\/?[a-z][\s\S]*>/i.test(value);
-}
-
 function isExternalHref(href: string): boolean {
   return /^(https?:)?\/\//i.test(href);
 }
@@ -216,6 +214,7 @@ function sanitizePublicHtml(html: string): string {
         tagName,
         attribs: {
           ...attributes,
+          src: getOptimizedCloudinaryImageUrl(attributes.src ?? ""),
           loading: "lazy",
         },
       }),
@@ -267,7 +266,7 @@ async function renderMarkdownHtml(markdown: string): Promise<{ html: string; toc
       ignoreMissing: true,
     })
     .use(rehypeStringify)
-    .process(markdown);
+    .process(normalizeMarkdownForRendering(markdown));
 
   const html = sanitizePublicHtml(String(file).trim());
   const decorated = decorateLegacyHtml(html);
@@ -287,7 +286,7 @@ export async function renderPublicNote({
   const rawContent = normalizeLineEndings(content ?? "");
   const resolvedContentText = normalizeLineEndings(contentText ?? "");
 
-  if (rawContent.trim() && isLikelyHtml(rawContent)) {
+  if (rawContent.trim() && looksLikeLegacyHtmlDocument(rawContent)) {
     const sanitizedHtml = sanitizePublicHtml(rawContent);
     const decorated = decorateLegacyHtml(sanitizedHtml);
 

@@ -16,6 +16,7 @@ import {
 import { normalizePublicProfile, type NormalizedPublicProfile } from "@/lib/publishing/profile";
 import { renderPublicNote } from "@/lib/publishing/render-public-note";
 import { isPublishedProfileNote, normalizeNoteVisibility } from "@/lib/publishing/visibility";
+import { looksLikeLegacyHtmlDocument } from "@/lib/content-format";
 
 type StringLikeId = { toString(): string } | string;
 
@@ -214,10 +215,6 @@ function extractMarkdownBody(content: string | null | undefined) {
   return normalizeLineEndings(parsed.content).trim();
 }
 
-function isLikelyHtml(value: string) {
-  return /<\/?[a-z][\s\S]*>/i.test(value);
-}
-
 function hasFreshSnapshotContent(
   note: Pick<PublicWorkspaceNote, "content" | "publicMarkdown">,
 ) {
@@ -227,7 +224,7 @@ function hasFreshSnapshotContent(
     return note.publicMarkdown === null || note.publicMarkdown?.trim() === "";
   }
 
-  if (isLikelyHtml(body)) {
+  if (looksLikeLegacyHtmlDocument(body)) {
     // Legacy HTML notes keep markdown snapshot as null; freshness is checked by HTML guards.
     return note.publicMarkdown === null;
   }

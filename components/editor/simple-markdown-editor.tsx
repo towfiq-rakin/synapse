@@ -9,6 +9,7 @@ import rehypeKatex from "rehype-katex";
 import rehypeStringify from "rehype-stringify";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { normalizeMarkdownForRendering } from "@/lib/content-format";
 import { enhanceMermaidCodeBlocks } from "@/lib/mermaid/render-mermaid";
 import { cn } from "@/lib/utils";
 
@@ -57,7 +58,7 @@ export default function SimpleMarkdownEditor({
           .use(remarkRehype)
           .use(rehypeKatex)
           .use(rehypeStringify)
-          .process(markdownSource);
+          .process(normalizeMarkdownForRendering(markdownSource));
 
         if (!active) {
           return;

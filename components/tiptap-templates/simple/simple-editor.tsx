@@ -335,7 +335,16 @@ export function SimpleEditor() {
         accept: "image/*",
         maxSize: MAX_FILE_SIZE,
         limit: 3,
-        upload: handleImageUpload,
+        upload: async (file, onProgress, abortSignal) => {
+          const src = await handleImageUpload(file, onProgress, abortSignal)
+          const name = file.name.replace(/\.[^.]+$/, "").trim() || "image"
+
+          return {
+            src,
+            alt: name,
+            title: name,
+          }
+        },
         onError: (error) => console.error("Upload failed:", error),
       }),
     ],

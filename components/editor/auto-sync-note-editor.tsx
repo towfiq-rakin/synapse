@@ -10,7 +10,6 @@ import StarterKit from "@tiptap/starter-kit";
 import LinkExtension from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Markdown } from "@tiptap/markdown";
-import { Image } from "@tiptap/extension-image";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { Typography } from "@tiptap/extension-typography";
@@ -69,6 +68,7 @@ import { EditableMathematics } from "@/components/tiptap-extension/editable-math
 import { MermaidPreviewExtension } from "@/components/tiptap-extension/mermaid-preview-extension";
 import { MarkdownMathInputExtension } from "@/components/tiptap-extension/markdown-math-input-extension";
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
+import { CloudinaryImage } from "@/components/tiptap-node/image-node/cloudinary-image";
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
 import {
   Breadcrumb,
@@ -80,12 +80,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
+import { MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 import {
   LAST_OPENED_NOTE_COOKIE,
   LAST_OPENED_NOTE_COOKIE_MAX_AGE_SECONDS,
 } from "@/lib/note-selection";
 import { renderMermaidInHtmlString } from "@/lib/mermaid/render-mermaid";
+import { looksLikeLegacyHtmlDocument, normalizeMarkdownForRendering } from "@/lib/content-format";
+import { uploadNoteImageAsset } from "@/lib/assets/upload-note-image";
 import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
 import "@/components/tiptap-node/code-block-node/code-block-node.scss";
 import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss";
@@ -144,10 +146,6 @@ function normalizeTitle(title: string): string {
   return normalized || "Untitled";
 }
 
-function isLikelyHtml(input: string): boolean {
-  return /<\/?[a-z][\s\S]*>/i.test(input);
-}
-
 function toEditorContent(content: string): PreparedEditorContent {
   if (!content.trim()) {
     return {
@@ -156,7 +154,7 @@ function toEditorContent(content: string): PreparedEditorContent {
     };
   }
 
-  if (isLikelyHtml(content)) {
+  if (looksLikeLegacyHtmlDocument(content)) {
     return {
       content,
       contentType: "html",
@@ -339,7 +337,7 @@ async function renderPrintableNoteHtml(markdown: string): Promise<string> {
       ignoreMissing: true,
     })
     .use(rehypeStringify)
-    .process(markdown);
+    .process(normalizeMarkdownForRendering(markdown));
 
   return renderMermaidInHtmlString(String(file));
 }
@@ -1103,7 +1101,7 @@ export default function AutoSyncNoteEditor({
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
-      Image,
+      CloudinaryImage,
       Typography,
       Superscript,
       Subscript,
@@ -1131,8 +1129,20 @@ export default function AutoSyncNoteEditor({
         accept: "image/*",
         maxSize: MAX_FILE_SIZE,
         limit: 3,
-        upload: handleImageUpload,
-        onError: (error) => console.error("Upload failed:", error),
+        upload: (file, onProgress, abortSignal) =>
+          uploadNoteImageAsset({
+            noteId: noteIdRef.current,
+            file,
+            onProgress,
+            abortSignal,
+          }).then((image) => ({
+            ...image,
+            provider: "cloudinary",
+          })),
+        onError: (error) => {
+          console.error("Upload failed:", error);
+          toast.error(error.message || "Image upload failed.");
+        },
       }),
     ],
     editorProps: {
