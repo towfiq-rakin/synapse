@@ -1,8 +1,9 @@
 import { getAuthenticatedUserId } from "@/lib/auth";
-import Note, { type NoteVisibility } from "@/lib/db/models/Note";
+import Note from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import { getExplorerPayload, resolveFolderIdFromBody } from "@/lib/explorer";
 import { generateUniqueSlug, parseFrontmatterTitle } from "@/lib/notes-path";
+import { normalizeNoteForResponse } from "@/lib/publishing/note";
 
 function normalizeText(input: unknown, fallback = ""): string {
   if (typeof input !== "string") return fallback;
@@ -26,10 +27,6 @@ function normalizeTags(input: unknown): string[] {
     .map((value) => value.trim().toLowerCase())
     .filter((value) => value.length > 0)
     .slice(0, 50);
-}
-
-function isVisibility(value: unknown): value is NoteVisibility {
-  return value === "private" || value === "public";
 }
 
 export async function GET() {
@@ -67,7 +64,6 @@ export async function POST(request: Request) {
   const content = typeof body.content === "string" ? body.content : "";
   const contentText = typeof body.contentText === "string" ? body.contentText : "";
   const tags = normalizeTags(body.tags);
-  const visibility: NoteVisibility = isVisibility(body.visibility) ? body.visibility : "private";
 
   await connectToDatabase();
 
@@ -95,14 +91,14 @@ export async function POST(request: Request) {
       content,
       contentText,
       type: "note",
-      visibility,
+      visibility: "private",
       tags,
     });
 
     const explorer = await getExplorerPayload(userId);
     const href = `/notes/${created._id.toString()}`;
 
-    return Response.json({ note: created.toObject(), href, explorer }, { status: 201 });
+    return Response.json({ note: normalizeNoteForResponse(created.toObject()), href, explorer }, { status: 201 });
   } catch (error) {
     if (
       typeof error === "object" &&

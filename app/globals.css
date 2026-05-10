@@ -131,7 +131,34 @@
   --shadow-xl: 0px 1px 2px 0px hsl(0 0% 0% / 0.18), 0px 8px 10px -1px hsl(0 0% 0% / 0.18);
   --shadow-2xl: 0px 1px 2px 0px hsl(0 0% 0% / 0.45);
   --tracking-normal: 0em;
+  --synapse-reading-size-multiplier: 1;
+  --synapse-density-multiplier: 1;
 
+}
+
+:root[data-reading-size="small"] {
+  --synapse-reading-size-multiplier: 0.92;
+}
+
+:root[data-reading-size="medium"] {
+  --synapse-reading-size-multiplier: 1;
+}
+
+:root[data-reading-size="large"] {
+  --synapse-reading-size-multiplier: 1.1;
+}
+
+:root[data-interface-density="compact"] {
+  --synapse-density-multiplier: 0.9;
+}
+
+:root[data-interface-density="comfortable"] {
+  --synapse-density-multiplier: 1;
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
 .dark {
@@ -258,8 +285,312 @@
   transition-property: opacity, max-height, height, min-height, padding, margin;
 }
 
+.public-docs-content {
+  color: var(--foreground);
+  font-size: calc(1rem * var(--synapse-reading-size-multiplier));
+  line-height: 1.75;
+}
+
+.public-docs-content > :first-child {
+  margin-top: 0;
+}
+
+.public-docs-content > :last-child {
+  margin-bottom: 0;
+}
+
+.public-docs-content h1,
+.public-docs-content h2,
+.public-docs-content h3,
+.public-docs-content h4,
+.public-docs-content h5,
+.public-docs-content h6 {
+  font-family: var(--font-theme-lora), serif;
+  font-weight: 650;
+  letter-spacing: -0.018em;
+  line-height: 1.2;
+  color: var(--foreground);
+  scroll-margin-top: 5.5rem;
+}
+
+.public-docs-content h1 {
+  margin: 2.2rem 0 0.9rem;
+  font-size: clamp(1.95rem, 2.7vw, 2.5rem);
+}
+
+.public-docs-content h2 {
+  margin: 2.5rem 0 0.9rem;
+  font-size: clamp(1.5rem, 2.1vw, 1.9rem);
+}
+
+.public-docs-content h3 {
+  margin: 2rem 0 0.75rem;
+  font-size: clamp(1.22rem, 1.45vw, 1.45rem);
+}
+
+.public-docs-content h4,
+.public-docs-content h5,
+.public-docs-content h6 {
+  margin: 1.45rem 0 0.65rem;
+  font-size: 1.02rem;
+}
+
+.public-docs-content h1 a,
+.public-docs-content h2 a,
+.public-docs-content h3 a,
+.public-docs-content h4 a,
+.public-docs-content h5 a,
+.public-docs-content h6 a {
+  margin-left: 0.35rem;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  opacity: 0.72;
+}
+
+.public-docs-content p,
+.public-docs-content ul,
+.public-docs-content ol,
+.public-docs-content blockquote,
+.public-docs-content pre,
+.public-docs-content table,
+.public-docs-content .katex-display {
+  margin: 0.95rem 0;
+}
+
+.public-docs-content p,
+.public-docs-content li,
+.public-docs-content blockquote {
+  line-height: 1.78;
+}
+
+.public-docs-content ul,
+.public-docs-content ol {
+  padding-left: 1.3rem;
+}
+
+.public-docs-content ul {
+  list-style: disc;
+}
+
+.public-docs-content ol {
+  list-style: decimal;
+}
+
+.public-docs-content li + li {
+  margin-top: 0.4rem;
+}
+
+.public-docs-content blockquote {
+  border-left: 2px solid var(--border);
+  padding-left: 0.95rem;
+  color: var(--muted-foreground);
+}
+
+.public-docs-content a {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.public-docs-content a:hover {
+  color: color-mix(in oklab, var(--foreground) 72%, var(--muted-foreground));
+}
+
+.public-docs-content pre {
+  position: relative;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background: color-mix(in oklab, var(--card) 82%, var(--muted));
+}
+
+.public-docs-content code {
+  font-family: var(--font-theme-jetbrains-mono), monospace;
+  font-size: 0.92em;
+}
+
+.public-docs-content pre code {
+  display: block;
+  min-width: max-content;
+  margin: 0;
+}
+
+.public-docs-content p code,
+.public-docs-content li code,
+.public-docs-content td code,
+.public-docs-content th code {
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  padding: 0.1rem 0.36rem;
+  background: color-mix(in oklab, var(--card) 82%, var(--muted));
+}
+
+.public-docs-content img {
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+}
+
+.public-docs-content hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+.public-docs-content table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  font-size: 0.95rem;
+}
+
+.public-docs-content th,
+.public-docs-content td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.68rem 0.8rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.public-docs-content thead th {
+  background: color-mix(in oklab, var(--card) 80%, var(--muted));
+  font-weight: 600;
+}
+
+.public-docs-content tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.public-docs-content .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.75rem 0;
+}
+
+.public-docs-content .katex {
+  font-size: 1.02em;
+}
+
+.public-docs-content .synapse-mermaid-render {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: color-mix(in oklab, var(--card) 82%, var(--muted));
+  padding: 1rem;
+}
+
+.public-docs-content .synapse-mermaid-render[data-invalid="true"] {
+  border-color: color-mix(in oklab, #dc2626 38%, var(--border));
+  background: color-mix(in oklab, #dc2626 10%, var(--background));
+  color: #dc2626;
+  font-size: 0.94rem;
+}
+
+.public-docs-content .synapse-mermaid-render svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.public-docs-content .hljs {
+  display: block;
+  overflow-x: auto;
+  background: transparent;
+  color: var(--foreground);
+}
+
+.public-docs-content .hljs-comment,
+.public-docs-content .hljs-quote {
+  color: color-mix(in oklab, var(--muted-foreground) 88%, transparent);
+  font-style: italic;
+}
+
+.public-docs-content .hljs-keyword,
+.public-docs-content .hljs-selector-tag,
+.public-docs-content .hljs-subst {
+  color: #c026d3;
+}
+
+.public-docs-content .hljs-number,
+.public-docs-content .hljs-literal,
+.public-docs-content .hljs-variable,
+.public-docs-content .hljs-template-variable,
+.public-docs-content .hljs-tag .hljs-attr {
+  color: #b45309;
+}
+
+.public-docs-content .hljs-string,
+.public-docs-content .hljs-doctag {
+  color: #15803d;
+}
+
+.public-docs-content .hljs-title,
+.public-docs-content .hljs-section,
+.public-docs-content .hljs-selector-id {
+  color: #1d4ed8;
+}
+
+.public-docs-content .hljs-attribute,
+.public-docs-content .hljs-name,
+.public-docs-content .hljs-type,
+.public-docs-content .hljs-symbol,
+.public-docs-content .hljs-bullet,
+.public-docs-content .hljs-built_in,
+.public-docs-content .hljs-addition {
+  color: #0f766e;
+}
+
+.public-docs-content .hljs-deletion,
+.public-docs-content .hljs-selector-attr,
+.public-docs-content .hljs-selector-pseudo,
+.public-docs-content .hljs-meta {
+  color: #b91c1c;
+}
+
+.public-code-copy-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--background) 92%, transparent);
+  color: var(--muted-foreground);
+  z-index: 2;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.public-code-copy-button:hover {
+  background: color-mix(in oklab, var(--muted) 72%, transparent);
+  color: var(--foreground);
+}
+
+.public-code-copy-icon {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .synapse-editor-shell .tiptap-toolbar[data-variant="fixed"] {
   padding-left: 3.25rem;
+}
+
+[data-slot="sidebar-menu-button"] {
+  min-height: calc(2rem * var(--synapse-density-multiplier));
+  padding-top: calc(0.5rem * var(--synapse-density-multiplier));
+  padding-bottom: calc(0.5rem * var(--synapse-density-multiplier));
 }
 
 @media (max-width: 767px) {

@@ -9,9 +9,8 @@ import rehypeKatex from "rehype-katex";
 import rehypeStringify from "rehype-stringify";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { enhanceMermaidCodeBlocks } from "@/lib/mermaid/render-mermaid";
 import { cn } from "@/lib/utils";
-
-let mermaidInitialized = false;
 
 type EditorMode = "write" | "preview";
 
@@ -24,77 +23,6 @@ export type SimpleMarkdownEditorProps = {
   className?: string;
 };
 
-type MermaidTarget = {
-  pre: HTMLPreElement;
-  source: string;
-};
-
-function getMermaidTargets(root: HTMLElement): MermaidTarget[] {
-  return Array.from(root.querySelectorAll<HTMLPreElement>("pre"))
-    .map((pre) => {
-      const code = pre.querySelector("code.language-mermaid");
-
-      if (!code) {
-        return null;
-      }
-
-      const source = code.textContent?.trim() ?? "";
-
-      if (!source) {
-        return null;
-      }
-
-      return { pre, source };
-    })
-    .filter((value): value is MermaidTarget => value !== null);
-}
-
-async function renderMermaidDiagrams(root: HTMLElement, isActive: () => boolean): Promise<void> {
-  const targets = getMermaidTargets(root);
-
-  if (targets.length === 0) {
-    return;
-  }
-
-  const mermaidModule = await import("mermaid");
-  const mermaid = mermaidModule.default;
-
-  if (!mermaidInitialized) {
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: "strict",
-      theme: "neutral",
-      suppressErrorRendering: true,
-    });
-
-    mermaidInitialized = true;
-  }
-
-  for (const [index, target] of targets.entries()) {
-    if (!isActive()) {
-      return;
-    }
-
-    const host = document.createElement("div");
-    host.className = "overflow-x-auto rounded-md border bg-muted/20 p-3";
-    target.pre.replaceWith(host);
-
-    try {
-      const diagramId = `mermaid-${Date.now()}-${index}-${Math.floor(Math.random() * 10000)}`;
-      const { svg, bindFunctions } = await mermaid.render(diagramId, target.source);
-
-      if (!isActive()) {
-        return;
-      }
-
-      host.innerHTML = svg;
-      bindFunctions?.(host);
-    } catch {
-      host.className = "rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive";
-      host.textContent = "Unable to render Mermaid diagram. Check the diagram syntax.";
-    }
-  }
-}
 
 export default function SimpleMarkdownEditor({
   id,
@@ -171,7 +99,7 @@ export default function SimpleMarkdownEditor({
       }
 
       try {
-        await renderMermaidDiagrams(previewRef.current, () => active);
+        await enhanceMermaidCodeBlocks(previewRef.current, () => active);
       } catch {
         // Mermaid errors are handled per-diagram above; ignore top-level failures.
       }

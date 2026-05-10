@@ -23,6 +23,9 @@ type AppShellProps = {
     email: string | null
     image: string | null
     username?: string | null
+    displayName?: string | null
+    bio?: string | null
+    isPublicProfile?: boolean
   } | null
 }
 

@@ -26,7 +26,6 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import remarkRehype from "remark-rehype";
 import { Selection } from "@tiptap/extensions";
-import Mathematics from "@tiptap/extension-mathematics";
 import matter from "gray-matter";
 import { common, createLowlight } from "lowlight";
 import { toast } from "sonner";
@@ -49,6 +48,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AppOptionsPopover } from "@/components/layout/app-options-popover";
+import type { ShareState } from "@/components/notes/share-note-dialog";
 import { Toolbar, ToolbarGroup, ToolbarSeparator } from "@/components/tiptap-ui-primitive/toolbar";
 import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button";
 import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button";
@@ -61,7 +61,16 @@ import { MarkButton } from "@/components/tiptap-ui/mark-button";
 import { TextAlignButton } from "@/components/tiptap-ui/text-align-button";
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button";
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
+<<<<<<< HEAD
 import { LiveMarkdownInputExtension } from "@/components/tiptap-extension/live-markdown-input-extension";
+=======
+import {
+  LiveMarkdownInputExtension,
+  normalizeMarkdownHref,
+} from "@/components/tiptap-extension/live-markdown-input-extension";
+import { EditableMathematics } from "@/components/tiptap-extension/editable-mathematics-extension";
+import { MermaidPreviewExtension } from "@/components/tiptap-extension/mermaid-preview-extension";
+>>>>>>> main
 import { MarkdownMathInputExtension } from "@/components/tiptap-extension/markdown-math-input-extension";
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
@@ -76,6 +85,11 @@ import {
 } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
+import {
+  LAST_OPENED_NOTE_COOKIE,
+  LAST_OPENED_NOTE_COOKIE_MAX_AGE_SECONDS,
+} from "@/lib/note-selection";
+import { renderMermaidInHtmlString } from "@/lib/mermaid/render-mermaid";
 import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
 import "@/components/tiptap-node/code-block-node/code-block-node.scss";
 import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss";
@@ -268,6 +282,18 @@ function serializeNoteContent(
   return matter.stringify(serializedBody, data);
 }
 
+function markdownToPlainText(markdown: string): string {
+  return markdown
+    .replace(/```[\s\S]*?```/g, (block) => block.replace(/```/g, ""))
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/[*_~>#-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function toDownloadFilename(title: string, extension: "md" | "pdf"): string {
   const sanitizedBase = normalizeTitle(title)
     .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "-")
@@ -319,7 +345,7 @@ async function renderPrintableNoteHtml(markdown: string): Promise<string> {
     .use(rehypeStringify)
     .process(markdown);
 
-  return String(file);
+  return renderMermaidInHtmlString(String(file));
 }
 
 function buildPrintDocument(title: string, bodyHtml: string): string {
@@ -459,6 +485,22 @@ function buildPrintDocument(title: string, bodyHtml: string): string {
         color: #1f2937;
       }
 
+      .print-note__content .synapse-mermaid-render {
+        margin: 1rem 0;
+        overflow-x: auto;
+        border: 1px solid #d1d5db;
+        border-radius: 0.8rem;
+        background: #f8fafc;
+        padding: 0.9rem;
+      }
+
+      .print-note__content .synapse-mermaid-render svg {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto;
+      }
+
       .print-note__content .hljs-comment,
       .print-note__content .hljs-quote {
         color: #6b7280;
@@ -575,6 +617,9 @@ function NoteEditorToolbar({
   onDeleted,
   onFind,
   onReplace,
+  onShareUpdated,
+  onToggleSourceMode,
+  isSourceMode,
 }: {
   noteId: string;
   noteTitle: string;
@@ -588,6 +633,9 @@ function NoteEditorToolbar({
   onDeleted?: () => void;
   onFind?: () => void;
   onReplace?: () => void;
+  onShareUpdated?: (state: ShareState) => void;
+  onToggleSourceMode?: () => void;
+  isSourceMode: boolean;
 }) {
   return (
     <div className="synapse-note-topbar">
@@ -666,6 +714,9 @@ function NoteEditorToolbar({
           onDeleted={onDeleted}
           onFind={onFind}
           onReplace={onReplace}
+          onShareUpdated={onShareUpdated}
+          onToggleSourceMode={onToggleSourceMode}
+          isSourceMode={isSourceMode}
         />
       </div>
     </div>
@@ -833,6 +884,7 @@ export default function AutoSyncNoteEditor({
   initialFolderId,
 }: AutoSyncNoteEditorProps) {
   const router = useRouter();
+  const [, setShareState] = useState<ShareState | null>(null);
   const [derivedTitle, setDerivedTitle] = useState<string>(initialTitle || "Untitled");
   const [frontmatter, setFrontmatter] = useState<NoteFrontmatterState>(EMPTY_FRONTMATTER);
   const [initialEditorContent, setInitialEditorContent] = useState<PreparedEditorContent>({
@@ -841,6 +893,8 @@ export default function AutoSyncNoteEditor({
   });
   const [isPreparingEditor, setIsPreparingEditor] = useState<boolean>(true);
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(initialFolderId ?? null);
+  const [isSourceMode, setIsSourceMode] = useState<boolean>(false);
+  const [sourceMarkdown, setSourceMarkdown] = useState<string>("");
 
   // Find/Replace bar state
   const [findReplaceMode, setFindReplaceMode] = useState<"find" | "replace" | null>(null);
@@ -935,6 +989,18 @@ export default function AutoSyncNoteEditor({
     return payload;
   }
 
+  function getCurrentMarkdownBody(currentEditor?: Editor): string {
+    if (isSourceMode) {
+      return sourceMarkdown;
+    }
+
+    if (currentEditor) {
+      return currentEditor.getMarkdown();
+    }
+
+    return editor?.getMarkdown() ?? "";
+  }
+
   function handleTitleChange(value: string) {
     setDerivedTitle(value);
     derivedTitleRef.current = value;
@@ -994,7 +1060,7 @@ export default function AutoSyncNoteEditor({
       const nextPayload: SavePayload = {
         ...latestPayloadRef.current,
         title: normalizeTitle(derivedTitleRef.current),
-        content: serializeNoteContent(next, editor.getMarkdown(), hadFrontmatterRef.current),
+        content: serializeNoteContent(next, getCurrentMarkdownBody(editor), hadFrontmatterRef.current),
       };
 
       latestPayloadRef.current = nextPayload;
@@ -1006,8 +1072,13 @@ export default function AutoSyncNoteEditor({
   const editor = useEditor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: false,
+<<<<<<< HEAD
     // Restrict markdown input/paste transformations to our live-markdown + math rules
     // to avoid duplicate rule execution from overlapping StarterKit rules.
+=======
+    // Scope markdown transforms to custom live-markdown + math extensions.
+    // Prevent duplicate/conflicting rule execution from StarterKit defaults.
+>>>>>>> main
     enableInputRules: ["liveMarkdownInputExtension", "markdownMathInputExtension"],
     enablePasteRules: ["liveMarkdownInputExtension", "markdownMathInputExtension", "link"],
     extensions: [
@@ -1020,11 +1091,22 @@ export default function AutoSyncNoteEditor({
         lowlight,
         languageClassPrefix: "language-",
       }),
+      MermaidPreviewExtension,
       HorizontalRule,
       LinkExtension.configure({
         openOnClick: false,
         autolink: true,
         enableClickSelection: true,
+        isAllowedUri: (url, ctx) => {
+          const normalized = normalizeMarkdownHref(url);
+
+          if (!normalized) {
+            return false;
+          }
+
+          return ctx.defaultValidate(normalized);
+        },
+        shouldAutoLink: (url) => Boolean(normalizeMarkdownHref(url)),
       }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       TaskList,
@@ -1044,13 +1126,18 @@ export default function AutoSyncNoteEditor({
           breaks: true,
         },
       }),
-      Mathematics.configure({
+      EditableMathematics.configure({
         katexOptions: {
           throwOnError: false,
+          output: "html",
         },
       }),
       MarkdownMathInputExtension,
+<<<<<<< HEAD
       // Keep this after dependent marks/nodes so its rules resolve against the final schema.
+=======
+      // Must come after dependent marks/nodes (link/code/list/heading/etc).
+>>>>>>> main
       LiveMarkdownInputExtension,
       SearchHighlightExtension,
       ImageUploadNode.configure({
@@ -1082,6 +1169,11 @@ export default function AutoSyncNoteEditor({
   }, [initialFolderId, noteId, router]);
 
   useEffect(() => {
+    const secure = window.location.protocol === "https:" ? "; Secure" : "";
+    document.cookie = `${LAST_OPENED_NOTE_COOKIE}=${encodeURIComponent(noteId)}; Path=/; Max-Age=${LAST_OPENED_NOTE_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax${secure}`;
+  }, [noteId]);
+
+  useEffect(() => {
     let active = true;
     const parsed = parseNoteContent(initialContent);
     const nextTitle = normalizeTitle(parsed.frontmatter.title || initialTitle || "Untitled");
@@ -1105,6 +1197,8 @@ export default function AutoSyncNoteEditor({
 
     if (active) {
       setInitialEditorContent(parsed.editorContent);
+      setSourceMarkdown(parsed.editorContent.contentType === "markdown" ? parsed.editorContent.content : "");
+      setIsSourceMode(false);
       setIsPreparingEditor(false);
     }
 
@@ -1191,6 +1285,47 @@ export default function AutoSyncNoteEditor({
   function handleMoved(newFolderId: string | null) {
     setCurrentFolderId(newFolderId);
     folderIdRef.current = newFolderId;
+  }
+
+  function handleShareUpdated(state: ShareState) {
+    setShareState(state);
+  }
+
+  function handleSourceMarkdownChange(value: string) {
+    setSourceMarkdown(value);
+
+    const nextPayload: SavePayload = {
+      title: normalizeTitle(derivedTitleRef.current),
+      folderId: folderIdRef.current,
+      content: serializeNoteContent(frontmatterRef.current, value, hadFrontmatterRef.current),
+      contentText: markdownToPlainText(value),
+    };
+
+    latestPayloadRef.current = nextPayload;
+    scheduleSave(nextPayload);
+  }
+
+  function handleToggleSourceMode() {
+    if (!editor) {
+      toast.error("Editor is still loading.");
+      return;
+    }
+
+    if (!isSourceMode) {
+      setSourceMarkdown(editor.getMarkdown());
+      setIsSourceMode(true);
+      return;
+    }
+
+    editor.commands.setContent(sourceMarkdown, {
+      emitUpdate: false,
+      contentType: "markdown",
+    });
+
+    const nextPayload = updateLatestPayloadFromEditor(editor, derivedTitleRef.current);
+    latestPayloadRef.current = nextPayload;
+    scheduleSave(nextPayload);
+    setIsSourceMode(false);
   }
 
   // ── Find/Replace helpers ────────────────────────────────────────────────────
@@ -1326,12 +1461,15 @@ export default function AutoSyncNoteEditor({
             onRenamed={handleRenamed}
             onMoved={handleMoved}
             onDeleted={handleDeleted}
-            onFind={() => openFindBar("find")}
-            onReplace={() => openFindBar("replace")}
-          />
+          onFind={() => openFindBar("find")}
+          onReplace={() => openFindBar("replace")}
+          onShareUpdated={handleShareUpdated}
+          onToggleSourceMode={handleToggleSourceMode}
+          isSourceMode={isSourceMode}
+        />
 
           {/* Find / Replace Popup */}
-          {findReplaceMode !== null && (
+          {findReplaceMode !== null && !isSourceMode && (
             <TooltipProvider delayDuration={300}>
               <div className="absolute right-4 top-14 z-50 flex w-80 flex-col gap-2 rounded-xl border border-border bg-popover p-2.5 text-popover-foreground shadow-lg animate-in fade-in zoom-in-95">
                 {/* Find row */}
@@ -1478,8 +1616,20 @@ export default function AutoSyncNoteEditor({
               <Loader2 className="size-4 animate-spin" />
               Preparing editor
             </div>
+          ) : isSourceMode ? (
+            <div className="synapse-note-content">
+              <textarea
+                value={sourceMarkdown}
+                onChange={(event) => handleSourceMarkdownChange(event.target.value)}
+                className="synapse-note-source-editor"
+                spellCheck={false}
+                aria-label="Markdown source editor"
+              />
+            </div>
           ) : (
-            <EditorContent editor={editor} className="synapse-note-content" />
+            <div className="synapse-note-content">
+              <EditorContent editor={editor} />
+            </div>
           )}
         </article>
       </EditorContext.Provider>

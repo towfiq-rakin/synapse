@@ -5,12 +5,14 @@ import { redirect } from "next/navigation";
 import { Types } from "mongoose";
 import { getAuthenticatedUserId } from "@/lib/auth";
 import Folder from "@/lib/db/models/Folder";
-import Note, { type NoteVisibility } from "@/lib/db/models/Note";
+import Note from "@/lib/db/models/Note";
 import { connectToDatabase } from "@/lib/db/mongoose";
 import {
   generateUniqueSlug,
   parseFrontmatterTitle,
 } from "@/lib/notes-path";
+import { buildPublishedSnapshot, generateUniqueShareId } from "@/lib/publishing/note";
+import { normalizeNoteVisibility } from "@/lib/publishing/visibility";
 
 function readString(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -20,10 +22,6 @@ function readString(formData: FormData, key: string): string {
 function normalizeTitle(input: string): string {
   const title = input.trim().slice(0, 180);
   return title || "Untitled";
-}
-
-function normalizeVisibility(input: string): NoteVisibility {
-  return input === "public" ? "public" : "private";
 }
 
 function normalizeTags(input: string): string[] {
@@ -63,7 +61,6 @@ export async function createNoteAction(formData: FormData): Promise<void> {
   const userId = await requireUserId();
   const title = normalizeTitle(readString(formData, "title"));
   const content = readString(formData, "content");
-  const visibility = normalizeVisibility(readString(formData, "visibility"));
   const tags = normalizeTags(readString(formData, "tags"));
 
   await connectToDatabase();
@@ -84,7 +81,7 @@ export async function createNoteAction(formData: FormData): Promise<void> {
     content,
     contentText: content,
     type: "note",
-    visibility,
+    visibility: "private",
     tags,
   });
 
@@ -102,7 +99,6 @@ export async function updateNoteAction(noteId: string, formData: FormData): Prom
 
   const title = normalizeTitle(readString(formData, "title"));
   const content = readString(formData, "content");
-  const visibility = normalizeVisibility(readString(formData, "visibility"));
   const tags = normalizeTags(readString(formData, "tags"));
 
   await connectToDatabase();
@@ -121,19 +117,58 @@ export async function updateNoteAction(noteId: string, formData: FormData): Prom
     return Boolean(existing);
   });
 
+  const current = await Note.findOne({ _id: noteId, userId })
+    .select("visibility shareId publishedAt")
+    .lean<{
+      visibility?: unknown;
+      shareId: string | null;
+      publishedAt: Date | null;
+    } | null>();
+
+  if (!current) {
+    redirect("/notes");
+  }
+
+  const normalizedVisibility = normalizeNoteVisibility(current.visibility);
+  const updates: Record<string, unknown> = {
+    title: resolvedTitle,
+    slug,
+    folderId,
+    content,
+    contentText: content,
+    type: "note",
+    tags,
+  };
+
+  if (normalizedVisibility === "unlisted" || normalizedVisibility === "published") {
+    const shareId =
+      normalizedVisibility === "unlisted"
+        ? current.shareId ?? (await generateUniqueShareId(async (candidate) => Boolean(await Note.exists({ shareId: candidate }))))
+        : current.shareId ?? null;
+
+    Object.assign(
+      updates,
+      await buildPublishedSnapshot(
+        {
+          title: resolvedTitle,
+          content,
+          contentText: content,
+          visibility: normalizedVisibility,
+          shareId: current.shareId,
+          publishedAt: current.publishedAt,
+        },
+        normalizedVisibility,
+        shareId,
+      ),
+    );
+  } else if (current.visibility === "public") {
+    updates.visibility = "published";
+  }
+
   const updated = await Note.findOneAndUpdate(
     { _id: noteId, userId },
     {
-      $set: {
-        title: resolvedTitle,
-        slug,
-        folderId,
-        content,
-        contentText: content,
-        type: "note",
-        visibility,
-        tags,
-      },
+      $set: updates,
     },
     { new: true },
   ).lean();

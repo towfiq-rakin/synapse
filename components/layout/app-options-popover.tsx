@@ -9,13 +9,14 @@ import {
   FileDown,
   FolderInput,
   FolderOpen,
+  Globe2,
   Loader2,
   PencilLine,
   Replace,
   ScanSearch,
   Trash2,
-  X,
 } from "lucide-react"
+import ShareNoteDialog, { type ShareState } from "@/components/notes/share-note-dialog"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -63,6 +64,12 @@ type AppOptionsPopoverProps = {
   onFind?: () => void
   /** Called to open find+replace bar in editor */
   onReplace?: () => void
+  /** Called after successful share/publish update */
+  onShareUpdated?: (state: ShareState) => void
+  /** Toggle markdown source editing mode */
+  onToggleSourceMode?: () => void
+  /** Whether source mode is active */
+  isSourceMode?: boolean
 }
 
 // ─── Rename Dialog ─────────────────────────────────────────────────────────────
@@ -353,11 +360,15 @@ export function AppOptionsPopover({
   onDeleted,
   onFind,
   onReplace,
+  onShareUpdated,
+  onToggleSourceMode,
+  isSourceMode = false,
 }: AppOptionsPopoverProps) {
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [renameOpen, setRenameOpen] = useState(false)
   const [moveOpen, setMoveOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
 
   function closePopover() {
     setPopoverOpen(false)
@@ -390,9 +401,17 @@ export function AppOptionsPopover({
               <BookOpenText className="size-4" />
               Reading view
             </Button>
-            <Button type="button" variant="ghost" className="h-8 w-full justify-start gap-2 px-2 text-sm font-normal">
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-8 w-full justify-start gap-2 px-2 text-sm font-normal"
+              onClick={() => {
+                closePopover()
+                onToggleSourceMode?.()
+              }}
+            >
               <Code2 className="size-4" />
-              Source mode
+              {isSourceMode ? "Visual mode" : "Source mode"}
             </Button>
             <Button
               type="button"
@@ -417,6 +436,18 @@ export function AppOptionsPopover({
             >
               <FolderInput className="size-4" />
               Move file to
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-8 w-full justify-start gap-2 px-2 text-sm font-normal"
+              onClick={() => {
+                closePopover()
+                setShareOpen(true)
+              }}
+            >
+              <Globe2 className="size-4" />
+              Share / Publish
             </Button>
             <Button
               type="button"
@@ -501,6 +532,13 @@ export function AppOptionsPopover({
         noteTitle={noteTitle}
         onOpenChange={setDeleteOpen}
         onDeleted={onDeleted}
+      />
+
+      <ShareNoteDialog
+        noteId={noteId}
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        onUpdated={onShareUpdated}
       />
     </>
   )

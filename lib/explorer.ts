@@ -14,6 +14,7 @@ import {
   toNullableId,
   type FolderPathNode,
 } from "@/lib/notes-path";
+import { normalizeNoteVisibility } from "@/lib/publishing/visibility";
 
 type StringLikeId = { toString(): string } | string;
 
@@ -176,7 +177,7 @@ export async function getExplorerPayload(userId: string): Promise<ExplorerPayloa
         folderId,
         path: [...folderPath, note.slug || slugFromText(note.title)],
         href: `/notes/${toId(note._id)}`,
-        visibility: note.visibility,
+        visibility: normalizeNoteVisibility(note.visibility),
         tags: note.tags,
         createdAt: note.createdAt,
         updatedAt: note.updatedAt,

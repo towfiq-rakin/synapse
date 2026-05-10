@@ -54,7 +54,7 @@
   grid-template-columns: minmax(12rem, 1fr) minmax(20rem, auto) minmax(7rem, 1fr);
   align-items: center;
   gap: 0.75rem;
-  min-height: 2.75rem;
+  min-height: calc(2.75rem * var(--synapse-density-multiplier));
   padding: 0 0.75rem;
 }
 
@@ -187,7 +187,7 @@
   display: grid;
   grid-template-columns: minmax(8rem, 9.5rem) 1fr;
   align-items: center;
-  min-height: 2.05rem;
+  min-height: calc(2.05rem * var(--synapse-density-multiplier));
   border-bottom: 1px solid color-mix(in oklab, var(--border) 68%, transparent);
 }
 
@@ -208,7 +208,7 @@
 
 .synapse-note-property-input {
   width: 100%;
-  height: 2rem;
+  height: calc(2rem * var(--synapse-density-multiplier));
   border: 0;
   background: transparent;
   color: var(--foreground);
@@ -297,12 +297,27 @@
   margin-top: 2rem;
 }
 
+.synapse-note-source-editor {
+  min-height: 62vh;
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--muted) 26%, var(--background));
+  color: color-mix(in oklab, var(--foreground) 90%, var(--muted-foreground));
+  font-family: var(--font-mono), monospace;
+  font-size: calc(0.96rem * var(--synapse-reading-size-multiplier));
+  line-height: 1.65;
+  padding: 1rem 1.05rem;
+  outline: none;
+}
+
 .synapse-note-prosemirror {
   min-height: 62vh;
   width: 100%;
   outline: none;
   color: color-mix(in oklab, var(--foreground) 90%, var(--muted-foreground));
-  font-size: clamp(1.02rem, 1.1vw, 1.12rem);
+  font-size: calc(clamp(1.02rem, 1.1vw, 1.12rem) * var(--synapse-reading-size-multiplier));
   line-height: 1.78;
 }
 
@@ -389,6 +404,150 @@
   border: 0;
   background: transparent;
   padding: 0;
+}
+
+.synapse-note-prosemirror .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.75rem 0;
+  text-align: center;
+}
+
+.synapse-note-prosemirror .katex {
+  font-size: 1.02em;
+}
+
+.synapse-note-prosemirror .synapse-math {
+  position: relative;
+  border-radius: 0.5rem;
+}
+
+.synapse-note-prosemirror .synapse-math[data-selected="true"] {
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 24%, transparent);
+  background: color-mix(in oklab, var(--accent) 42%, transparent);
+}
+
+.synapse-note-prosemirror .synapse-math[data-invalid="true"] .synapse-math-render {
+  color: #dc2626;
+}
+
+.synapse-note-prosemirror .synapse-math--inline {
+  display: inline-flex;
+  align-items: baseline;
+  margin: 0 0.1rem;
+  padding: 0.08rem 0.2rem;
+}
+
+.synapse-note-prosemirror .synapse-math--block {
+  display: block;
+  width: 100%;
+  margin: 1rem 0;
+  padding: 0.45rem 0.35rem;
+}
+
+.synapse-note-prosemirror .synapse-math-render {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.synapse-note-prosemirror .synapse-math--block .synapse-math-render {
+  text-align: center;
+}
+
+.synapse-note-prosemirror .synapse-math-source {
+  display: none;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.9em;
+}
+
+.synapse-note-prosemirror .synapse-math[data-editing="true"] .synapse-math-source {
+  display: inline-flex;
+}
+
+.synapse-note-prosemirror .synapse-math[data-editing="true"] .synapse-math-render {
+  display: none;
+}
+
+.synapse-note-prosemirror .synapse-math-delimiter {
+  color: var(--muted-foreground);
+  user-select: none;
+}
+
+.synapse-note-prosemirror .synapse-math-input,
+.synapse-note-prosemirror .synapse-math-textarea {
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  border-radius: 0.4rem;
+  background: color-mix(in oklab, var(--background) 95%, var(--muted));
+  color: var(--foreground);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.95em;
+  outline: none;
+}
+
+.synapse-note-prosemirror .synapse-math-input {
+  min-width: 7rem;
+  max-width: min(34rem, 70vw);
+  padding: 0.1rem 0.35rem;
+}
+
+.synapse-note-prosemirror .synapse-math-textarea {
+  width: min(100%, 46rem);
+  min-height: 5.25rem;
+  resize: vertical;
+  padding: 0.5rem 0.6rem;
+  line-height: 1.5;
+  margin: 0.15rem 0;
+}
+
+.synapse-note-prosemirror .synapse-math--block .synapse-math-source {
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.15rem;
+}
+
+.synapse-note-prosemirror .synapse-math--block[data-editing="true"] .synapse-math-source {
+  display: flex;
+}
+
+.synapse-note-prosemirror .synapse-mermaid-preview {
+  display: block;
+  width: 100%;
+  margin: 0.15rem 0 1.35rem;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  cursor: text;
+}
+
+.synapse-note-prosemirror .synapse-mermaid-render {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.95rem;
+  background: color-mix(in oklab, var(--muted) 36%, var(--background));
+  padding: 1rem;
+}
+
+.synapse-note-prosemirror .synapse-mermaid-render[data-invalid="true"] {
+  border-color: color-mix(in oklab, #dc2626 38%, var(--border));
+  background: color-mix(in oklab, #dc2626 10%, var(--background));
+  color: #dc2626;
+  font-size: 0.94rem;
+}
+
+.synapse-note-prosemirror .synapse-mermaid-render svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.synapse-note-prosemirror pre.synapse-mermaid-source-hidden {
+  display: none;
 }
 
 .synapse-note-prosemirror hr {

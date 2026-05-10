@@ -24,8 +24,11 @@
 .DS_Store
 *.pem
 quartz/
+<<<<<<< HEAD
 /quartz
 quartz/*
+=======
+>>>>>>> main
 
 # debug
 npm-debug.log*

@@ -20,14 +20,21 @@ import {
   pasteRegex as codePasteRegex,
 } from "@tiptap/extension-code";
 import { backtickInputRegex as codeBlockBacktickInputRegex } from "@tiptap/extension-code-block";
+<<<<<<< HEAD
+=======
+import { inputRegex as blockquoteInputRegex } from "@tiptap/extension-blockquote";
+>>>>>>> main
 import {
   starInputRegex as italicStarInputRegex,
   starPasteRegex as italicStarPasteRegex,
   underscoreInputRegex as italicUnderscoreInputRegex,
   underscorePasteRegex as italicUnderscorePasteRegex,
 } from "@tiptap/extension-italic";
+<<<<<<< HEAD
 import { inputRegex as blockquoteInputRegex } from "@tiptap/extension-blockquote";
 import { isAllowedUri } from "@tiptap/extension-link";
+=======
+>>>>>>> main
 import {
   bulletListInputRegex,
   inputRegex as taskItemInputRegex,
@@ -48,6 +55,11 @@ const headingInputRegexes: Array<{ level: 1 | 2 | 3 | 4; find: RegExp }> = [
 const horizontalRuleInputRegex = /^(?:---|\*\*\*)\s?$/;
 const markdownLinkInputRegex = /\[([^\]\n]+)]\(([^\s)]+)\)$/;
 const markdownLinkPasteRegex = /\[([^\]\n]+)]\(([^\s)]+)\)/g;
+<<<<<<< HEAD
+=======
+const BAD_PROTOCOL_REGEX = /^(?:javascript|data|vbscript):/i;
+const ILLEGAL_HREF_CHARS_REGEX = /[\[\]()<>]/;
+>>>>>>> main
 
 function isInCodeContext(state: Parameters<InputRule["handler"]>[0]["state"], from: number): boolean {
   const $from = state.doc.resolve(from);
@@ -61,6 +73,7 @@ function isInCodeContext(state: Parameters<InputRule["handler"]>[0]["state"], fr
   return Boolean(codeMark && $from.marks().some((mark) => mark.type === codeMark));
 }
 
+<<<<<<< HEAD
 function toSafeHref(raw: string): string | null {
   const trimmed = raw.trim().replace(/^<|>$/g, "");
 
@@ -69,6 +82,52 @@ function toSafeHref(raw: string): string | null {
   }
 
   return isAllowedUri(trimmed) ? trimmed : null;
+=======
+export function normalizeMarkdownHref(rawHref: string): string | null {
+  const value = rawHref.trim().replace(/^<|>$/g, "");
+
+  if (!value || /\s/.test(value) || BAD_PROTOCOL_REGEX.test(value) || ILLEGAL_HREF_CHARS_REGEX.test(value)) {
+    return null;
+  }
+
+  if (value.startsWith("/")) {
+    return value;
+  }
+
+  if (/^www\./i.test(value)) {
+    return `https://${value}`;
+  }
+
+  if (/^mailto:/i.test(value)) {
+    return value;
+  }
+
+  const hasExplicitScheme = /^[a-z][a-z0-9+.-]*:/i.test(value);
+
+  if (hasExplicitScheme && !/^https?:\/\//i.test(value)) {
+    return null;
+  }
+
+  if (!hasExplicitScheme) {
+    if (value.startsWith("//")) {
+      return null;
+    }
+
+    return value;
+  }
+
+  try {
+    const parsed = new URL(value);
+
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return null;
+    }
+
+    return parsed.href;
+  } catch {
+    return null;
+  }
+>>>>>>> main
 }
 
 function applyMarkdownLink(
@@ -82,7 +141,11 @@ function applyMarkdownLink(
   }
 
   const label = match[1]?.trim();
+<<<<<<< HEAD
   const href = toSafeHref(match[2] ?? "");
+=======
+  const href = normalizeMarkdownHref(match[2] ?? "");
+>>>>>>> main
   const linkType = state.schema.marks.link;
 
   if (!label || !href || !linkType) {
