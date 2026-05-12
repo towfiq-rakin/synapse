@@ -41,6 +41,7 @@ type ShareNoteDialogProps = {
 
 type NoteGetResponse = {
   note?: {
+    fileName?: string
     title?: string
   }
   share?: ShareState
