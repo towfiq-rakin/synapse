@@ -168,8 +168,8 @@
     "hash": "63c57ad8ec6bc2f8750f9db3da5ba1ea"
   },
   "/home/rakin/Desktop/Codes/note-app/app/api/notes/[id]/route.ts": {
-    "mtime": 1778619088.1616151,
-    "hash": "334914561d8ecb0e2db1b455aa223e73"
+    "mtime": 1778619427.759315,
+    "hash": "6b201f7a057adb6b83cc2ae5f0113bf5"
   },
   "/home/rakin/Desktop/Codes/note-app/app/api/notes/[id]/publish/route.ts": {
     "mtime": 1778618969.8120275,
@@ -236,8 +236,8 @@
     "hash": "d22fd20e7bb78d35805dd0ac99d44f7b"
   },
   "/home/rakin/Desktop/Codes/note-app/components/layout/explorer-sidebar.tsx": {
-    "mtime": 1778618937.4841468,
-    "hash": "99c277a745af4d1c22c4e5b742aceb9a"
+    "mtime": 1778619909.1883578,
+    "hash": "2e3c8adbdfd686b4bd0ccdcaedaa791c"
   },
   "/home/rakin/Desktop/Codes/note-app/components/editor/simple-markdown-editor.tsx": {
     "mtime": 1778428219.0618644,
@@ -248,8 +248,8 @@
     "hash": "1fb2a20e6db5019933c359393e4a8e09"
   },
   "/home/rakin/Desktop/Codes/note-app/components/editor/auto-sync-note-editor.tsx": {
-    "mtime": 1778619180.9523146,
-    "hash": "5501f498c17b9c77bc2354c0b97e7561"
+    "mtime": 1778619427.683589,
+    "hash": "cf609507557dbfd8abdfddc6b6ba29f2"
   },
   "/home/rakin/Desktop/Codes/note-app/components/editor/editor-menu-users.ts": {
     "mtime": 1776108763.334215,
@@ -616,8 +616,8 @@
     "hash": "d56d74675ebff3c93f87560314d173bb"
   },
   "/home/rakin/Desktop/Codes/note-app/components/notes/share-note-dialog.tsx": {
-    "mtime": 1778619066.182689,
-    "hash": "2a7cc8f9b80b47a1b009ee9f411f2cd1"
+    "mtime": 1778619427.8384576,
+    "hash": "e7e1d279d7e461d0ebabf0c1cecdce8a"
   },
   "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/separator/separator.tsx": {
     "mtime": 1776176386.1680908,
@@ -976,8 +976,8 @@
     "hash": "7deb9ae3ce958819a4383905323bcb7b"
   },
   "/home/rakin/Desktop/Codes/note-app/AGENTS.md": {
-    "mtime": 1778606013.151112,
-    "hash": "407b905a047b8f3c4879c7fc27df0450"
+    "mtime": 1778620234.8385959,
+    "hash": "44ccc0cd85d25f3965c9b89a42de634d"
   },
   "/home/rakin/Desktop/Codes/note-app/docs/SRD.md": {
     "mtime": 1772728558.4397862,

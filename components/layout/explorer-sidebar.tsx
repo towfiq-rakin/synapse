@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ChevronRight,
   FileText,
+  FolderInput,
   Folder as FolderIcon,
   FolderPlus,
   Pencil,
@@ -225,6 +226,7 @@ function FolderBranch({
   onRenameFolder,
   onDeleteFolder,
   onRenameNote,
+  onMoveNote,
   onDeleteNote,
 }: {
   folder: TreeFolder
@@ -236,6 +238,7 @@ function FolderBranch({
   onRenameFolder: (folder: ExplorerFolder) => void
   onDeleteFolder: (folder: ExplorerFolder) => void
   onRenameNote: (note: ExplorerNote) => void
+  onMoveNote: (note: ExplorerNote) => void
   onDeleteNote: (note: ExplorerNote) => void
 }) {
   const open = openFolders.has(folder.id)
@@ -289,6 +292,7 @@ function FolderBranch({
               onRenameFolder={onRenameFolder}
               onDeleteFolder={onDeleteFolder}
               onRenameNote={onRenameNote}
+              onMoveNote={onMoveNote}
               onDeleteNote={onDeleteNote}
             />
           ))}
@@ -304,6 +308,10 @@ function FolderBranch({
                   <ContextMenuItem onSelect={() => onRenameNote(note)}>
                     <Pencil className="size-4" />
                     Rename file
+                  </ContextMenuItem>
+                  <ContextMenuItem onSelect={() => onMoveNote(note)}>
+                    <FolderInput className="size-4" />
+                    Move to folder
                   </ContextMenuItem>
                   <ContextMenuItem variant="destructive" onSelect={() => onDeleteNote(note)}>
                     <Trash2 className="size-4" />
@@ -329,9 +337,12 @@ export default function ExplorerSidebar({ open }: ExplorerSidebarProps) {
   const [newFolderOpen, setNewFolderOpen] = useState(false)
   const [renameFolderOpen, setRenameFolderOpen] = useState(false)
   const [renameNoteOpen, setRenameNoteOpen] = useState(false)
+  const [moveNoteOpen, setMoveNoteOpen] = useState(false)
+  const [moveFolderId, setMoveFolderId] = useState("")
   const [selectedParentId, setSelectedParentId] = useState("")
   const [renameTargetFolder, setRenameTargetFolder] = useState<ExplorerFolder | null>(null)
   const [renameTargetNote, setRenameTargetNote] = useState<ExplorerNote | null>(null)
+  const [moveTargetNote, setMoveTargetNote] = useState<ExplorerNote | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   const tree = useMemo(() => buildTree(payload, sortMode), [payload, sortMode])
@@ -511,6 +522,35 @@ export default function ExplorerSidebar({ open }: ExplorerSidebarProps) {
     }
   }
 
+  async function moveNote(formData: FormData) {
+    if (!moveTargetNote) return
+    const folderId = String(formData.get("folderId") ?? "") || null
+
+    setSubmitting(true)
+    try {
+      const response = await fetch(`/api/notes/${moveTargetNote.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ folderId }),
+      })
+      if (!response.ok) return
+
+      const data = (await response.json()) as { explorer?: ExplorerPayload; href?: string }
+      if (data.explorer) {
+        setPayload(data.explorer)
+      } else {
+        await refreshExplorer()
+      }
+      setMoveNoteOpen(false)
+      setMoveTargetNote(null)
+      if (data.href && window.location.pathname.includes(moveTargetNote.slug)) {
+        router.replace(data.href)
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   async function deleteNote(note: ExplorerNote) {
     if (!window.confirm(`Delete note "${note.title}"?`)) return
 
@@ -625,6 +665,11 @@ export default function ExplorerSidebar({ open }: ExplorerSidebarProps) {
                     setRenameTargetNote(currentNote)
                     setRenameNoteOpen(true)
                   }}
+                  onMoveNote={(currentNote) => {
+                    setMoveTargetNote(currentNote)
+                    setMoveFolderId(currentNote.folderId ?? "")
+                    setMoveNoteOpen(true)
+                  }}
                   onDeleteNote={deleteNote}
                 />
               ))}
@@ -646,6 +691,16 @@ export default function ExplorerSidebar({ open }: ExplorerSidebarProps) {
                       >
                         <Pencil className="size-4" />
                         Rename file
+                      </ContextMenuItem>
+                      <ContextMenuItem
+                        onSelect={() => {
+                          setMoveTargetNote(note)
+                          setMoveFolderId(note.folderId ?? "")
+                          setMoveNoteOpen(true)
+                        }}
+                      >
+                        <FolderInput className="size-4" />
+                        Move to folder
                       </ContextMenuItem>
                       <ContextMenuItem variant="destructive" onSelect={() => deleteNote(note)}>
                         <Trash2 className="size-4" />
@@ -756,6 +811,43 @@ export default function ExplorerSidebar({ open }: ExplorerSidebarProps) {
             <DialogFooter>
               <Button type="submit" disabled={submitting}>
                 Save
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={moveNoteOpen}
+        onOpenChange={(nextOpen) => {
+          setMoveNoteOpen(nextOpen)
+          if (!nextOpen) {
+            setMoveTargetNote(null)
+            setMoveFolderId("")
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Move file to folder</DialogTitle>
+          </DialogHeader>
+          <form action={moveNote} className="grid gap-3">
+            <select
+              name="folderId"
+              value={moveFolderId}
+              onChange={(event) => setMoveFolderId(event.target.value)}
+              className="h-9 rounded-md border border-input bg-transparent px-2.5 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+            >
+              <option value="">Root</option>
+              {folderOptions.map((folder) => (
+                <option key={folder.id} value={folder.id}>
+                  {folder.label}
+                </option>
+              ))}
+            </select>
+            <DialogFooter>
+              <Button type="submit" disabled={submitting}>
+                Move
               </Button>
             </DialogFooter>
           </form>

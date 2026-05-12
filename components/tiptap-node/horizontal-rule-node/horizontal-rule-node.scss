@@ -1,4 +1,4 @@
-.tiptap.ProseMirror {
+.ProseMirror {
   --horizontal-rule-color: var(--tt-gray-light-a-200);
 
   .dark & {
@@ -9,7 +9,7 @@
 /* =====================
      HORIZONTAL RULE
      ===================== */
-.tiptap.ProseMirror {
+.ProseMirror {
   hr {
     border: none;
     height: 1px;
@@ -17,9 +17,10 @@
   }
 
   [data-type="horizontalRule"] {
-    margin-top: 2.25em;
-    margin-bottom: 2.25em;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
+    margin-top: 0.8rem;
+    margin-bottom: 0.8rem;
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+    cursor: pointer;
   }
 }
