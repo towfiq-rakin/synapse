@@ -411,12 +411,14 @@ export default function AppSidebar({
       setOpenMobile(false)
     }
 
+    onPanelChange?.(null)
     setSearchQuery(initialQuery)
     setSearchOpen(true)
   }
 
   function openSearchResult(note: NoteSummary) {
     rememberSearch(note.title || "Untitled")
+    onPanelChange?.(null)
     setSearchOpen(false)
     router.push(note.href)
   }
@@ -441,6 +443,8 @@ export default function AppSidebar({
   }
 
   function handleRecentsOpenChange(nextOpen: boolean) {
+    onPanelChange?.(null)
+
     if (state === "collapsed") {
       setOpen(true)
       setRecentsOpen(true)
@@ -557,7 +561,10 @@ export default function AppSidebar({
                       <SidebarMenuItem key={note.id}>
                         <RecentItemButton
                           isActive={pathname === note.href}
-                          onClick={() => router.push(note.href)}
+                          onClick={() => {
+                            onPanelChange?.(null)
+                            router.push(note.href)
+                          }}
                         >
                           {note.title || "Untitled"}
                         </RecentItemButton>
