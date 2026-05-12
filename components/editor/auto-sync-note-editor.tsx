@@ -102,12 +102,14 @@ import "@/components/ai/ai-assistant-panel.scss";
 
 type AutoSyncNoteEditorProps = {
   noteId: string;
+  initialFileName: string;
   initialTitle: string;
   initialContent: string;
   initialFolderId: string | null;
 };
 
 type SavePayload = {
+  fileName: string;
   title: string;
   folderId: string | null;
   content: string;
@@ -145,8 +147,16 @@ const EMPTY_FRONTMATTER: NoteFrontmatterState = {
 };
 
 function normalizeTitle(title: string): string {
-  const normalized = title.trim().slice(0, 180);
+  return title.trim().slice(0, 180);
+}
+
+function normalizeFileName(fileName: string): string {
+  const normalized = normalizeTitle(fileName);
   return normalized || "Untitled";
+}
+
+function resolveDisplayTitle(title: string, fileName: string): string {
+  return normalizeTitle(title) || normalizeFileName(fileName);
 }
 
 function toEditorContent(content: string): PreparedEditorContent {
@@ -291,8 +301,8 @@ function markdownToPlainText(markdown: string): string {
     .trim();
 }
 
-function toDownloadFilename(title: string, extension: "md" | "pdf"): string {
-  const sanitizedBase = normalizeTitle(title)
+function toDownloadFilename(baseName: string, extension: "md" | "pdf"): string {
+  const sanitizedBase = baseName
     .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "-")
     .replace(/\s+/g, " ")
     .trim();
@@ -888,13 +898,15 @@ function NoteFrontmatterPanel({
 
 export default function AutoSyncNoteEditor({
   noteId,
+  initialFileName,
   initialTitle,
   initialContent,
   initialFolderId,
 }: AutoSyncNoteEditorProps) {
   const router = useRouter();
   const [, setShareState] = useState<ShareState | null>(null);
-  const [derivedTitle, setDerivedTitle] = useState<string>(initialTitle || "Untitled");
+  const [fileName, setFileName] = useState<string>(normalizeFileName(initialFileName));
+  const [derivedTitle, setDerivedTitle] = useState<string>(normalizeTitle(initialTitle));
   const [frontmatter, setFrontmatter] = useState<NoteFrontmatterState>(EMPTY_FRONTMATTER);
   const [initialEditorContent, setInitialEditorContent] = useState<PreparedEditorContent>({
     content: "",
@@ -923,7 +935,8 @@ export default function AutoSyncNoteEditor({
   const saveSequenceRef = useRef<number>(0);
   const saveTimeoutRef = useRef<number | null>(null);
   const isHydratedRef = useRef<boolean>(false);
-  const derivedTitleRef = useRef<string>(initialTitle || "Untitled");
+  const fileNameRef = useRef<string>(normalizeFileName(initialFileName));
+  const derivedTitleRef = useRef<string>(normalizeTitle(initialTitle));
   const frontmatterRef = useRef<NoteFrontmatterState>(EMPTY_FRONTMATTER);
   const hadFrontmatterRef = useRef<boolean>(false);
   const folderIdRef = useRef<string | null>(initialFolderId ?? null);
@@ -989,10 +1002,11 @@ export default function AutoSyncNoteEditor({
     }, 700);
   }
 
-  function updateLatestPayloadFromEditor(currentEditor: Editor, title = derivedTitleRef.current) {
+  function updateLatestPayloadFromEditor(currentEditor: Editor) {
     const markdownBody = currentEditor.getMarkdown();
     const payload: SavePayload = {
-      title: normalizeTitle(title),
+      fileName: normalizeFileName(fileNameRef.current),
+      title: normalizeTitle(frontmatterRef.current.title),
       folderId: folderIdRef.current,
       content: serializeNoteContent(frontmatterRef.current, markdownBody, hadFrontmatterRef.current),
       contentText: currentEditor.getText(),
@@ -1015,8 +1029,9 @@ export default function AutoSyncNoteEditor({
   }
 
   function handleTitleChange(value: string) {
-    setDerivedTitle(value);
-    derivedTitleRef.current = value;
+    const normalizedFileName = normalizeFileName(value);
+    setFileName(normalizedFileName);
+    fileNameRef.current = normalizedFileName;
 
     if (!latestPayloadRef.current) {
       return;
@@ -1024,7 +1039,7 @@ export default function AutoSyncNoteEditor({
 
     const nextPayload = {
       ...latestPayloadRef.current,
-      title: normalizeTitle(value),
+      fileName: normalizedFileName,
     };
 
     latestPayloadRef.current = nextPayload;
@@ -1032,10 +1047,9 @@ export default function AutoSyncNoteEditor({
   }
 
   function handleTitleBlur() {
-    const normalizedTitle = normalizeTitle(derivedTitleRef.current);
-
-    setDerivedTitle(normalizedTitle);
-    derivedTitleRef.current = normalizedTitle;
+    const normalizedFileName = normalizeFileName(fileNameRef.current);
+    setFileName(normalizedFileName);
+    fileNameRef.current = normalizedFileName;
 
     if (!latestPayloadRef.current) {
       return;
@@ -1043,7 +1057,7 @@ export default function AutoSyncNoteEditor({
 
     const nextPayload = {
       ...latestPayloadRef.current,
-      title: normalizedTitle,
+      fileName: normalizedFileName,
     };
 
     latestPayloadRef.current = nextPayload;
@@ -1059,12 +1073,9 @@ export default function AutoSyncNoteEditor({
 
       frontmatterRef.current = next;
       hadFrontmatterRef.current = true;
-
-      if (field === "title" && typeof value === "string") {
-        const normalizedFromFrontmatter = normalizeTitle(value);
-        setDerivedTitle(normalizedFromFrontmatter);
-        derivedTitleRef.current = normalizedFromFrontmatter;
-      }
+      const normalizedTitle = normalizeTitle(next.title);
+      setDerivedTitle(normalizedTitle);
+      derivedTitleRef.current = normalizedTitle;
 
       if (!latestPayloadRef.current || !editor) {
         return next;
@@ -1072,7 +1083,7 @@ export default function AutoSyncNoteEditor({
 
       const nextPayload: SavePayload = {
         ...latestPayloadRef.current,
-        title: normalizeTitle(derivedTitleRef.current),
+        title: normalizeTitle(next.title),
         content: serializeNoteContent(next, getCurrentMarkdownBody(editor), hadFrontmatterRef.current),
       };
 
@@ -1126,7 +1137,7 @@ export default function AutoSyncNoteEditor({
       Subscript,
       Selection,
       Placeholder.configure({
-        placeholder: "Press '/' for ideas, or start writing...",
+        placeholder: "Start writing...",
       }),
       Markdown.configure({
         markedOptions: {
@@ -1174,7 +1185,7 @@ export default function AutoSyncNoteEditor({
       },
     },
     onUpdate({ editor: currentEditor }) {
-      scheduleSave(updateLatestPayloadFromEditor(currentEditor, derivedTitleRef.current));
+      scheduleSave(updateLatestPayloadFromEditor(currentEditor));
     },
   });
 
@@ -1192,7 +1203,7 @@ export default function AutoSyncNoteEditor({
   useEffect(() => {
     let active = true;
     const parsed = parseNoteContent(initialContent);
-    const nextTitle = normalizeTitle(parsed.frontmatter.title || initialTitle || "Untitled");
+    const nextTitle = normalizeTitle(parsed.frontmatter.title || initialTitle);
 
     if (saveTimeoutRef.current) {
       window.clearTimeout(saveTimeoutRef.current);
@@ -1201,6 +1212,9 @@ export default function AutoSyncNoteEditor({
 
     setDerivedTitle(nextTitle);
     derivedTitleRef.current = nextTitle;
+    const nextFileName = normalizeFileName(initialFileName);
+    setFileName(nextFileName);
+    fileNameRef.current = nextFileName;
     setFrontmatter(parsed.frontmatter);
     frontmatterRef.current = parsed.frontmatter;
     hadFrontmatterRef.current = parsed.hadFrontmatter;
@@ -1221,7 +1235,7 @@ export default function AutoSyncNoteEditor({
     return () => {
       active = false;
     };
-  }, [initialContent, initialFolderId, initialTitle, noteId]);
+  }, [initialContent, initialFileName, initialFolderId, initialTitle, noteId]);
 
   useEffect(() => {
     if (!editor || isPreparingEditor || hydrationDoneRef.current) {
@@ -1234,7 +1248,8 @@ export default function AutoSyncNoteEditor({
     });
 
     const initialPayload: SavePayload = {
-      title: normalizeTitle(derivedTitleRef.current),
+      fileName: normalizeFileName(fileNameRef.current),
+      title: normalizeTitle(frontmatterRef.current.title),
       folderId: initialFolderId ?? null,
       content: serializeNoteContent(frontmatterRef.current, editor.getMarkdown(), hadFrontmatterRef.current),
       contentText: editor.getText(),
@@ -1260,8 +1275,8 @@ export default function AutoSyncNoteEditor({
       return;
     }
 
-    const payload = updateLatestPayloadFromEditor(editor, derivedTitleRef.current);
-    downloadUtf8TextFile(toDownloadFilename(payload.title, "md"), payload.content);
+    const payload = updateLatestPayloadFromEditor(editor);
+    downloadUtf8TextFile(toDownloadFilename(resolveDisplayTitle(payload.title, payload.fileName), "md"), payload.content);
   }
 
   async function handleExportPdf() {
@@ -1270,7 +1285,7 @@ export default function AutoSyncNoteEditor({
       return;
     }
 
-    const payload = updateLatestPayloadFromEditor(editor, derivedTitleRef.current);
+    const payload = updateLatestPayloadFromEditor(editor);
     const printWindow = window.open("", "_blank");
 
     if (!printWindow) {
@@ -1281,7 +1296,7 @@ export default function AutoSyncNoteEditor({
     try {
       const printableHtml = await renderPrintableNoteHtml(editor.getMarkdown());
       printWindow.document.open();
-      printWindow.document.write(buildPrintDocument(payload.title, printableHtml));
+      printWindow.document.write(buildPrintDocument(resolveDisplayTitle(payload.title, payload.fileName), printableHtml));
       printWindow.document.close();
     } catch {
       printWindow.close();
@@ -1293,9 +1308,10 @@ export default function AutoSyncNoteEditor({
     routerRef.current.push("/notes");
   }
 
-  function handleRenamed(newTitle: string) {
-    setDerivedTitle(newTitle);
-    derivedTitleRef.current = newTitle;
+  function handleRenamed(newFileName: string) {
+    const normalizedFileName = normalizeFileName(newFileName);
+    setFileName(normalizedFileName);
+    fileNameRef.current = normalizedFileName;
   }
 
   function handleMoved(newFolderId: string | null) {
@@ -1311,7 +1327,8 @@ export default function AutoSyncNoteEditor({
     setSourceMarkdown(value);
 
     const nextPayload: SavePayload = {
-      title: normalizeTitle(derivedTitleRef.current),
+      fileName: normalizeFileName(fileNameRef.current),
+      title: normalizeTitle(frontmatterRef.current.title),
       folderId: folderIdRef.current,
       content: serializeNoteContent(frontmatterRef.current, value, hadFrontmatterRef.current),
       contentText: markdownToPlainText(value),
@@ -1338,7 +1355,7 @@ export default function AutoSyncNoteEditor({
       contentType: "markdown",
     });
 
-    const nextPayload = updateLatestPayloadFromEditor(editor, derivedTitleRef.current);
+    const nextPayload = updateLatestPayloadFromEditor(editor);
     latestPayloadRef.current = nextPayload;
     scheduleSave(nextPayload);
     setIsSourceMode(false);
@@ -1517,15 +1534,17 @@ export default function AutoSyncNoteEditor({
     toast.success(`Replaced ${findResults.length} occurrence(s).`);
   }
 
+  const displayTitle = resolveDisplayTitle(derivedTitle, fileName);
+
   return (
     <section className="synapse-note-shell">
       <EditorContext.Provider value={{ editor }}>
         <div className="synapse-note-chrome">
           <NoteEditorToolbar
             noteId={noteId}
-            noteTitle={derivedTitle}
+            noteTitle={fileName}
             currentFolderId={currentFolderId}
-            title={derivedTitle}
+            title={displayTitle}
             exportDisabled={isPreparingEditor || !editor}
             onExportMarkdown={handleExportMarkdown}
             onExportPdf={handleExportPdf}
@@ -1673,10 +1692,10 @@ export default function AutoSyncNoteEditor({
 
         <article className="synapse-note-page">
           <input
-            value={derivedTitle}
+            value={fileName}
             onChange={(event) => handleTitleChange(event.target.value)}
             onBlur={handleTitleBlur}
-            aria-label="Note title"
+            aria-label="File name"
             placeholder="Untitled"
             className="synapse-note-title"
           />
@@ -1710,7 +1729,7 @@ export default function AutoSyncNoteEditor({
         open={aiPanelOpen}
         onOpenChange={setAiPanelOpen}
         noteId={noteId}
-        noteTitle={derivedTitle}
+        noteTitle={displayTitle}
         currentMarkdown={getCurrentMarkdownBody()}
         selectedText={aiSelectedText}
         onInsert={handleAiInsert}

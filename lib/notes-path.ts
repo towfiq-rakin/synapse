@@ -12,6 +12,7 @@ export type FolderPathNode = {
 
 export type NotePathNode = {
   _id: StringLikeId;
+  fileName?: string;
   title: string;
   slug?: string;
   folderId: NullableId;
@@ -111,7 +112,8 @@ export function buildPrivateNoteHref(
   note: NotePathNode,
   folderSegmentsById: Map<string, string[]>,
 ): string {
-  const noteSlug = note.slug?.trim() || slugFromText(note.title);
+  const baseName = note.fileName?.trim() || note.title?.trim() || "Untitled";
+  const noteSlug = note.slug?.trim() || slugFromText(baseName);
   const folderId = toNullableId(note.folderId);
   const folderSegments = folderId ? folderSegmentsById.get(folderId) ?? [] : [];
   return `/${[...folderSegments, noteSlug].join("/")}`;

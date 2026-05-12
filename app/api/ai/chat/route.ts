@@ -81,11 +81,11 @@ export async function POST(request: Request) {
   /* ── 4. Load & verify note ownership ──────────────────────────── */
   await connectToDatabase();
 
-  let note: Pick<INote, "title" | "content"> | null;
+  let note: Pick<INote, "fileName" | "title" | "content"> | null;
   try {
     note = await Note.findOne({ _id: noteId, userId: localUserId })
-      .select("title content")
-      .lean<Pick<INote, "title" | "content"> | null>();
+      .select("fileName title content")
+      .lean<Pick<INote, "fileName" | "title" | "content"> | null>();
   } catch {
     return jsonError("Invalid note ID.", 400);
   }
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
   const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
 
   const { systemInstruction, userMessage } = buildNoteAssistantPrompt({
-    noteTitle: note.title,
+    noteTitle: note.title?.trim() || note.fileName?.trim() || "Untitled",
     noteMarkdown,
     selectedText,
     action,

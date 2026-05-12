@@ -11,6 +11,7 @@ type NotePageProps = {
 
 type EditorNote = {
   _id: { toString(): string } | string;
+  fileName?: string;
   title: string;
   content: string;
   folderId: { toString(): string } | string | null;
@@ -32,7 +33,7 @@ export default async function NoteEditorPage({ params }: NotePageProps) {
   await connectToDatabase();
 
   const note = await Note.findOne({ _id: id, userId })
-    .select("_id title content folderId")
+    .select("_id fileName title content folderId")
     .lean<EditorNote | null>();
 
   if (!note) {
@@ -43,7 +44,8 @@ export default async function NoteEditorPage({ params }: NotePageProps) {
     <AutoSyncNoteEditor
       key={id}
       noteId={typeof note._id === "string" ? note._id : note._id.toString()}
-      initialTitle={note.title || "Untitled"}
+      initialFileName={note.fileName?.trim() || note.title?.trim() || "Untitled"}
+      initialTitle={note.title || ""}
       initialContent={note.content || ""}
       initialFolderId={typeof note.folderId === "string" ? note.folderId : note.folderId?.toString() ?? null}
     />

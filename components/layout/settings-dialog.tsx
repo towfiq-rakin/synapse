@@ -681,19 +681,19 @@ export default function SettingsDialog({
                           )}
                           {hasUserImage ? "Change photo" : "Upload photo"}
                         </Button>
-                        <p className="max-w-[16rem] text-right text-xs leading-5 text-muted-foreground">
+                        {/* <p className="max-w-[16rem] text-right text-xs leading-5 text-muted-foreground">
                           Profile image uploads are handled by Clerk.
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                   </div>
 
                   <div className="rounded-[24px] border border-border/80 bg-background p-4">
                     <div className="pb-4">
-                      <h3 className="text-sm font-medium text-foreground">Username</h3>
-                      <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                      {/* <h3 className="text-sm font-medium text-foreground">Username</h3> */}
+                      {/* <p className="mt-1 text-sm leading-6 text-muted-foreground">
                         This updates both your Clerk profile and the app&apos;s public note path.
-                      </p>
+                      </p> */}
                     </div>
                     <form className="grid gap-4" onSubmit={handleUsernameSave}>
                       <AuthField
@@ -988,9 +988,9 @@ export default function SettingsDialog({
 
             <Separator />
             <DialogFooter className="items-center justify-between gap-3 px-5 py-4 sm:flex-row sm:px-7">
-              <p className="text-sm text-muted-foreground">
+              {/* <p className="text-sm text-muted-foreground">
                 Some settings still local only.
-              </p>
+              </p> */}
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Done
               </Button>

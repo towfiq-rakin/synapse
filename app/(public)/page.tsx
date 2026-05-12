@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import LiquidEther from "@/components/LiquidEther";
 import TextPressure from "@/components/TextPressure";
@@ -15,7 +14,22 @@ export default function SynapseLanding() {
 
       <nav className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between px-5 py-4 sm:px-8">
         <Link href="/" className="flex items-center gap-3 text-white/90">
-          <Image src="/synapse-white.png" alt="Synapse" width={28} height={28} className="h-7 w-7" />
+          <div className="flex size-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white shadow-lg shadow-black/15 backdrop-blur">
+            <span
+              aria-hidden="true"
+              className="block size-7 bg-current"
+              style={{
+                WebkitMaskImage: "url('/synapse.svg')",
+                maskImage: "url('/synapse.svg')",
+                WebkitMaskRepeat: "no-repeat",
+                maskRepeat: "no-repeat",
+                WebkitMaskSize: "contain",
+                maskSize: "contain",
+                WebkitMaskPosition: "center",
+                maskPosition: "center",
+              }}
+            />
+          </div>
           <span className="text-xs font-semibold uppercase tracking-[0.4em] text-white/80">Synapse</span>
         </Link>
         <div className="flex items-center gap-2 sm:gap-3">

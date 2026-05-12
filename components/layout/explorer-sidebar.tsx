@@ -303,7 +303,7 @@ function FolderBranch({
                 <ContextMenuContent>
                   <ContextMenuItem onSelect={() => onRenameNote(note)}>
                     <Pencil className="size-4" />
-                    Rename
+                    Rename file
                   </ContextMenuItem>
                   <ContextMenuItem variant="destructive" onSelect={() => onDeleteNote(note)}>
                     <Trash2 className="size-4" />
@@ -380,7 +380,7 @@ export default function ExplorerSidebar({ open }: ExplorerSidebarProps) {
   }
 
   async function createNote(formData: FormData) {
-    const title = String(formData.get("title") ?? "").trim() || "Untitled"
+    const fileName = String(formData.get("fileName") ?? "").trim() || "Untitled"
     const folderId = String(formData.get("folderId") ?? "")
 
     setSubmitting(true)
@@ -389,7 +389,7 @@ export default function ExplorerSidebar({ open }: ExplorerSidebarProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title,
+          fileName,
           folderId: folderId || null,
           content: "",
           contentText: "",
@@ -487,15 +487,15 @@ export default function ExplorerSidebar({ open }: ExplorerSidebarProps) {
 
   async function renameNote(formData: FormData) {
     if (!renameTargetNote) return
-    const title = String(formData.get("title") ?? "").trim()
-    if (!title) return
+    const fileName = String(formData.get("fileName") ?? "").trim()
+    if (!fileName) return
 
     setSubmitting(true)
     try {
       const response = await fetch(`/api/notes/${renameTargetNote.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title }),
+        body: JSON.stringify({ fileName }),
       })
       if (!response.ok) return
 
@@ -645,7 +645,7 @@ export default function ExplorerSidebar({ open }: ExplorerSidebarProps) {
                         }}
                       >
                         <Pencil className="size-4" />
-                        Rename
+                        Rename file
                       </ContextMenuItem>
                       <ContextMenuItem variant="destructive" onSelect={() => deleteNote(note)}>
                         <Trash2 className="size-4" />
@@ -666,7 +666,7 @@ export default function ExplorerSidebar({ open }: ExplorerSidebarProps) {
             <DialogTitle>New Note</DialogTitle>
           </DialogHeader>
           <form action={createNote} className="grid gap-3">
-            <Input name="title" placeholder="Note name" autoComplete="off" />
+            <Input name="fileName" placeholder="File name" autoComplete="off" />
             <select
               name="folderId"
               value={selectedParentId}
@@ -743,12 +743,12 @@ export default function ExplorerSidebar({ open }: ExplorerSidebarProps) {
       <Dialog open={renameNoteOpen} onOpenChange={setRenameNoteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Rename Note</DialogTitle>
+            <DialogTitle>Rename File</DialogTitle>
           </DialogHeader>
           <form action={renameNote} className="grid gap-3">
             <Input
-              name="title"
-              placeholder="Note name"
+              name="fileName"
+              placeholder="File name"
               autoComplete="off"
               required
               defaultValue={renameTargetNote?.title ?? ""}

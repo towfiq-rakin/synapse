@@ -59,7 +59,7 @@ type LeanFolder = Pick<IFolder, "name" | "slug" | "parentId" | "order" | "create
   _id: StringLikeId;
 };
 
-type LeanNote = Pick<INote, "title" | "slug" | "folderId" | "visibility" | "tags" | "createdAt" | "updatedAt"> & {
+type LeanNote = Pick<INote, "fileName" | "title" | "slug" | "folderId" | "visibility" | "tags" | "createdAt" | "updatedAt"> & {
   _id: StringLikeId;
 };
 
@@ -143,7 +143,7 @@ export async function getExplorerPayload(userId: string): Promise<ExplorerPayloa
       .lean<LeanFolder[]>(),
     Note.find({ userId, type: "note" })
       .sort({ updatedAt: -1 })
-      .select("_id title slug folderId visibility tags createdAt updatedAt")
+      .select("_id fileName title slug folderId visibility tags createdAt updatedAt")
       .lean<LeanNote[]>(),
   ]);
 
@@ -170,12 +170,13 @@ export async function getExplorerPayload(userId: string): Promise<ExplorerPayloa
     notes: notes.map((note) => {
       const folderId = toNullableId(note.folderId);
       const folderPath = folderId ? folderSegmentsById.get(folderId) ?? [] : [];
+      const fileName = note.fileName?.trim() || note.title?.trim() || "Untitled";
       return {
         id: toId(note._id),
-        title: note.title || "Untitled",
-        slug: note.slug || slugFromText(note.title),
+        title: fileName,
+        slug: note.slug || slugFromText(fileName),
         folderId,
-        path: [...folderPath, note.slug || slugFromText(note.title)],
+        path: [...folderPath, note.slug || slugFromText(fileName)],
         href: `/notes/${toId(note._id)}`,
         visibility: normalizeNoteVisibility(note.visibility),
         tags: note.tags,

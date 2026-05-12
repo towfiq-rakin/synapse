@@ -151,7 +151,7 @@ export default function ShareNoteDialog({
           return
         }
 
-        setNoteTitle(data.note?.title?.trim() || "Untitled")
+        setNoteTitle(data.note?.title?.trim() || data.note?.fileName?.trim() || "Untitled")
         setShareState(data.share)
         setSelectedVisibility(data.share.visibility)
       })

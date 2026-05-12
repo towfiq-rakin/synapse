@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import { PanelLeftIcon } from "lucide-react"
 import AppSidebar from "@/components/layout/app-sidebar"
 import ExplorerSidebar from "@/components/layout/explorer-sidebar"
@@ -70,6 +70,51 @@ export default function AppShell({ children, defaultOpen, user }: AppShellProps)
   const pathname = usePathname()
   const showMobileShellHeader = !pathname.startsWith("/notes/")
   const showMobileShellThemeToggle = !pathname.startsWith("/notes/")
+  const router = useRouter()
+
+  useEffect(() => {
+    if (pathname !== "/notes") {
+      return
+    }
+
+    let cancelled = false
+
+    async function openLatestRecentNote() {
+      try {
+        const response = await fetch("/api/notes", { cache: "no-store" })
+
+        if (!response.ok) {
+          return
+        }
+
+        const data = (await response.json()) as {
+          notes?: Array<{ id: string; href?: string }>
+        }
+        const latestRecent = data.notes?.[0]
+
+        if (!latestRecent) {
+          return
+        }
+
+        const targetHref =
+          typeof latestRecent.href === "string" && latestRecent.href.trim().length > 0
+            ? latestRecent.href
+            : `/notes/${latestRecent.id}`
+
+        if (!cancelled && targetHref !== pathname) {
+          router.replace(targetHref)
+        }
+      } catch {
+        // Keep /notes as fallback when recents fetch fails.
+      }
+    }
+
+    void openLatestRecentNote()
+
+    return () => {
+      cancelled = true
+    }
+  }, [pathname, router])
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>

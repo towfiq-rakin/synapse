@@ -40,6 +40,7 @@ export async function ensureProfileIndexNote(userId: string) {
 
   const created = await Note.create({
     userId,
+    fileName: PROFILE_INDEX_NOTE_TITLE,
     title: PROFILE_INDEX_NOTE_TITLE,
     slug: PROFILE_INDEX_NOTE_SLUG,
     folderId: null,
@@ -62,6 +63,7 @@ export async function ensureProfileIndexNote(userId: string) {
 type PublishableProfileIndexNote = {
   _id: { toString(): string } | string;
   userId: { toString(): string } | string;
+  fileName?: string;
   title: string;
   slug?: string;
   folderId: { toString(): string } | string | null;
@@ -80,12 +82,13 @@ export async function ensurePublishedProfileIndexNote(userId: string) {
     folderId: null,
     slug: PROFILE_INDEX_NOTE_SLUG,
   })
-    .select("_id userId title slug folderId content contentText visibility shareId publishedAt updatedAt")
+    .select("_id userId fileName title slug folderId content contentText visibility shareId publishedAt updatedAt")
     .lean<PublishableProfileIndexNote | null>();
 
   if (!existing) {
     const created = await Note.create({
       userId,
+      fileName: PROFILE_INDEX_NOTE_TITLE,
       title: PROFILE_INDEX_NOTE_TITLE,
       slug: PROFILE_INDEX_NOTE_SLUG,
       folderId: null,
@@ -128,7 +131,14 @@ export async function ensurePublishedProfileIndexNote(userId: string) {
   const updated = await Note.findByIdAndUpdate(
     existing._id,
     {
-      $set: await buildPublishedSnapshot(existing, "published", existing.shareId ?? null),
+      $set: await buildPublishedSnapshot(
+        {
+          ...existing,
+          title: existing.title?.trim() || existing.fileName?.trim() || PROFILE_INDEX_NOTE_TITLE,
+        },
+        "published",
+        existing.shareId ?? null,
+      ),
     },
     { new: true, runValidators: true },
   )

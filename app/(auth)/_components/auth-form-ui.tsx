@@ -71,11 +71,11 @@ export function AuthField({
         className={cn("h-11 rounded-xl px-3", className)}
         {...props}
       />
-      {error ? (
+      {/* {error ? (
         <p id={errorId} className="mt-1.5 text-xs text-destructive" role="alert">
           {error}
         </p>
-      ) : null}
+      ) : null} */}
     </label>
   );
 }
@@ -120,11 +120,11 @@ export function PasswordField({
           <span className="sr-only">{visible ? "Hide password" : "Show password"}</span>
         </button>
       </div>
-      {error ? (
+      {/* {error ? (
         <p id={errorId} className="mt-1.5 text-xs text-destructive" role="alert">
           {error}
         </p>
-      ) : null}
+      ) : null} */}
     </label>
   );
 }

@@ -95,9 +95,9 @@ function getFriendlyMessageForIssue(issue: ClerkIssue) {
 
   switch (code) {
     case "form_identifier_not_found":
-      return "We could not find an account with those details.";
+      return "The email or password is incorrect.";
     case "form_password_incorrect":
-      return "The password is incorrect.";
+      return "The email or password is incorrect.";
     case "form_identifier_exists":
       return "An account with this email or username already exists.";
     case "form_username_invalid_character":
@@ -160,10 +160,10 @@ function getFriendlyFieldMessage(issue: ClerkIssue, fieldName: ClerkFieldName | 
 
   switch (fieldName) {
     case "identifier":
-      if (code === "form_identifier_not_found") return "No account found with those details.";
+      if (code === "form_identifier_not_found") return "The email or password is incorrect.";
       return "Enter your email address or username.";
     case "password":
-      if (code === "form_password_incorrect") return "Password is incorrect.";
+      if (code === "form_password_incorrect") return "The email or password is incorrect.";
       if (code === "form_password_pwned") return "Choose a different password.";
       if (code === "form_password_length_too_short") return "Use at least 8 characters.";
       if (lower.includes("required")) return "Enter your password.";

@@ -25,7 +25,7 @@ function SynapseMark() {
       </div>
       <div>
         <p className="text-xs font-medium uppercase tracking-[0.3em] text-white/70">Synapse</p>
-        <p className="text-lg leading-none [font-family:var(--font-brand-yatra)]">Knowledge workspace</p>
+        <p className="text-lg leading-none [font-family:var(--font-brand-yatra)] text-white">Knowledge workspace</p>
       </div>
     </div>
   );
@@ -46,7 +46,9 @@ export default function AuthShell({ children }: AuthShellProps) {
           <div className="mb-6 rounded-2xl bg-[linear-gradient(160deg,#102a43_0%,#0f172a_48%,#111827_100%)] p-4 lg:hidden">
             <SynapseMark />
           </div>
-          <div className="mx-auto w-full max-w-md">{children}</div>
+          <div className="mx-auto w-full max-w-md min-h-[34rem] sm:h-[34rem] [&>section]:h-full">
+            {children}
+          </div>
         </div>
       </div>
     </section>

@@ -113,7 +113,7 @@ function RenameDialog({
       const res = await fetch(`/api/notes/${noteId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: trimmed }),
+        body: JSON.stringify({ fileName: trimmed }),
       })
       if (!res.ok) {
         const data = (await res.json()) as { error?: string }
@@ -134,15 +134,15 @@ function RenameDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Rename note</DialogTitle>
-          <DialogDescription>Enter a new title for this note.</DialogDescription>
+          <DialogTitle>Rename file</DialogTitle>
+          <DialogDescription>Enter a new filename for this note.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Input
             ref={inputRef}
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="Note title"
+            placeholder="File name"
             disabled={loading}
             autoFocus
           />

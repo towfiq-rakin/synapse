@@ -21,11 +21,16 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-function normalizeTitle(input: unknown): string | undefined {
+function normalizeFileName(input: unknown): string | undefined {
   if (typeof input !== "string") return undefined;
 
-  const title = input.trim().slice(0, 180);
-  return title.length > 0 ? title : "Untitled";
+  const fileName = input.trim().slice(0, 180);
+  return fileName.length > 0 ? fileName : "Untitled";
+}
+
+function normalizeTitle(input: unknown): string | undefined {
+  if (typeof input !== "string") return undefined;
+  return input.trim().slice(0, 180);
 }
 
 function normalizeSlug(input: unknown): string | undefined {
@@ -112,6 +117,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   const updates: {
+    fileName?: string;
     title?: string;
     content?: string;
     contentText?: string;
@@ -128,6 +134,9 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   let nextFolderId: string | null | undefined;
   let explicitSlug = false;
+
+  const fileName = normalizeFileName(body.fileName);
+  if (fileName !== undefined) updates.fileName = fileName;
 
   const title = normalizeTitle(body.title);
   if (title !== undefined) updates.title = title;
@@ -170,8 +179,9 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   const current = await Note.findOne({ _id: id, userId }).select(
-    "title folderId slug content contentText visibility shareId publishedAt",
+    "fileName title folderId slug content contentText visibility shareId publishedAt",
   ).lean<{
+    fileName?: string;
     title: string;
     folderId: { toString(): string } | string | null;
     slug?: string;
@@ -192,20 +202,24 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   const effectiveContentText = typeof updates.contentText === "string" ? updates.contentText : current.contentText;
   const frontmatterTitle = parseFrontmatterTitle(effectiveContentText);
+  const effectiveFileName =
+    updates.fileName ?? current.fileName?.trim() ?? current.title?.trim() ?? "Untitled";
   const effectiveTitle =
-    normalizeTitle(frontmatterTitle ?? updates.title ?? current.title) ??
-    current.title;
+    updates.title !== undefined
+      ? updates.title
+      : normalizeTitle(frontmatterTitle ?? current.title) ?? current.title ?? "";
+  const effectiveDisplayTitle = effectiveTitle || effectiveFileName;
 
   updates.title = effectiveTitle;
 
-  if (!explicitSlug || nextFolderId !== undefined || updates.title !== undefined) {
+  if (!explicitSlug || nextFolderId !== undefined || updates.fileName !== undefined) {
     const effectiveFolderId = normalizeFolderId(
       nextFolderId !== undefined ? nextFolderId : current.folderId,
     );
 
     const slug = explicitSlug && updates.slug
       ? updates.slug
-      : await generateUniqueSlug(effectiveTitle, async (candidate) => {
+      : await generateUniqueSlug(effectiveFileName, async (candidate) => {
           const existing = await Note.exists({
             _id: { $ne: id },
             userId,
@@ -215,7 +229,7 @@ export async function PATCH(request: Request, context: RouteContext) {
           return Boolean(existing);
         });
 
-    updates.slug = slug || slugFromText(effectiveTitle);
+    updates.slug = slug || slugFromText(effectiveFileName);
   }
 
   const effectiveVisibility = normalizeNoteVisibility(current.visibility);
@@ -232,7 +246,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       updates,
       await buildPublishedSnapshot(
         {
-          title: effectiveTitle,
+          title: effectiveDisplayTitle,
           content: effectiveContent,
           contentText: effectiveContentText,
           visibility: effectiveVisibility,

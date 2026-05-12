@@ -10,6 +10,15 @@ function normalizeText(input: unknown, fallback = ""): string {
   return input.trim();
 }
 
+function normalizeFileName(input: unknown): string {
+  const normalized = normalizeText(input, "").slice(0, 180);
+  return normalized || "Untitled";
+}
+
+function normalizeNoteTitle(input: unknown): string {
+  return normalizeText(input, "").slice(0, 180);
+}
+
 function normalizeSlug(input: unknown): string | undefined {
   if (typeof input !== "string") return undefined;
 
@@ -60,7 +69,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const title = normalizeText(body.title, "Untitled").slice(0, 180);
+  const fileName = normalizeFileName(body.fileName ?? body.title);
   const content = typeof body.content === "string" ? body.content : "";
   const contentText = typeof body.contentText === "string" ? body.contentText : "";
   const tags = normalizeTags(body.tags);
@@ -74,16 +83,17 @@ export async function POST(request: Request) {
   }
 
   const frontmatterTitle = parseFrontmatterTitle(contentText);
-  const resolvedTitle = normalizeText(frontmatterTitle ?? title, "Untitled").slice(0, 180);
+  const resolvedTitle = normalizeNoteTitle(frontmatterTitle ?? "");
 
   const slug = normalizeSlug(body.slug) ??
-    (await generateUniqueSlug(resolvedTitle, async (candidate) => {
+    (await generateUniqueSlug(fileName, async (candidate) => {
       const existing = await Note.exists({ userId, folderId, slug: candidate });
       return Boolean(existing);
     }));
 
   try {
     const created = await Note.create({
+      fileName,
       userId,
       title: resolvedTitle,
       slug,

@@ -1,0 +1,1098 @@
+{
+  "/home/rakin/Desktop/Codes/note-app/eslint.config.mjs": {
+    "mtime": 1775062658.3619406,
+    "hash": "dfa1f5f6a7037bf39dc510f30b180002"
+  },
+  "/home/rakin/Desktop/Codes/note-app/test-katex.mjs": {
+    "mtime": 1778430151.2060988,
+    "hash": "fd6ea86de98e56aa17e46489ace4baaa"
+  },
+  "/home/rakin/Desktop/Codes/note-app/postcss.config.mjs": {
+    "mtime": 1775062658.362085,
+    "hash": "239f3ebf717465dc636818a1a619398d"
+  },
+  "/home/rakin/Desktop/Codes/note-app/test-katex-html.js": {
+    "mtime": 1778430151.2060156,
+    "hash": "ca73e7e9d6a5d4032600ca617f41adf9"
+  },
+  "/home/rakin/Desktop/Codes/note-app/scss.d.ts": {
+    "mtime": 1776176386.185887,
+    "hash": "d4b73df9b41bd6aeddc94c7958c6d743"
+  },
+  "/home/rakin/Desktop/Codes/note-app/next.config.ts": {
+    "mtime": 1775062658.3675342,
+    "hash": "073c476be067d6d4649b355483ee2690"
+  },
+  "/home/rakin/Desktop/Codes/note-app/proxy.ts": {
+    "mtime": 1778424378.5471268,
+    "hash": "335f2616a0e763270b27a9077b41a09c"
+  },
+  "/home/rakin/Desktop/Codes/note-app/hooks/use-tiptap-editor.ts": {
+    "mtime": 1776178540.6832669,
+    "hash": "b836ce7d15206aeff51e52be2500afff"
+  },
+  "/home/rakin/Desktop/Codes/note-app/hooks/use-is-breakpoint.ts": {
+    "mtime": 1776178540.6822667,
+    "hash": "6fe5ccf9fa8c580ee5d0f1338eea13fa"
+  },
+  "/home/rakin/Desktop/Codes/note-app/hooks/use-cursor-visibility.ts": {
+    "mtime": 1776176386.180015,
+    "hash": "9e42e698c99b51f58ae64374f607c266"
+  },
+  "/home/rakin/Desktop/Codes/note-app/hooks/use-composed-ref.ts": {
+    "mtime": 1776178540.6822667,
+    "hash": "eea455f8f11b6f3116eb880bb090450d"
+  },
+  "/home/rakin/Desktop/Codes/note-app/hooks/use-scrolling.ts": {
+    "mtime": 1776176386.1810303,
+    "hash": "21ded7e940dbb919f263cfcdc2504529"
+  },
+  "/home/rakin/Desktop/Codes/note-app/hooks/use-color-profile.ts": {
+    "mtime": 1778097611.420009,
+    "hash": "ef8e8d21328390a475492f98a0def3ba"
+  },
+  "/home/rakin/Desktop/Codes/note-app/hooks/use-menu-navigation.ts": {
+    "mtime": 1776178540.6822667,
+    "hash": "1077b6781f915321c875abdf87b05245"
+  },
+  "/home/rakin/Desktop/Codes/note-app/hooks/use-unmount.ts": {
+    "mtime": 1776178540.6832669,
+    "hash": "0eab35f1de93b0520f386cca15752991"
+  },
+  "/home/rakin/Desktop/Codes/note-app/hooks/use-mobile.ts": {
+    "mtime": 1777482715.778366,
+    "hash": "209b5193af16624cdd89d3591480dd48"
+  },
+  "/home/rakin/Desktop/Codes/note-app/hooks/use-element-rect.ts": {
+    "mtime": 1776178540.6822667,
+    "hash": "ef6cdc03a12851748677d6b3e6053b0f"
+  },
+  "/home/rakin/Desktop/Codes/note-app/hooks/use-window-size.ts": {
+    "mtime": 1776176386.1818383,
+    "hash": "46ebc13e625bb5a2aca7ca1460527daf"
+  },
+  "/home/rakin/Desktop/Codes/note-app/hooks/use-throttled-callback.ts": {
+    "mtime": 1776176386.181361,
+    "hash": "1981ad42f7eb2eb743d8fbe41d537d44"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/layout.tsx": {
+    "mtime": 1778424378.5377252,
+    "hash": "c2b3dbe269d7faf2d41afb1260421fe8"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(auth)/layout.tsx": {
+    "mtime": 1778424378.535345,
+    "hash": "4805413fd51b50b0c00608e09b0d77e0"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(auth)/_components/auth-shell.tsx": {
+    "mtime": 1778614543.7426805,
+    "hash": "187ccd1a15621965236f7541bf41358c"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(auth)/_components/custom-login-form.tsx": {
+    "mtime": 1778097611.4172592,
+    "hash": "42d3100fec15034717057c1fbb3162a8"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(auth)/_components/auth-validation.ts": {
+    "mtime": 1778608151.3998663,
+    "hash": "7876727dc6e4547413171579f03f7550"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(auth)/_components/custom-signup-form.tsx": {
+    "mtime": 1778097611.4172592,
+    "hash": "aef0ea32b84f33e914b077d45b94ea5b"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(auth)/_components/auth-form-ui.tsx": {
+    "mtime": 1778608414.8389401,
+    "hash": "ff1d5481d3faf8dcc6f5b967570d4d15"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(auth)/signup/page.tsx": {
+    "mtime": 1778097611.4172592,
+    "hash": "5dcf1e468b5e0a3e09258d598ffa5a8d"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(auth)/login/page.tsx": {
+    "mtime": 1778097611.4172592,
+    "hash": "321e102c202b551a57f1b43e9b7aeac7"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(public)/page.tsx": {
+    "mtime": 1778613996.5238595,
+    "hash": "01c4064ab63f612c0573ef4ee13a0eca"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(public)/share/[shareId]/page.tsx": {
+    "mtime": 1778424378.5360003,
+    "hash": "bb7885e9bb08306ca793d32f0fd19c0a"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(public)/u/[username]/page.tsx": {
+    "mtime": 1778424378.5361736,
+    "hash": "8f7cc97668b181f409d7a0f93891ad95"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(public)/u/[username]/[...notePath]/page.tsx": {
+    "mtime": 1778424378.5361736,
+    "hash": "809368076e42fc08a3dfe21f5f406795"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(public)/[username]/[...notePath]/page.tsx": {
+    "mtime": 1778424378.5357356,
+    "hash": "d3ae5fe4f133ff1d539ad03d09f6534d"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/simple/page.tsx": {
+    "mtime": 1776176386.1490822,
+    "hash": "7a5787abce6a14a42105700873a5475d"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(app)/layout.tsx": {
+    "mtime": 1778424378.534778,
+    "hash": "75183031d36b17f3984e34048fea0131"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(app)/notes/page.tsx": {
+    "mtime": 1778430151.2054117,
+    "hash": "932a228d587e5fda7b3a3ea144931f8c"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(app)/notes/actions.ts": {
+    "mtime": 1778618883.136355,
+    "hash": "30495eef9ab0bc083ceaab6ae9ef673c"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/(app)/notes/[id]/page.tsx": {
+    "mtime": 1778618728.0157704,
+    "hash": "101db71f1af334f68e7fcf5981e34761"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/api/explorer/route.ts": {
+    "mtime": 1778097611.4172592,
+    "hash": "93d146b21f9d70a7dd5425bb8d37054a"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/api/assets/route.ts": {
+    "mtime": 1778428219.0615082,
+    "hash": "16848ffa844c6490baa5002c50c206ab"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/api/assets/cloudinary-signature/route.ts": {
+    "mtime": 1778428219.0614378,
+    "hash": "e4162a265f34eda926afc0a27f572c4e"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/api/notes/route.ts": {
+    "mtime": 1778618698.2038143,
+    "hash": "63c57ad8ec6bc2f8750f9db3da5ba1ea"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/api/notes/[id]/route.ts": {
+    "mtime": 1778619088.1616151,
+    "hash": "334914561d8ecb0e2db1b455aa223e73"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/api/notes/[id]/publish/route.ts": {
+    "mtime": 1778618969.8120275,
+    "hash": "94c4b6ca08f710759b22b08a1c9c01c7"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/api/folders/route.ts": {
+    "mtime": 1778097611.4172592,
+    "hash": "c3e65a3605d093a7bd63cf7b54ef1525"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/api/folders/[id]/route.ts": {
+    "mtime": 1778097611.4172592,
+    "hash": "f9bd0c7828f26f379c5a0f64644d56ec"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/api/settings/public-profile/route.ts": {
+    "mtime": 1778430151.2055542,
+    "hash": "6619b93e12803c2816435ae4ffdd1a2b"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/api/settings/profile/route.ts": {
+    "mtime": 1778097611.4188418,
+    "hash": "72a2a01b58ac6446ca97ccfea7613b35"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/api/settings/password/route.ts": {
+    "mtime": 1778097611.4188418,
+    "hash": "17930647962b72c10f337131362cfde1"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/api/ai/chat/route.ts": {
+    "mtime": 1778618961.5260577,
+    "hash": "f5561597888892a79d8db61bcb196a76"
+  },
+  "/home/rakin/Desktop/Codes/note-app/app/sso-callback/page.tsx": {
+    "mtime": 1778097611.419009,
+    "hash": "70952b15047d39ba27aec173d567c2da"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/TextPressure.tsx": {
+    "mtime": 1778438269.9986215,
+    "hash": "5cf59814f32440690ba86b3711da4de8"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/theme-provider.tsx": {
+    "mtime": 1776069675.144205,
+    "hash": "86862a64b01b4554587cddccd8507ee7"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/LiquidEther.tsx": {
+    "mtime": 1778438264.1666148,
+    "hash": "4de034b32d3cfb6588704957c0ff09e5"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/layout/app-sidebar.tsx": {
+    "mtime": 1778618907.312261,
+    "hash": "5c8d67dd84e1bce429f21bb4a058a3b8"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/layout/settings-dialog.tsx": {
+    "mtime": 1778610348.5455015,
+    "hash": "d4214d9853ba389c341770e7d5282484"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/layout/app-shell.tsx": {
+    "mtime": 1778614998.5004938,
+    "hash": "b9528c00ccf37484e99ee6cf47be5583"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/layout/sidebar-tree.tsx": {
+    "mtime": 1778618989.4329567,
+    "hash": "cb170d7d368951c5c48f3d64948ad295"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/layout/app-options-popover.tsx": {
+    "mtime": 1778618945.0331187,
+    "hash": "d22fd20e7bb78d35805dd0ac99d44f7b"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/layout/explorer-sidebar.tsx": {
+    "mtime": 1778618937.4841468,
+    "hash": "99c277a745af4d1c22c4e5b742aceb9a"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/editor/simple-markdown-editor.tsx": {
+    "mtime": 1778428219.0618644,
+    "hash": "7761956da30d683198b1ec5bc68fa884"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/editor/editor-menu.tsx": {
+    "mtime": 1776108763.8636026,
+    "hash": "1fb2a20e6db5019933c359393e4a8e09"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/editor/auto-sync-note-editor.tsx": {
+    "mtime": 1778619180.9523146,
+    "hash": "5501f498c17b9c77bc2354c0b97e7561"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/editor/editor-menu-users.ts": {
+    "mtime": 1776108763.334215,
+    "hash": "be81c72cd2489e08f48b506649aacc0b"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/redo2-icon.tsx": {
+    "mtime": 1776176386.1567247,
+    "hash": "2f59404d3d7ec1a2a79b2c314893aef8"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/strike-icon.tsx": {
+    "mtime": 1776176386.1568906,
+    "hash": "f73400faf5174354e7079eba57090fe4"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/heading-six-icon.tsx": {
+    "mtime": 1776176386.1544368,
+    "hash": "608dd377d3ededd19557b25dc9dd8a42"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/italic-icon.tsx": {
+    "mtime": 1776176386.155669,
+    "hash": "0381c82ca1f45c6eeb1006836befa867"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/align-right-icon.tsx": {
+    "mtime": 1776176386.1512485,
+    "hash": "044f4cf601ed590890bb9392b25af6c1"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/bold-icon.tsx": {
+    "mtime": 1776176386.1519654,
+    "hash": "4c9f07deeb3aabb0a4659a63af615f89"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/align-justify-icon.tsx": {
+    "mtime": 1776176386.1508727,
+    "hash": "4646025cc34f99c83a18e73c87a95472"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/subscript-icon.tsx": {
+    "mtime": 1776176386.1570668,
+    "hash": "9b1257b83080b5626194e0f785b489ed"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/chevron-down-icon.tsx": {
+    "mtime": 1776176386.152332,
+    "hash": "1f7b24d111daf0193622291038677dbd"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/underline-icon.tsx": {
+    "mtime": 1776176386.1579072,
+    "hash": "73c060fbbef4bbd42d76c66827e0bbe2"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/corner-down-left-icon.tsx": {
+    "mtime": 1776176386.1532395,
+    "hash": "187d7e9f489eabe3f326ecc6eb42b58f"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/external-link-icon.tsx": {
+    "mtime": 1776176386.1533878,
+    "hash": "fecdc1ab859a9bcee9d6cec1f63bdc85"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/heading-icon.tsx": {
+    "mtime": 1776176386.153803,
+    "hash": "3b01b5d1bf5e36530a763f83521cbff4"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/heading-three-icon.tsx": {
+    "mtime": 1776176386.1547956,
+    "hash": "e01640baf146e435a6a82e51ac01cf9d"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/align-left-icon.tsx": {
+    "mtime": 1776176386.1510854,
+    "hash": "78a1db496c69631e890e9e9c38753ea4"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/ban-icon.tsx": {
+    "mtime": 1776176386.1517427,
+    "hash": "984192e72c12d5ef2b2f7ac286a4f868"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/image-plus-icon.tsx": {
+    "mtime": 1776176386.155492,
+    "hash": "8f9e2077571c2975ba0ed3c9bdbe9a3a"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/sun-icon.tsx": {
+    "mtime": 1776176386.1571052,
+    "hash": "d479331823c949dad87cba71a51846a2"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/list-icon.tsx": {
+    "mtime": 1776176386.156033,
+    "hash": "e94f97e3cd2ea805862cfe42b98330d9"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/close-icon.tsx": {
+    "mtime": 1776176386.1525252,
+    "hash": "f9e8361b3670a9309e0246ae9275a629"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/list-ordered-icon.tsx": {
+    "mtime": 1776176386.156204,
+    "hash": "ecde2987a4cc449a1403d6c87a401c80"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/list-todo-icon.tsx": {
+    "mtime": 1776176386.1563952,
+    "hash": "2f56e4b742cbefbec13658d095687c79"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/code-block-icon.tsx": {
+    "mtime": 1776176386.1526718,
+    "hash": "dd9b1dd23dc99e6fbc436004f5a8e0ef"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/moon-star-icon.tsx": {
+    "mtime": 1776176386.1565137,
+    "hash": "229c195d8b708b2651ff4af38474a7f5"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/heading-one-icon.tsx": {
+    "mtime": 1776176386.154272,
+    "hash": "44968b36f6fb4992bea18688f8423792"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/trash-icon.tsx": {
+    "mtime": 1776176386.1575806,
+    "hash": "7d804d973671bc22673b534f999e22ee"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/align-center-icon.tsx": {
+    "mtime": 1776176386.1507068,
+    "hash": "1a56c6f39f11b2cdd6a27e8e9c49a4a6"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/heading-two-icon.tsx": {
+    "mtime": 1776176386.154992,
+    "hash": "2ef2df579c215b73e1531a5583ecfa3a"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/heading-five-icon.tsx": {
+    "mtime": 1776176386.153574,
+    "hash": "2cc1e60e0de51473e693370ae88b8d25"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/check-icon.tsx": {
+    "mtime": 1776176386.152113,
+    "hash": "903b7c62387f61db35cab579b1d718c7"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/blockquote-icon.tsx": {
+    "mtime": 1776176386.1518617,
+    "hash": "1931001e1fb6fcbd28cba3a7bc203090"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/link-icon.tsx": {
+    "mtime": 1776176386.15591,
+    "hash": "91ed2a9178303c1b1aa530752f5593b9"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/highlighter-icon.tsx": {
+    "mtime": 1776176386.155314,
+    "hash": "2592fa18f2fe552d73d2e42e69b25bc6"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/arrow-left-icon.tsx": {
+    "mtime": 1776176386.1515877,
+    "hash": "74095a5ed6606031e89163bcc3795d5a"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/superscript-icon.tsx": {
+    "mtime": 1776176386.1574295,
+    "hash": "86488aa52f9844d94e92dd4522ea64f9"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/code2-icon.tsx": {
+    "mtime": 1776176386.1530352,
+    "hash": "aa76f03c68ac030b672a40bc37e010e9"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/heading-four-icon.tsx": {
+    "mtime": 1776176386.1537356,
+    "hash": "1e1bd7d08146245423b5a0020290fc36"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-icons/undo2-icon.tsx": {
+    "mtime": 1776176386.158115,
+    "hash": "dada40d388a125afe263652b779361fa"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/theme/color-profile-sync.tsx": {
+    "mtime": 1778097611.419009,
+    "hash": "1355bcc715cd47c34f535a1f86f05abe"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/text-align-button/index.tsx": {
+    "mtime": 1776176386.1771395,
+    "hash": "fe6bd9ba3a5cad65065b7681a24356d8"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/text-align-button/use-text-align.ts": {
+    "mtime": 1776176386.177729,
+    "hash": "4ef05ba2ac61d941ed5aa6bd601565e9"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/text-align-button/text-align-button.tsx": {
+    "mtime": 1776176386.1775947,
+    "hash": "a7490c1b537cfa38dfb3dbef1758033b"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/undo-redo-button/undo-redo-button.tsx": {
+    "mtime": 1776176386.178687,
+    "hash": "0a2a4b2d55a7fedcdf2ea2402ac0d722"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/undo-redo-button/index.tsx": {
+    "mtime": 1776176386.1780381,
+    "hash": "383869b2d379d6e01f498342753e9c50"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/undo-redo-button/use-undo-redo.ts": {
+    "mtime": 1776176386.179039,
+    "hash": "c29d324b5ad8f84d2fd0a6827e6c27d0"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/image-upload-button/use-image-upload.ts": {
+    "mtime": 1776176386.174661,
+    "hash": "3875fb2bbdabd256af2900ce42e97bf2"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/image-upload-button/image-upload-button.tsx": {
+    "mtime": 1776176386.1740386,
+    "hash": "773c618fce7d316e26f8705bad417ad9"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/image-upload-button/index.tsx": {
+    "mtime": 1776176386.1742363,
+    "hash": "99a3d068e460d90d8b9260d8b3cbd0c3"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/blockquote-button/blockquote-button.tsx": {
+    "mtime": 1776176386.1695163,
+    "hash": "6ceca78c27959a78332c7b9da52c93a4"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/blockquote-button/use-blockquote.ts": {
+    "mtime": 1776176386.169803,
+    "hash": "5f989a3512779183b0d9e76ec823736c"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/blockquote-button/index.tsx": {
+    "mtime": 1776176386.169803,
+    "hash": "11c9e1e0bd57f9a06a84061c2fb39a47"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/heading-dropdown-menu/heading-dropdown-menu.tsx": {
+    "mtime": 1776176386.17331,
+    "hash": "035b1dc7a894015fab684e68f31d6c9d"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/heading-dropdown-menu/use-heading-dropdown-menu.ts": {
+    "mtime": 1776176386.173803,
+    "hash": "25ca71f3b05fa5e01c5b18cdef88032f"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/heading-dropdown-menu/index.tsx": {
+    "mtime": 1776176386.1737554,
+    "hash": "8cf09917cf338d39ed753b0c8bef65ec"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/mark-button/mark-button.tsx": {
+    "mtime": 1776176386.176857,
+    "hash": "a2d1533d12a0321f7de3712cdd50f174"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/mark-button/use-mark.ts": {
+    "mtime": 1776176386.1770325,
+    "hash": "35eccf432a6f7d02faea003f2f16ebe7"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/mark-button/index.tsx": {
+    "mtime": 1776176386.1766925,
+    "hash": "0cfd33c6adfa101e1407ac8ad89a44f1"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/color-highlight-popover/color-highlight-popover.tsx": {
+    "mtime": 1776176386.1721735,
+    "hash": "c3dd80680853cb38dcd391e6715c04af"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/color-highlight-popover/index.tsx": {
+    "mtime": 1776176386.172558,
+    "hash": "cf53bead06169d6fb4b9bac668c6fc54"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/list-dropdown-menu/use-list-dropdown-menu.ts": {
+    "mtime": 1776176386.1764169,
+    "hash": "04d082d9393e8ded0ea9b6ad18ef772e"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/list-dropdown-menu/list-dropdown-menu.tsx": {
+    "mtime": 1776176386.1763546,
+    "hash": "52610b25388e3c6321b8297d2142fbb3"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/list-dropdown-menu/index.tsx": {
+    "mtime": 1776176386.1762125,
+    "hash": "2a2550deab2b0332a027609be3f5c7cf"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/list-button/list-button.tsx": {
+    "mtime": 1776176386.1757152,
+    "hash": "f409e8e2b734d113b64fc89baa7137de"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/list-button/use-list.ts": {
+    "mtime": 1776176386.1759088,
+    "hash": "361738a2efc1a3ecedfac65111afe252"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/list-button/index.tsx": {
+    "mtime": 1776176386.1755288,
+    "hash": "6316541569ce2312df50225d7f1efd99"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/color-highlight-button/use-color-highlight.ts": {
+    "mtime": 1776176386.172061,
+    "hash": "94bfce979e24f648bd6c171f80a52a37"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/color-highlight-button/color-highlight-button.tsx": {
+    "mtime": 1776176386.1715047,
+    "hash": "2fd84517c8d895ec4cd6697294a2811a"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/color-highlight-button/index.tsx": {
+    "mtime": 1776176386.1718168,
+    "hash": "9e8f6b75798bf1c50e60c2f412a137a4"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/heading-button/heading-button.tsx": {
+    "mtime": 1776176386.17265,
+    "hash": "a6ddceba91073cd986432cd679775b53"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/heading-button/use-heading.ts": {
+    "mtime": 1776176386.173165,
+    "hash": "459efce1c5c8628bddb3d9e69a298221"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/heading-button/index.tsx": {
+    "mtime": 1776176386.172857,
+    "hash": "8d25b78b9619ddfeed337b7d9b990dd9"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/code-block-button/use-code-block.ts": {
+    "mtime": 1776176386.171059,
+    "hash": "6d4729f9d21a9df7ab22064fec03d1d2"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/code-block-button/index.tsx": {
+    "mtime": 1776176386.1708379,
+    "hash": "7f103bc5dbe68ab73a5b4915e191019c"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/code-block-button/code-block-button.tsx": {
+    "mtime": 1776176386.170352,
+    "hash": "c473f2208dde3ba257bba95d12188aa9"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/link-popover/use-link-popover.ts": {
+    "mtime": 1776178540.6822667,
+    "hash": "9523e4717b67a0f5b763bf51a7797e74"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/link-popover/link-popover.tsx": {
+    "mtime": 1776178540.6822667,
+    "hash": "6773de7c775b35e5d2091aa77c62bab7"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui/link-popover/index.tsx": {
+    "mtime": 1776176386.174803,
+    "hash": "65a9e4a0bf911784a91c06ddafa0f337"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/public/public-theme-controls.tsx": {
+    "mtime": 1778424378.541101,
+    "hash": "6b88495172b79f22180163081c5d8313"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/public/public-workspace-layout.tsx": {
+    "mtime": 1778424378.5412805,
+    "hash": "1e630d1f58298c12d9b2132b3d32f208"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/public/public-top-bar.tsx": {
+    "mtime": 1778424378.5411904,
+    "hash": "c404c65f585db0e668f4157cde23d4fd"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/public/public-table-of-contents.tsx": {
+    "mtime": 1778424378.5410004,
+    "hash": "7a66179f5cc0cc1f69598a0527d2b9b4"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/public/public-note-explorer.tsx": {
+    "mtime": 1778424378.5408206,
+    "hash": "3dadc4ac9e12d96ea9a9d22fb0700a27"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/public/public-reader-search.tsx": {
+    "mtime": 1778424378.5409167,
+    "hash": "1323b2f1260cd8fab36f6f66a1637d4c"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/public/public-note-content.tsx": {
+    "mtime": 1778424378.5405843,
+    "hash": "96b5ea8b04e92cd62e6f6f42d2a0083f"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/public/public-note-article.tsx": {
+    "mtime": 1778424378.5404768,
+    "hash": "be78ee027b6c620a69b6b232bf17eeaa"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-node/image-node/cloudinary-image.ts": {
+    "mtime": 1778428219.0619524,
+    "hash": "7c837aae16bb9d96b44ccde8efe00a8d"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension.ts": {
+    "mtime": 1776176386.1589894,
+    "hash": "03b1c68aea3f0b657f5f4d53c782ffb7"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-node/image-upload-node/image-upload-node-extension.ts": {
+    "mtime": 1778428219.0620656,
+    "hash": "5f4be5cc92e5168955981eea7cc9528f"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-node/image-upload-node/image-upload-node.tsx": {
+    "mtime": 1778428219.0622025,
+    "hash": "f6654b73e719213e50090d0727a4b741"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-node/image-upload-node/index.tsx": {
+    "mtime": 1776176386.160544,
+    "hash": "d56d74675ebff3c93f87560314d173bb"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/notes/share-note-dialog.tsx": {
+    "mtime": 1778619066.182689,
+    "hash": "2a7cc8f9b80b47a1b009ee9f411f2cd1"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/separator/separator.tsx": {
+    "mtime": 1776176386.1680908,
+    "hash": "0d0333debc4ecee6c6dd64ebe6d87f68"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/separator/index.tsx": {
+    "mtime": 1776176386.1675682,
+    "hash": "b2c947df405f90c47e61026b0b5d09f7"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/dropdown-menu/dropdown-menu.tsx": {
+    "mtime": 1776176386.1658392,
+    "hash": "649632a5a7668fbef1bf7721cf116f8b"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/dropdown-menu/index.tsx": {
+    "mtime": 1776176386.1663597,
+    "hash": "e8919d4466fe19af1aacebbf99abf11a"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/popover/popover.tsx": {
+    "mtime": 1776176386.167432,
+    "hash": "53cae9331ccbb7e28131f0e0a62051f3"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/popover/index.tsx": {
+    "mtime": 1776176386.1670213,
+    "hash": "e75d74c1a5e25fc4c9d6884b0c1a21f9"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/button-group/button-group.tsx": {
+    "mtime": 1776176386.1635637,
+    "hash": "c5fa194d3b8dfd0752897da4c4617c61"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/button-group/index.tsx": {
+    "mtime": 1776176386.163803,
+    "hash": "cd9d9c381d7bdb626e8af598fbef67d2"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/toolbar/toolbar.tsx": {
+    "mtime": 1776176386.1688135,
+    "hash": "487966e3a84ace49fc188372664d7366"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/toolbar/index.tsx": {
+    "mtime": 1776176386.1684659,
+    "hash": "ac82b09bc3c2286b045787fd50254917"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/button/button.tsx": {
+    "mtime": 1776176386.1647139,
+    "hash": "49eda2a926a00956ac33e571dfbfa745"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/button/index.tsx": {
+    "mtime": 1776176386.1648853,
+    "hash": "89af064483c2ddd320c4b454adb5e83a"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/tooltip/tooltip.tsx": {
+    "mtime": 1776178540.6822667,
+    "hash": "4fd33f0792dbb193317fcec5b339976d"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/tooltip/index.tsx": {
+    "mtime": 1776176386.1689985,
+    "hash": "a41de1dbe46a2a82ebe995995cb8c9dd"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/card/card.tsx": {
+    "mtime": 1776176386.1652555,
+    "hash": "036ac4cec41cd0d43b82f0207ddd90af"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/card/index.tsx": {
+    "mtime": 1776176386.1654522,
+    "hash": "1ddb06246873c0e1c46f1032653d5a57"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/input/input.tsx": {
+    "mtime": 1776176386.1668918,
+    "hash": "942a7f2092d6cca505bef8543ab4cf89"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/input/index.tsx": {
+    "mtime": 1776176386.1665506,
+    "hash": "6cdbbd4d8db2c12a6fb8ddd8cbfea423"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/badge/badge.tsx": {
+    "mtime": 1776176386.1631148,
+    "hash": "729c623e82ae2281fa374c70db633da7"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/badge/index.tsx": {
+    "mtime": 1776176386.1632628,
+    "hash": "c805ef3b30e7439c131eedf658fab540"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/spacer/spacer.tsx": {
+    "mtime": 1776176386.1684659,
+    "hash": "39e6c8035c4a4d3487139d0ff2e8394a"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-ui-primitive/spacer/index.tsx": {
+    "mtime": 1776176386.1683154,
+    "hash": "fe009d7f7ff56bd08040c2bcd7b65ff7"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-extension/node-background-extension.ts": {
+    "mtime": 1776176386.1503332,
+    "hash": "2785ef9bd4fbc9f102c5f044c3d4a7ed"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-extension/mermaid-preview-extension.ts": {
+    "mtime": 1778424378.542134,
+    "hash": "d086a68002604405374217b6dc43b907"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-extension/editable-mathematics-extension.ts": {
+    "mtime": 1778424378.5415323,
+    "hash": "e79744d7aab627d623df58c3b5715aee"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-extension/live-markdown-input-extension.ts": {
+    "mtime": 1778431203.4172304,
+    "hash": "2a80427b61b1424c3dd98a9d3d1f1988"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-extension/markdown-math-input-extension.ts": {
+    "mtime": 1778424378.5419226,
+    "hash": "4356aeaf12cb8f8565532b9e37b9ef39"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/settings/color-profile-picker.tsx": {
+    "mtime": 1778097611.419009,
+    "hash": "a666b070fef0e5056b66d0cc00abd744"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ai/ai-assistant-panel.tsx": {
+    "mtime": 1778433004.6269855,
+    "hash": "20d9f2d2dd9691b3b6e562f72e087d12"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ai/markdown-content.tsx": {
+    "mtime": 1778434660.5183623,
+    "hash": "2e6f60b90b18f139367b84b01cae33b6"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/input-group.tsx": {
+    "mtime": 1776100118.9044917,
+    "hash": "d9761c5e769d6c1dd400d530009014c9"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/collapsible.tsx": {
+    "mtime": 1777833155.50903,
+    "hash": "3c4ea9e2a14792a5718026a7c4da2fa4"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/sidebar.tsx": {
+    "mtime": 1777914953.0913417,
+    "hash": "37e2b8138a879f8a3237b3501693ee04"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/skeleton.tsx": {
+    "mtime": 1776100118.904963,
+    "hash": "0e6e825c43d858d98c9903f4da975382"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/context-menu.tsx": {
+    "mtime": 1776100118.904198,
+    "hash": "2d0e5f4887c9ee654580342712edad13"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/popover.tsx": {
+    "mtime": 1776100118.9046476,
+    "hash": "5cb312f95dc963324173db2b699d4596"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/separator.tsx": {
+    "mtime": 1776100118.9048076,
+    "hash": "f57449eae78fbd87d99e4edc45ab3c1e"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/dropdown-menu.tsx": {
+    "mtime": 1776100118.9043272,
+    "hash": "353ffaf8691157a2a1b5f849bcfc7b84"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/tooltip.tsx": {
+    "mtime": 1776100118.905327,
+    "hash": "b0b931c1a15ec3924fa5fecebaa15685"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/dialog.tsx": {
+    "mtime": 1776100118.9042912,
+    "hash": "fdb193b224e45ab54c4b572ea3d4aff6"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/resizable.tsx": {
+    "mtime": 1778435018.2312632,
+    "hash": "1f0f385519b1d48a14bfb81158385403"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/badge.tsx": {
+    "mtime": 1776100118.9040182,
+    "hash": "633c33997e6137921ae433dd2dd0cb31"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/button.tsx": {
+    "mtime": 1775063568.2496116,
+    "hash": "c6662f9ca47e3fc0cbc6f002db90709d"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/sonner.tsx": {
+    "mtime": 1776100118.905221,
+    "hash": "03ea7033e5fecff82265a96b931ab264"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/sheet.tsx": {
+    "mtime": 1776100118.9048886,
+    "hash": "4764df6512dc9a1c35b99b1baa3bf2bf"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/input.tsx": {
+    "mtime": 1776100118.90457,
+    "hash": "47dea79b2056ea408da28d55b895ac95"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/command.tsx": {
+    "mtime": 1776100118.9041045,
+    "hash": "99c962372ae5292bdc9bd69a34d3f933"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/alert-dialog.tsx": {
+    "mtime": 1777919209.1837845,
+    "hash": "3c91abd97b5ebde0f053de965f0d2e43"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/breadcrumb.tsx": {
+    "mtime": 1777833155.508919,
+    "hash": "cfc37bc0992747fd8023fef428f67d6a"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/scroll-area.tsx": {
+    "mtime": 1776100118.9047275,
+    "hash": "5a04c269a377e8176ebbf27ee8ac35bf"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/ui/textarea.tsx": {
+    "mtime": 1776100118.9052906,
+    "hash": "69ec66b8dde852cc89c1217075253d87"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-templates/simple/simple-editor.tsx": {
+    "mtime": 1778428219.0623372,
+    "hash": "b92e09ab4edd3aaa30e1e89d8d55dd37"
+  },
+  "/home/rakin/Desktop/Codes/note-app/components/tiptap-templates/simple/theme-toggle.tsx": {
+    "mtime": 1777482715.778366,
+    "hash": "8475e1226ac3ab3bca85ef4f2f3ee75e"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/ui-preferences.ts": {
+    "mtime": 1778424378.544622,
+    "hash": "b49dae0a7382b841a7a52d4a212c0b91"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/color-profiles.ts": {
+    "mtime": 1778097611.420009,
+    "hash": "7e7ae8dd1339a41a82f75b95752da71d"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/utils.ts": {
+    "mtime": 1775063568.2861445,
+    "hash": "5a6fd53fdcf2be529e9cc0b718fde352"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/auth.ts": {
+    "mtime": 1778424378.5426207,
+    "hash": "f6aaf139e6831d39d514428b79b75d44"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/cloudinary.ts": {
+    "mtime": 1778428219.0625787,
+    "hash": "b00c7b40f31b0620d6b9cf7969dbd083"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/content-format.ts": {
+    "mtime": 1778428219.0626998,
+    "hash": "7334e36fe84d4dce3059ca852bc677a7"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/explorer.ts": {
+    "mtime": 1778618837.4155376,
+    "hash": "e7a95877fd3d31778e47e9da93f768e2"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/profile-index-note.ts": {
+    "mtime": 1778619012.4528747,
+    "hash": "0155a98d4464afe1e6160cea1415d50c"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/tiptap-utils.ts": {
+    "mtime": 1776178540.6832669,
+    "hash": "0c1247dc784f139e973c2eec2b3cd65c"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/note-selection.ts": {
+    "mtime": 1778424378.5433006,
+    "hash": "2c620a3b5e83dd42d7de5b4748c66188"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/slugify-note-title.ts": {
+    "mtime": 1778424378.5445347,
+    "hash": "e7f9f27281364fd3e8a23b482d80da30"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/notes-path.ts": {
+    "mtime": 1778618980.0219905,
+    "hash": "093024435a016bcccc9993fdb5a4801e"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/db/mongoose.ts": {
+    "mtime": 1776111560.4089136,
+    "hash": "cec636b622bfe25e105e51dfbe235b16"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/db/models/User.ts": {
+    "mtime": 1778424378.5428648,
+    "hash": "3db41eb33319dcc7572106a74c252d79"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/db/models/Folder.ts": {
+    "mtime": 1776070132.5303667,
+    "hash": "4c510db279d66d4c51f18e676f62f210"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/db/models/Note.ts": {
+    "mtime": 1778618688.4818285,
+    "hash": "4448b527b7cc57174da119d17ee5f7f3"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/db/models/Asset.ts": {
+    "mtime": 1778428219.0627725,
+    "hash": "f986ed89c91a602c763069dfe0c1305b"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/db/models/shared/ownership.ts": {
+    "mtime": 1776070132.5303667,
+    "hash": "d7d024e4356709fc6db60db81a444072"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/mermaid/render-mermaid.ts": {
+    "mtime": 1778424378.543166,
+    "hash": "b31f8ffedb83566bf374d22b68b265bc"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/assets/upload-note-image.ts": {
+    "mtime": 1778428219.0624657,
+    "hash": "f35302c6aa3414f542f8a377fc8a3610"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/assets/note-assets.ts": {
+    "mtime": 1778428219.0624013,
+    "hash": "f166e6c0e6f96c1feb9f4a9d5efd45ac"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/publishing/visibility.ts": {
+    "mtime": 1778424378.5443585,
+    "hash": "d44b0253043a413e9af54bc72bb39641"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/publishing/profile.ts": {
+    "mtime": 1778424378.5437007,
+    "hash": "c27c2a463e349561bd08d7c64d5faade"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/publishing/public-links.ts": {
+    "mtime": 1778618852.4684765,
+    "hash": "74721e56234eeb70cab430d51f1e3a70"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/publishing/note.ts": {
+    "mtime": 1778424378.5436082,
+    "hash": "57f3b3e98a1ac6dd2ed398e5cd28f565"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/publishing/render-public-note.ts": {
+    "mtime": 1778430151.2059326,
+    "hash": "3817e6738b117e5aad2c3a04399ae829"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/publishing/public-queries.ts": {
+    "mtime": 1778618865.0554261,
+    "hash": "a881801a23faf86b2aa77efd4b69580d"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/ai/note-assistant-prompts.ts": {
+    "mtime": 1778432143.5788965,
+    "hash": "b4fa3c72f1832adb411a255a5396976f"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/ai/rate-limit.ts": {
+    "mtime": 1778432153.8489096,
+    "hash": "a6d399ba2d55dfe38442511af1667dd6"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/ai/gemini.ts": {
+    "mtime": 1778432125.851874,
+    "hash": "4b3c2019f2b3ee0c55241afbaac8ef1b"
+  },
+  "/home/rakin/Desktop/Codes/note-app/lib/ai/ai-request-validation.ts": {
+    "mtime": 1778432151.844907,
+    "hash": "18baa66bb556c67b199ea13b52a4af08"
+  },
+  "/home/rakin/Desktop/Codes/note-app/CLAUDE.md": {
+    "mtime": 1775062795.4363205,
+    "hash": "5c27369b226fcf2be8a6cfe52224e767"
+  },
+  "/home/rakin/Desktop/Codes/note-app/README.md": {
+    "mtime": 1775062658.3620398,
+    "hash": "f15aaa42d5d299d091b1171097ea56ad"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docker-compose.yml": {
+    "mtime": 1778424378.5424697,
+    "hash": "af6a037e762857942d35cba1f0bc8cf0"
+  },
+  "/home/rakin/Desktop/Codes/note-app/DESIGN.md": {
+    "mtime": 1778097611.4162462,
+    "hash": "7e8cbd46b8dc3998e85ff1f4fb18e732"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docker-compose.prod.yml": {
+    "mtime": 1778424378.5422661,
+    "hash": "7deb9ae3ce958819a4383905323bcb7b"
+  },
+  "/home/rakin/Desktop/Codes/note-app/AGENTS.md": {
+    "mtime": 1778606013.151112,
+    "hash": "407b905a047b8f3c4879c7fc27df0450"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docs/SRD.md": {
+    "mtime": 1772728558.4397862,
+    "hash": "628620d256a91693b51fa566bc1afc8c"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docs/SAD.md": {
+    "mtime": 1772728558.4428318,
+    "hash": "ea29900e5afe8c684af547d69f2a347f"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docs/ARCHITECTURE.md": {
+    "mtime": 1772728558.4471576,
+    "hash": "5b64a4acbcf3dc6f2fbf9d952a1b0f0f"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docs/SRS.md": {
+    "mtime": 1772728558.4395752,
+    "hash": "f3b88ced94d6d3caf1f5ef513d209492"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docs/DEPLOYMENT_GCP_VPS.md": {
+    "mtime": 1776100118.9055417,
+    "hash": "b555a407337980a292c638fe045e4493"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docs/INITIALIZATION.md": {
+    "mtime": 1772728558.4428318,
+    "hash": "e92ab714d533d23e16fe3d57c4bdbef9"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docs/Integrating Clerk Authentication.md": {
+    "mtime": 1778097611.420009,
+    "hash": "28394c55593fec93cb22d473691da435"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docs/AI_ASSISTANT.md": {
+    "mtime": 1772550903.8582878,
+    "hash": "195a3cc07fe82534f40c687e88ca0613"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docs/PROJECT_PLAN.md": {
+    "mtime": 1772728558.4428318,
+    "hash": "462aaa5556f5461c2e438e70630ed629"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docs/tiptap/katex.md": {
+    "mtime": 1776176386.179684,
+    "hash": "7fcc74abfa96ab2ac57de20700855e1a"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docs/SDP - I Project Proposal Guideline.pdf": {
+    "mtime": 1773312938.8902507,
+    "hash": "2616dae666e51085acc91278257f8a56"
+  },
+  "/home/rakin/Desktop/Codes/note-app/docs/Synapse - Proposal.pdf": {
+    "mtime": 1773325846.4213564,
+    "hash": "36144c2e7cd7c3310470b235b8f4fe96"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/android-chrome-192x192.png": {
+    "mtime": 1777833155.5115273,
+    "hash": "4daa355b599e8e50da5e9ee69d137802"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/file.svg": {
+    "mtime": 1777833155.5146105,
+    "hash": "4c98e1f9a3ac23c8c607e0b5b0d7ad45"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/android-chrome-512x512.png": {
+    "mtime": 1777833155.5119264,
+    "hash": "1cab49ecefbbcff1b40960100563ef9e"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/synapse-white.png": {
+    "mtime": 1777833155.5162535,
+    "hash": "68cd2f227a84ab9ac8f6f9169eabff29"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/globe.svg": {
+    "mtime": 1775062658.367137,
+    "hash": "2aaafa6a49b6563925fe440891e32717"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/synapse-black.png": {
+    "mtime": 1777833155.5156484,
+    "hash": "4d9f130daceb2f1fc1e6c1556f1bea17"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/favicon.svg": {
+    "mtime": 1777833155.5140014,
+    "hash": "3721a8f73644dca62cf5b96399232f73"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/synapse.svg": {
+    "mtime": 1777833155.5168424,
+    "hash": "45322a8c8ad3cbc4fea8cbb17323faae"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/vercel.svg": {
+    "mtime": 1775062658.3671076,
+    "hash": "c0af2f507b369b085b35ef4bbe3bcf1e"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/synapse.png": {
+    "mtime": 1777833155.5164478,
+    "hash": "d3e41f182e38d111eb78e10cfcb5cd82"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/favicon-16x16.png": {
+    "mtime": 1777833155.5126164,
+    "hash": "9c44300154c03778030c660af01ae95b"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/favicon-32x32.png": {
+    "mtime": 1777833155.5128257,
+    "hash": "082f236d84493a218bfb5370c341d669"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/window.svg": {
+    "mtime": 1775062658.367137,
+    "hash": "a2760511c65806022ad20adf74370ff3"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/apple-touch-icon.png": {
+    "mtime": 1777833155.5122855,
+    "hash": "30a792b7d0b9e5109c97d3645abff776"
+  },
+  "/home/rakin/Desktop/Codes/note-app/public/next.svg": {
+    "mtime": 1775062658.367137,
+    "hash": "8e061864f388b47f33a1c3780831193e"
+  },
+  "/home/rakin/Desktop/Codes/note-app/assets/logo/synapse-white.png": {
+    "mtime": 1777482715.775366,
+    "hash": "a706d2dbeef65f1330178319e9f5e293"
+  },
+  "/home/rakin/Desktop/Codes/note-app/assets/logo/synapse.png": {
+    "mtime": 1777482715.7773662,
+    "hash": "5a829255ced617cf5078a994b20368a4"
+  }
+}

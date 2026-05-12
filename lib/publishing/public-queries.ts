@@ -30,6 +30,7 @@ type LeanPublicFolder = Pick<IFolder, "name" | "slug" | "parentId" | "order"> & 
 
 type LeanPublicNote = Pick<
   INote,
+  | "fileName"
   | "title"
   | "slug"
   | "folderId"
@@ -55,6 +56,7 @@ export type PublicProfile = NormalizedPublicProfile & {
 
 export type PublicWorkspaceNote = {
   id: string;
+  fileName: string;
   title: string;
   slug: string;
   folderId: string | null;
@@ -245,8 +247,9 @@ function buildWorkspaceNote(
   username: string,
   folderSegmentsById: Map<string, string[]>,
 ): PublicWorkspaceNote {
-  const title = note.title?.trim() || "Untitled";
-  const slug = note.slug?.trim() || slugFromText(title);
+  const fileName = note.fileName?.trim() || note.title?.trim() || "Untitled";
+  const title = note.title?.trim() || fileName;
+  const slug = note.slug?.trim() || slugFromText(fileName);
   const folderId = toNullableId(note.folderId);
   const folderPath = folderId ? folderSegmentsById.get(folderId) ?? [] : [];
   const path = [...folderPath, slug];
@@ -254,6 +257,7 @@ function buildWorkspaceNote(
 
   return {
     id: toId(note._id),
+    fileName,
     title,
     slug,
     folderId,
@@ -394,7 +398,7 @@ export async function getPublishedWorkspaceTree(username: string): Promise<Publi
     Note.find({ userId: profile.id, type: "note" })
       .sort({ updatedAt: -1 })
       .select(
-        "_id userId title slug folderId content contentText visibility shareId publicHtml publicMarkdown publicToc createdAt updatedAt publishedAt",
+        "_id userId fileName title slug folderId content contentText visibility shareId publicHtml publicMarkdown publicToc createdAt updatedAt publishedAt",
       )
       .lean<LeanPublicNote[]>(),
   ]);
@@ -441,7 +445,7 @@ export async function getPublishedNoteByPath(
     slug: noteSlug,
     type: "note",
   })
-    .select("_id userId title slug folderId content contentText visibility shareId publicHtml publicMarkdown publicToc createdAt updatedAt publishedAt")
+    .select("_id userId fileName title slug folderId content contentText visibility shareId publicHtml publicMarkdown publicToc createdAt updatedAt publishedAt")
     .lean<LeanPublicNote | null>();
 
   if (!note || !isPublishedProfileNote(note)) {
@@ -466,7 +470,7 @@ export async function getUnlistedNoteByShareId(shareId: string): Promise<PublicS
   await connectToDatabase();
 
   const note = await Note.findOne({ shareId: normalizedShareId, type: "note" })
-    .select("_id userId title slug folderId content contentText visibility shareId publicHtml publicMarkdown publicToc createdAt updatedAt publishedAt")
+    .select("_id userId fileName title slug folderId content contentText visibility shareId publicHtml publicMarkdown publicToc createdAt updatedAt publishedAt")
     .lean<LeanPublicNote | null>();
 
   if (!note) {

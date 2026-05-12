@@ -106,7 +106,7 @@ function buildTree(folders: SidebarFolder[], notes: SidebarNote[]): TreeResult {
 
   const normalizedNotes: TreeNote[] = notes.map((note) => {
     const id = toId(note._id);
-    const title = note.title || "Untitled";
+    const title = note.fileName?.trim() || note.title || "Untitled";
     const folderId = toNullableId(note.folderId);
     const slug = note.slug?.trim() || "untitled";
 

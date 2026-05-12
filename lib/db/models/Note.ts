@@ -11,6 +11,7 @@ export interface INoteTocItem {
 }
 
 export interface INote extends IUserOwnedDocument {
+  fileName: string;
   title: string;
   slug?: string;
   folderId: Types.ObjectId | null;
@@ -55,12 +56,18 @@ const noteTocItemSchema = new Schema<INoteTocItem>(
 const noteSchema = new Schema<INote>(
   {
     userId: userIdField,
-    title: {
+    fileName: {
       type: String,
       required: true,
       trim: true,
       maxlength: 180,
       default: "Untitled",
+    },
+    title: {
+      type: String,
+      trim: true,
+      maxlength: 180,
+      default: "",
     },
     slug: {
       type: String,

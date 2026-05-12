@@ -6,6 +6,7 @@ type StringLikeId = { toString(): string } | string;
 
 export type PublicLinkableNote = {
   userId: StringLikeId;
+  fileName?: string;
   title: string;
   slug?: string;
   folderId: StringLikeId | null;
@@ -42,13 +43,14 @@ export function buildShareUrl(shareId: string | null | undefined): string | null
   return `/share/${shareId}`;
 }
 
-export async function buildPublishedNoteUrl(note: Pick<PublicLinkableNote, "userId" | "title" | "slug" | "folderId">, username: string): Promise<string> {
+export async function buildPublishedNoteUrl(note: Pick<PublicLinkableNote, "userId" | "fileName" | "title" | "slug" | "folderId">, username: string): Promise<string> {
   const userId = toId(note.userId);
   const folders = await Folder.find({ userId }).select("_id slug parentId").lean<FolderPathNode[]>();
   const folderSegmentsById = buildFolderSegmentsById(folders);
   const folderId = toNullableId(note.folderId);
   const folderSegments = folderId ? folderSegmentsById.get(folderId) ?? [] : [];
-  const noteSlug = note.slug?.trim() || slugFromText(note.title);
+  const fileName = note.fileName?.trim() || note.title?.trim() || "Untitled";
+  const noteSlug = note.slug?.trim() || slugFromText(fileName);
 
   return `/u/${username.toLowerCase()}/${[...folderSegments, noteSlug].join("/")}`;
 }

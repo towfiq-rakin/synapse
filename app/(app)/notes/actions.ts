@@ -19,9 +19,13 @@ function readString(formData: FormData, key: string): string {
   return typeof value === "string" ? value : "";
 }
 
+function normalizeFileName(input: string): string {
+  const fileName = input.trim().slice(0, 180);
+  return fileName || "Untitled";
+}
+
 function normalizeTitle(input: string): string {
-  const title = input.trim().slice(0, 180);
-  return title || "Untitled";
+  return input.trim().slice(0, 180);
 }
 
 function normalizeTags(input: string): string[] {
@@ -59,7 +63,7 @@ async function requireUserId(): Promise<string> {
 
 export async function createNoteAction(formData: FormData): Promise<void> {
   const userId = await requireUserId();
-  const title = normalizeTitle(readString(formData, "title"));
+  const fileName = normalizeFileName(readString(formData, "fileName") || readString(formData, "title"));
   const content = readString(formData, "content");
   const tags = normalizeTags(readString(formData, "tags"));
 
@@ -67,14 +71,15 @@ export async function createNoteAction(formData: FormData): Promise<void> {
 
   const folderId = await resolveFolderId(userId, readString(formData, "folderId"));
   const frontmatterTitle = parseFrontmatterTitle(content);
-  const resolvedTitle = normalizeTitle(frontmatterTitle ?? title);
-  const slug = await generateUniqueSlug(resolvedTitle, async (candidate) => {
+  const resolvedTitle = normalizeTitle(frontmatterTitle ?? "");
+  const slug = await generateUniqueSlug(fileName, async (candidate) => {
     const existing = await Note.exists({ userId, folderId, slug: candidate });
     return Boolean(existing);
   });
 
   const created = await Note.create({
     userId,
+    fileName,
     title: resolvedTitle,
     slug,
     folderId,
@@ -97,7 +102,7 @@ export async function updateNoteAction(noteId: string, formData: FormData): Prom
     redirect("/notes");
   }
 
-  const title = normalizeTitle(readString(formData, "title"));
+  const fileName = normalizeFileName(readString(formData, "fileName") || readString(formData, "title"));
   const content = readString(formData, "content");
   const tags = normalizeTags(readString(formData, "tags"));
 
@@ -105,9 +110,9 @@ export async function updateNoteAction(noteId: string, formData: FormData): Prom
 
   const folderId = await resolveFolderId(userId, readString(formData, "folderId"));
   const frontmatterTitle = parseFrontmatterTitle(content);
-  const resolvedTitle = normalizeTitle(frontmatterTitle ?? title);
+  const resolvedTitle = normalizeTitle(frontmatterTitle ?? "");
 
-  const slug = await generateUniqueSlug(resolvedTitle, async (candidate) => {
+  const slug = await generateUniqueSlug(fileName, async (candidate) => {
     const existing = await Note.exists({
       _id: { $ne: noteId },
       userId,
@@ -131,6 +136,7 @@ export async function updateNoteAction(noteId: string, formData: FormData): Prom
 
   const normalizedVisibility = normalizeNoteVisibility(current.visibility);
   const updates: Record<string, unknown> = {
+    fileName,
     title: resolvedTitle,
     slug,
     folderId,
@@ -150,7 +156,7 @@ export async function updateNoteAction(noteId: string, formData: FormData): Prom
       updates,
       await buildPublishedSnapshot(
         {
-          title: resolvedTitle,
+          title: resolvedTitle || fileName,
           content,
           contentText: content,
           visibility: normalizedVisibility,
@@ -240,15 +246,16 @@ export async function createQuickNoteAction(formData: FormData): Promise<void> {
   await connectToDatabase();
 
   const folderId = await resolveFolderId(userId, parentRaw);
-  const title = "Untitled";
-  const slug = await generateUniqueSlug(title, async (candidate) => {
+  const fileName = "Untitled";
+  const slug = await generateUniqueSlug(fileName, async (candidate) => {
     const existing = await Note.exists({ userId, folderId, slug: candidate });
     return Boolean(existing);
   });
 
   const created = await Note.create({
     userId,
-    title,
+    fileName,
+    title: "",
     slug,
     folderId,
     content: "",

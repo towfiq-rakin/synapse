@@ -24,6 +24,7 @@ type PublishBody = {
 type PublishableNote = {
   _id: { toString(): string } | string;
   userId: { toString(): string } | string;
+  fileName?: string;
   title: string;
   slug?: string;
   folderId: { toString(): string } | string | null;
@@ -66,7 +67,9 @@ export async function PATCH(request: Request, context: RouteContext) {
   await connectToDatabase();
 
   const [note, owner] = await Promise.all([
-    Note.findOne({ _id: id, userId }).lean<PublishableNote | null>(),
+    Note.findOne({ _id: id, userId })
+      .select("_id userId fileName title slug folderId content contentText visibility shareId publishedAt")
+      .lean<PublishableNote | null>(),
     User.findById(userId)
       .select("username name displayName bio isPublicProfile publishedAt")
       .lean<{
@@ -127,7 +130,10 @@ export async function PATCH(request: Request, context: RouteContext) {
         { _id: id, userId },
         {
           $set: await buildPublishedSnapshot(
-            note,
+            {
+              ...note,
+              title: note.title?.trim() || note.fileName?.trim() || "Untitled",
+            },
             targetVisibility,
             targetVisibility === "unlisted" ? shareId : shareId ?? null,
           ),
