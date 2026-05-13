@@ -195,7 +195,7 @@ export default function CustomLoginForm() {
   return (
     <section className={AUTH_CARD_CLASS}>
       <header className="space-y-2 text-center">
-        <h2 className="text-3xl font-semibold tracking-tight text-foreground">Welcome back</h2>
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h2>
         <p className="text-sm text-muted-foreground">Sign in with OAuth or your Synapse credentials.</p>
       </header>
 
