@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import BackToTopButton from "@/components/public/back-to-top-button";
 import { cn } from "@/lib/utils";
 
 type PublicWorkspaceLayoutProps = {
@@ -76,6 +77,8 @@ export default function PublicWorkspaceLayout({
           ) : null}
         </div>
       </main>
+
+      <BackToTopButton />
     </div>
   );
 }
